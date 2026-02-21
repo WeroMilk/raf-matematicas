@@ -183,8 +183,7 @@ export default function PorNivelContent({
       </section>
 
       <div
-        className={`flex flex-col gap-1.5 ${expandedNivel ? "min-h-0 flex-1 overflow-hidden" : "min-h-0 flex-1 overflow-y-auto pb-10"}`}
-        style={{ WebkitOverflowScrolling: "touch", ...(expandedNivel ? {} : { minHeight: 0 }) }}
+        className={`flex min-h-0 flex-1 flex-col gap-1.5 overflow-hidden ${!expandedNivel ? "pb-4" : ""}`}
       >
         {nivelesAMostrar.map((nivel) => {
           const alumnos = dataPorNivel[nivel];
@@ -199,10 +198,7 @@ export default function PorNivelContent({
           return (
             <section
               key={nivel}
-              className={`card-ios flex flex-col rounded-xl border border-border bg-card p-2 overflow-hidden ${
-                isExpanded ? "min-h-0 flex-1" : "h-[175px] shrink-0 flex-none"
-              }`}
-              style={isExpanded ? { minHeight: 0 } : undefined}
+              className="card-ios flex min-h-0 flex-1 flex-col rounded-xl border border-border bg-card p-2 overflow-hidden"
               {...(!isExpanded && {
                 role: "button",
                 tabIndex: 0,
