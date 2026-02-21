@@ -1,0 +1,387 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f2f2f7;
+  --foreground: #1c1c1e;
+  --card: #ffffff;
+  --border: #c6c6c8;
+  --primary: #8e8e93;
+  --primary-foreground: #ffffff;
+  --gris-iphone: #8e8e93;
+  --fill-tertiary: #e5e5ea;
+  --fill-secondary: #d1d1d6;
+  --requiere-apoyo: #d32f2f;
+  --en-desarrollo: #f9a825;
+  --esperado: #2e7d32;
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --ease-out: cubic-bezier(0.33, 1, 0.68, 1);
+  --ease-ios: cubic-bezier(0.25, 0.1, 0.25, 1);
+  /* Desktop */
+  --container-max: 1200px;
+  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --card-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.08);
+  /* Altura reservada para el footer (nada debe invadirlo): móvil usa esto + safe-area */
+  --nav-height: 60px;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-requiere-apoyo: var(--requiere-apoyo);
+  --color-en-desarrollo: var(--en-desarrollo);
+  --color-esperado: var(--esperado);
+  --color-gris-iphone: var(--gris-iphone);
+}
+
+.bg-gris-iphone {
+  background-color: #8e8e93;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  touch-action: manipulation;
+  scroll-behavior: smooth;
+  /* Fallback para navegadores que no soportan dvh */
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow: hidden;
+}
+
+.app-shell {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+@media (min-width: 1024px) {
+  .app-shell {
+    background: linear-gradient(180deg, #f0f1f4 0%, #e8e9ed 100%);
+  }
+}
+
+.app-main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  /* Reservar espacio fijo para el footer: nada del contenido lo toca; si sobra contenido, hace scroll dentro */
+  padding-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom, 0));
+  padding-left: env(safe-area-inset-left, 0);
+  padding-right: env(safe-area-inset-right, 0);
+}
+
+@media (min-width: 1024px) {
+  .app-main {
+    /* Reservar espacio para el footer también en desktop (nada debe quedar debajo) */
+    padding-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom, 0px));
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+}
+
+.app-main--no-nav {
+  padding-bottom: 0;
+}
+
+/* Mini listas (3 secciones): altura fija para que cada una scrollee por separado */
+.lista-mini-por-nivel {
+  min-height: 0;
+  max-height: 152px;
+  overflow-y: auto !important;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Lista expandida por nivel: altura máxima para que nunca toque el footer; padding inferior para no quedar tapada por el nav */
+.lista-expandida-por-nivel {
+  max-height: min(
+    calc(100dvh - var(--nav-height) - 320px - env(safe-area-inset-bottom, 0px)),
+    70vh
+  );
+  min-height: 0;
+  overflow-y: auto !important;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom, 0px) + 0.5rem);
+}
+
+/* Contenedor principal: siempre hace scroll si el contenido sobra, para no tocar el footer */
+.page-container {
+  width: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  /* Margen inferior para que el último contenido no quede pegado al borde del área del footer */
+  padding-bottom: 1rem;
+}
+
+@media (min-width: 1024px) {
+  .page-container {
+    max-width: var(--container-max);
+    margin-left: auto;
+    margin-right: auto;
+    padding: 24px 32px 32px;
+    box-shadow: var(--card-shadow);
+    border-radius: 20px;
+    background: var(--card);
+    min-height: 0;
+  }
+}
+
+/* Barra de navegación inferior: compacta; altura alineada con --nav-height */
+.app-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  flex-shrink: 0;
+  padding-bottom: calc(6px + env(safe-area-inset-bottom, 0));
+  padding-left: max(16px, env(safe-area-inset-left, 0));
+  padding-right: max(16px, env(safe-area-inset-right, 0));
+  padding-top: 6px;
+  background: linear-gradient(to top, rgba(255, 255, 255, 0.92) 0%, rgba(248, 249, 252, 0.88) 100%);
+  backdrop-filter: saturate(200%) blur(24px);
+  -webkit-backdrop-filter: saturate(200%) blur(24px);
+  border-top: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.06), 0 1px 0 rgba(255, 255, 255, 0.8) inset;
+}
+
+.app-nav-glow {
+  position: absolute;
+  top: 0;
+  left: 20%;
+  right: 20%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(142, 142, 147, 0.25), transparent);
+  pointer-events: none;
+}
+
+.app-nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto;
+  padding: 4px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+}
+
+.nav-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  flex: 1;
+  min-height: 44px;
+  padding: 6px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+}
+.nav-tab:active {
+  transform: scale(0.96);
+}
+
+.nav-tab--inactive {
+  color: var(--foreground);
+  opacity: 0.75;
+}
+
+.nav-tab--inactive:hover {
+  background: rgba(142, 142, 147, 0.12);
+  opacity: 1;
+}
+
+.nav-tab--active {
+  background: linear-gradient(180deg, #5c5c5e 0%, #424245 100%);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  opacity: 1;
+}
+
+.nav-tab--active .nav-tab__icon {
+  opacity: 1;
+}
+
+.nav-tab__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.9;
+}
+
+.nav-tab__label {
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+}
+
+@media (min-width: 1024px) {
+  .app-nav {
+    padding-left: 24px;
+    padding-right: 24px;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 -6px 28px rgba(0, 0, 0, 0.06);
+  }
+  .app-nav-inner {
+    max-width: var(--container-max);
+  }
+}
+
+/* Quitar cuadro de foco (outline) al hacer clic en gráficas Recharts */
+.recharts-wrapper,
+.recharts-wrapper:focus,
+.recharts-wrapper:focus-visible,
+.recharts-surface,
+.recharts-layer,
+.recharts-bar-rectangle,
+.recharts-rectangle {
+  outline: none !important;
+  box-shadow: none !important;
+}
+.recharts-wrapper *,
+.recharts-wrapper *:focus,
+.recharts-wrapper *:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+/* Por si el navegador pinta un ring de foco en el contenedor de la gráfica */
+[class*="recharts"]:focus,
+[class*="recharts"]:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+.chart-no-focus,
+.chart-no-focus:focus,
+.chart-no-focus:focus-visible,
+.chart-no-focus *,
+.chart-no-focus *:focus,
+.chart-no-focus *:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Animaciones estilo iOS */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-page-in {
+  animation: slideUp var(--duration-normal) var(--ease-ios) forwards;
+}
+
+.animate-fade-in {
+  animation: fadeIn var(--duration-normal) var(--ease-ios) forwards;
+}
+
+.animate-stagger-in {
+  animation: scaleIn var(--duration-normal) var(--ease-ios) forwards;
+}
+
+/* Botones y cards estilo iPhone: feedback al tocar */
+.btn-ios {
+  transition: transform var(--duration-fast) var(--ease-out), background-color var(--duration-fast), opacity var(--duration-fast);
+}
+.btn-ios:active {
+  transform: scale(0.97);
+  opacity: 0.9;
+}
+
+.card-ios {
+  transition: transform var(--duration-fast) var(--ease-out), box-shadow var(--duration-normal), background-color var(--duration-fast);
+  box-shadow: var(--card-shadow);
+}
+.card-ios:hover {
+  box-shadow: var(--card-shadow-hover);
+}
+.card-ios:active {
+  transform: scale(0.99);
+}
+
+@media (min-width: 1024px) {
+  .card-ios {
+    box-shadow: var(--card-shadow);
+  }
+  .card-ios:hover {
+    box-shadow: var(--card-shadow-hover);
+  }
+}
+
+.link-ios {
+  transition: transform var(--duration-fast) var(--ease-out), background-color var(--duration-fast), opacity var(--duration-fast);
+}
+.link-ios:active {
+  transform: scale(0.98);
+  opacity: 0.95;
+}
+
+/* Selects estilo iOS */
+.select-ios {
+  transition: background-color var(--duration-fast), border-color var(--duration-fast), transform var(--duration-fast);
+  border-radius: 10px;
+}
+.select-ios:active {
+  transform: scale(0.98);
+}
+
+@media (max-width: 768px) {
+  button, a[role="button"], .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
