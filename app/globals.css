@@ -193,6 +193,18 @@ body {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
 }
 
+.app-nav__logout {
+  flex: 1;
+}
+
+.app-nav__logout button {
+  min-height: 36px;
+  min-width: auto;
+  padding: 6px 10px;
+  font-size: 0.75rem;
+  border-radius: 10px;
+}
+
 .nav-tab {
   display: flex;
   flex-direction: column;

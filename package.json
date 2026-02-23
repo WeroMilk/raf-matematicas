@@ -16,6 +16,7 @@
     "start": "next start",
     "regenerate-super": "node scripts/regenerate-super-only.mjs",
     "ver-hash-super": "node scripts/ver-hash-super.mjs",
+    "verificar-resultados": "node scripts/verificar-resultados-vs-excel.mjs",
     "lint": "eslint"
   },
   "dependencies": {

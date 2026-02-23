@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import LogoutButton from "@/app/components/LogoutButton";
 
 type Session = { tipo: "super" | "escuela"; cct?: string } | null;
 
@@ -65,6 +66,9 @@ export default function Nav({ session }: { session?: Session }) {
             </Link>
           );
         })}
+        <div className="app-nav__logout nav-tab nav-tab--inactive flex min-h-[44px] flex-col items-center justify-center">
+          <LogoutButton />
+        </div>
       </div>
     </nav>
   );
