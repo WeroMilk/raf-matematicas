@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getResultadosSync } from "@/lib/data-server";
 import { COLORS } from "@/types/raf";
-import LogoSonoraSec from "@/app/components/LogoSonoraSec";
+import PageHeader from "@/app/components/PageHeader";
 import ScrollOnlyWhenNeeded from "@/app/components/ScrollOnlyWhenNeeded";
 import ChartPastelNiveles from "@/app/components/ChartPastelNiveles";
 import ChartBarrasReactivos from "@/app/components/ChartBarrasReactivos";
@@ -31,16 +31,10 @@ export default function HomePage() {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden gap-2 animate-fade-in p-2 lg:gap-6 lg:p-0 lg:pb-8">
-      <header className="shrink-0 flex flex-row flex-wrap items-start justify-between gap-2">
-        <div className="min-w-0">
-          <h1 className="text-base font-bold text-foreground lg:text-xl lg:tracking-tight">RAF Matemáticas</h1>
-          <p className="text-xs text-foreground/80 lg:text-sm">Secundarias Técnicas · SEC Sonora · Hermosillo</p>
-        </div>
-        <div className="flex shrink-0 justify-end">
-          <LogoSonoraSec maxWidth={160} className="hidden sm:block" />
-          <LogoSonoraSec maxWidth={130} className="sm:hidden" />
-        </div>
-      </header>
+      <PageHeader>
+        <h1 className="text-base font-bold text-foreground lg:text-xl lg:tracking-tight">RAF Matemáticas</h1>
+        <p className="text-xs text-foreground/80 lg:text-sm">Secundarias Técnicas · SEC Sonora · Hermosillo</p>
+      </PageHeader>
 
       <ScrollOnlyWhenNeeded className="min-h-0 flex-1 overflow-x-hidden pb-2 lg:pb-4">
         {escuelas.length === 0 ? (

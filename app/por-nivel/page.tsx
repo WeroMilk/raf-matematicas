@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import BackButton from "@/app/components/BackButton";
+import PageHeader from "@/app/components/PageHeader";
 import PorNivelContent from "./PorNivelContent";
 import { getResultadosSync } from "@/lib/data-server";
 import { getAlumnosPorNivelSync } from "@/lib/data-server";
@@ -54,12 +55,12 @@ export default async function PorNivelPage({
 
   return (
     <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-1.5 overflow-hidden p-2 pb-2">
-      <header className="shrink-0">
+      <PageHeader>
         <BackButton
           href={nivelFiltro ? "/por-nivel" : "/"}
           label={nivelFiltro ? "Por nivel" : "Inicio"}
         />
-      </header>
+      </PageHeader>
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
         <PorNivelContent
         alumnosPorNivel={alumnosPorNivel}

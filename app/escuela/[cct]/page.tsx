@@ -7,7 +7,7 @@ import { COLORS } from "@/types/raf";
 import ChartBarrasReactivos from "@/app/components/ChartBarrasReactivos";
 import ChartPastelNiveles from "@/app/components/ChartPastelNiveles";
 import BackButton from "@/app/components/BackButton";
-import LogoSonoraSec from "@/app/components/LogoSonoraSec";
+import PageHeader from "@/app/components/PageHeader";
 import ScrollOnlyWhenNeeded from "@/app/components/ScrollOnlyWhenNeeded";
 
 export default async function EscuelaPage({ params }: { params: Promise<{ cct: string }> }) {
@@ -26,34 +26,28 @@ export default async function EscuelaPage({ params }: { params: Promise<{ cct: s
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden px-2 pb-2 pt-1.5 min-w-0 lg:gap-6 lg:pt-2 lg:px-0 lg:pb-8">
-      <header className="shrink-0 flex flex-row flex-wrap items-start justify-between gap-2">
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            {isSuper && <BackButton href="/escuelas" label="Escuelas" />}
-          </div>
-          <h1 className="mt-0.5 text-base font-bold lg:text-xl lg:tracking-tight">
-            {escuela.buscador?.nombre ?? escuela.cct}
-          </h1>
-          <p className="text-xs text-foreground/80 lg:text-sm">
-            {escuela.cct}
-            {escuela.buscador?.localidad || escuela.buscador?.municipio
-              ? ` · ${[escuela.buscador.localidad, escuela.buscador.municipio].filter(Boolean).join(", ")}`
-              : ""}
-          </p>
-          <p className="text-xs text-foreground/70 lg:text-sm">
-            {escuela.totalEstudiantes} alumnos · {escuela.grupos.length} grupos
-          </p>
-          {(escuela.buscador?.domicilio || escuela.buscador?.telefono) && (
-            <p className="mt-0.5 text-[11px] text-foreground/60 lg:text-xs">
-              {[escuela.buscador.domicilio, escuela.buscador.telefono].filter(Boolean).join(" · ")}
-            </p>
-          )}
+      <PageHeader>
+        <div className="flex flex-wrap items-center gap-2">
+          {isSuper && <BackButton href="/escuelas" label="Escuelas" />}
         </div>
-        <div className="shrink-0">
-          <LogoSonoraSec maxWidth={160} className="hidden sm:block" />
-          <LogoSonoraSec maxWidth={130} className="sm:hidden" />
-        </div>
-      </header>
+        <h1 className="mt-0.5 text-base font-bold lg:text-xl lg:tracking-tight">
+          {escuela.buscador?.nombre ?? escuela.cct}
+        </h1>
+        <p className="text-xs text-foreground/80 lg:text-sm">
+          {escuela.cct}
+          {escuela.buscador?.localidad || escuela.buscador?.municipio
+            ? ` · ${[escuela.buscador.localidad, escuela.buscador.municipio].filter(Boolean).join(", ")}`
+            : ""}
+        </p>
+        <p className="text-xs text-foreground/70 lg:text-sm">
+          {escuela.totalEstudiantes} alumnos · {escuela.grupos.length} grupos
+        </p>
+        {(escuela.buscador?.domicilio || escuela.buscador?.telefono) && (
+          <p className="mt-0.5 text-[11px] text-foreground/60 lg:text-xs">
+            {[escuela.buscador.domicilio, escuela.buscador.telefono].filter(Boolean).join(" · ")}
+          </p>
+        )}
+      </PageHeader>
 
       <section className="grid min-w-0 grid-cols-3 gap-2 lg:gap-4 shrink-0">
         <Link

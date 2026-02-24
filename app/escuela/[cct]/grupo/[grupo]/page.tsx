@@ -6,6 +6,7 @@ import ChartBarrasReactivos from "@/app/components/ChartBarrasReactivos";
 import ChartPastelNiveles from "@/app/components/ChartPastelNiveles";
 import TablaAlumnos from "@/app/components/TablaAlumnos";
 import BackButton from "@/app/components/BackButton";
+import PageHeader from "@/app/components/PageHeader";
 import ScrollOnlyWhenNeeded from "@/app/components/ScrollOnlyWhenNeeded";
 
 const NIVEL_TO_PARAM = {
@@ -33,11 +34,11 @@ export default async function GrupoPage({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden p-2 min-w-0">
-      <header className="shrink-0">
+      <PageHeader>
         <BackButton href={`/escuela/${cct}`} label={escuela.cct} />
         <h1 className="mt-1 text-base font-bold">Grupo {grupoData.nombre}</h1>
         <p className="text-xs text-foreground/80">{grupoData.total} alumnos</p>
-      </header>
+      </PageHeader>
 
       <ScrollOnlyWhenNeeded className="min-h-0 flex-1 overflow-x-hidden flex flex-col gap-2 pb-4">
       <section className="grid min-w-0 grid-cols-3 gap-2 shrink-0">
