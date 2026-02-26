@@ -16,9 +16,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
 const RESULTADOS_PATH = path.join(ROOT, "public", "data", "resultados.json");
 
+const EXCEL_EN_REPO = path.join(ROOT, "data", "buscador", "Buscador de Escuelas en Linea.xlsx");
 const DEFAULT_EXCEL =
   process.env.BUSCADOR_EXCEL ||
-  path.join(process.env.USERPROFILE || process.env.HOME || "", "Downloads", "Buscador de Escuelas en Linea.xlsx");
+  (fs.existsSync(EXCEL_EN_REPO) ? EXCEL_EN_REPO : path.join(process.env.USERPROFILE || process.env.HOME || "", "Downloads", "Buscador de Escuelas en Linea.xlsx"));
 
 const COLUMNAS = [
   "CCT",
@@ -86,9 +87,9 @@ function buildMapFromExcel(filePath) {
 function main() {
   const excelPath = process.argv[2] || DEFAULT_EXCEL;
   if (!fs.existsSync(excelPath)) {
-    console.error("No se encontró el Excel:", excelPath);
-    console.error("Uso: node scripts/merge-buscador-escuelas.mjs [ruta/al/Buscador de Escuelas en Linea.xlsx]");
-    process.exit(1);
+    console.warn("No se encontró el Excel del Buscador:", excelPath);
+    console.warn("Omitiendo merge. Los datos de nombre/localidad/municipio no se añadirán.");
+    process.exit(0);
   }
 
   if (!fs.existsSync(RESULTADOS_PATH)) {
