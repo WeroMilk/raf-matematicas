@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { COLORS } from "@/types/raf";
 
@@ -35,16 +36,25 @@ function TooltipAciertos(props: { active?: boolean; payload?: { payload: { react
 }
 
 export default function ChartBarrasReactivos({ porcentajes, title, totalAlumnos }: Props) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   const data = porcentajes.map((p, i) => ({
     reactivo: `${i + 1}`,
     porcentaje: p,
     fill: getColor(p),
     aciertos: totalAlumnos != null ? Math.round((p / 100) * totalAlumnos) : undefined,
   }));
+
+  const chartContainerClass = "h-24 w-full min-w-0 min-h-[6rem] sm:h-28 sm:min-h-[7rem] outline-none";
+
   return (
     <div className="chart-no-focus w-full min-w-0 outline-none" tabIndex={-1}>
       {title && <h3 className="mb-1 text-xs font-semibold">{title}</h3>}
-      <div className="h-24 w-full min-w-0 sm:h-28 outline-none" tabIndex={-1}>
+      <div className={chartContainerClass} tabIndex={-1}>
+        {!mounted ? (
+          <div className="h-full w-full animate-pulse rounded-lg bg-[var(--fill-tertiary)]" aria-hidden />
+        ) : (
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
             <XAxis dataKey="reactivo" tick={{ fontSize: 8 }} />
@@ -57,6 +67,7 @@ export default function ChartBarrasReactivos({ porcentajes, title, totalAlumnos 
             </Bar>
           </BarChart>
         </ResponsiveContainer>
+        )}
       </div>
     </div>
   );

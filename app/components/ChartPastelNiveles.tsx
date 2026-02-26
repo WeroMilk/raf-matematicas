@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 import { COLORS } from "@/types/raf";
 
@@ -14,6 +15,9 @@ interface Props {
 }
 
 export default function ChartPastelNiveles({ requiereApoyo, enDesarrollo, esperado, title }: Props) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   const data = [
     { name: NAMES[0], value: requiereApoyo },
     { name: NAMES[1], value: enDesarrollo },
@@ -21,10 +25,16 @@ export default function ChartPastelNiveles({ requiereApoyo, enDesarrollo, espera
   ].filter((d) => d.value > 0);
   if (data.length === 0) return null;
   const total = requiereApoyo + enDesarrollo + esperado;
+
+  const chartContainerClass = "h-28 w-full min-w-0 min-h-[7rem] sm:h-32 sm:min-h-[8rem] lg:h-40 lg:min-h-[10rem]";
+
   return (
     <div className="w-full min-w-0">
       {title && <h3 className="mb-1 text-xs font-semibold">{title}</h3>}
-      <div className="h-28 w-full min-w-0 sm:h-32 lg:h-40">
+      <div className={chartContainerClass}>
+        {!mounted ? (
+          <div className="h-full w-full animate-pulse rounded-lg bg-[var(--fill-tertiary)]" aria-hidden />
+        ) : (
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -57,6 +67,7 @@ export default function ChartPastelNiveles({ requiereApoyo, enDesarrollo, espera
             />
           </PieChart>
         </ResponsiveContainer>
+        )}
       </div>
     </div>
   );
