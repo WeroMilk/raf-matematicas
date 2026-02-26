@@ -43,9 +43,7 @@ lib/passwords-inicial.txt
 lib/passwords-nuevos.txt
 USUARIOS-Y-CONTRASEÑAS.txt
 
-# datos generados (npm run build:data)
-public/data/resultados.json
-USUARIOS-Y-CONTRASEÑAS.txt
+# datos generados: resultados.json SÍ se incluye en repo para deploy en Vercel
 
 # vercel
 .vercel

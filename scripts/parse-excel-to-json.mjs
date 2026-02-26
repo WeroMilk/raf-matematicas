@@ -193,6 +193,11 @@ function main() {
   if (!fs.existsSync(DATA_DIR)) {
     fs.mkdirSync(DATA_DIR, { recursive: true });
     console.log("Carpeta data/excel creada. Coloca ahí los archivos *_actualizado.xlsx y vuelve a ejecutar.");
+    // En deploy (Vercel) no existe data/excel: conservar resultados.json del repo
+    if (fs.existsSync(OUT_FILE)) {
+      console.log("Conservando public/data/resultados.json existente (deploy sin data/excel).");
+      return;
+    }
     const empty = { escuelas: [], generado: new Date().toISOString() };
     fs.mkdirSync(OUT_DIR, { recursive: true });
     fs.writeFileSync(OUT_FILE, JSON.stringify(empty, null, 2), "utf8");
@@ -203,6 +208,11 @@ function main() {
   const files = fs.readdirSync(DATA_DIR).filter((f) => f.endsWith("_actualizado.xlsx"));
   if (!files.length) {
     console.log("No se encontraron archivos *_actualizado.xlsx en", DATA_DIR);
+    // En deploy (Vercel) no hay Excel: conservar resultados.json existente del repo
+    if (fs.existsSync(OUT_FILE)) {
+      console.log("Conservando public/data/resultados.json existente (deploy sin Excel).");
+      return;
+    }
     const empty = { escuelas: [], generado: new Date().toISOString() };
     fs.mkdirSync(OUT_DIR, { recursive: true });
     fs.writeFileSync(OUT_FILE, JSON.stringify(empty, null, 2), "utf8");
