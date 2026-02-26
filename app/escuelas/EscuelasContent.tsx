@@ -47,7 +47,7 @@ export default function EscuelasContent({ escuelas }: Props) {
                 : "bg-[var(--fill-tertiary)] text-foreground hover:bg-[var(--fill-secondary)]"
             }`}
           >
-            Nº ascendente
+            n.º ascendente
           </button>
           <button
             type="button"
@@ -58,7 +58,7 @@ export default function EscuelasContent({ escuelas }: Props) {
                 : "bg-[var(--fill-tertiary)] text-foreground hover:bg-[var(--fill-secondary)]"
             }`}
           >
-            Nº descendente
+            n.º descendente
           </button>
           <button
             type="button"

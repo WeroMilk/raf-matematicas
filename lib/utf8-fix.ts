@@ -1,4 +1,13 @@
 /**
+ * Corrige errores ortográficos comunes en nombres propios (RAE).
+ * Ej.: "MUÑZ" → "MUÑOZ", "PEÃA" → "PEÑA".
+ */
+function fixOrtografiaComun(str: string): string {
+  if (typeof str !== "string") return str;
+  return str.replace(/\bMUÑZ\b/gi, "MUÑOZ").replace(/\bmuñz\b/g, "muñoz");
+}
+
+/**
  * Corrige texto que fue guardado en UTF-8 pero leído como Latin-1 (mojibake).
  * Ej.: "PEÃA" → "PEÑA", "Ã³" → "ó", "MUÃOZ" → "MUÑOZ".
  */
@@ -8,17 +17,23 @@ export function fixUtf8Mojibake(str: string): string {
   let s = str
     .replace(/Ã±/g, "ñ")
     .replace(/ÃA/g, "Ñ")
+    .replace(/Ão/g, "ñ")
     .replace(/ÃO/g, "Ñ")
-    .replace(/Ãa/g, "ñ")
-    .replace(/Ão/g, "ñ");
-  if (s !== str) return s;
+    .replace(/Ãa/g, "ñ");
+  // MUÃOZ → MUÑOZ (Ão/ÃO da Ñ/ñ, pero queda MUñZ o MUÑZ; corregir a MUÑOZ)
+  s = s.replace(/\bMU[ñÑ]Z\b/g, "MUÑOZ");
+  if (s !== str) return fixOrtografiaComun(s);
   // Mojibake estándar: secuencia UTF-8 leída como Latin-1
-  if (!/Ã[\x80-\xBF]/.test(str)) return str;
-  try {
-    return Buffer.from(str, "latin1").toString("utf8");
-  } catch {
-    return str;
+  if (/Ã[\x80-\xBF]/.test(str)) {
+    try {
+      s = Buffer.from(str, "latin1").toString("utf8");
+    } catch {
+      s = str;
+    }
+  } else {
+    s = str;
   }
+  return fixOrtografiaComun(s);
 }
 
 /**

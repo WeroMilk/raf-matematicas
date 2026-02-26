@@ -35,15 +35,29 @@ const COLUMNAS = [
   "ALUMNOS",
 ];
 
-/** Corrige texto UTF-8 leído como Latin-1 (ej. PEÃA → PEÑA). */
+/** Corrige texto UTF-8 leído como Latin-1 (ej. PEÃA → PEÑA, MUÃOZ → MUÑOZ). */
 function fixUtf8Mojibake(str) {
   if (typeof str !== "string") return str;
-  if (!/Ã[\x80-\xBF]/.test(str)) return str;
-  try {
-    return Buffer.from(str, "latin1").toString("utf8");
-  } catch {
-    return str;
+  let s = str
+    .replace(/Ã±/g, "ñ")
+    .replace(/ÃA/g, "Ñ")
+    .replace(/Ão/g, "ñ")
+    .replace(/ÃO/g, "Ñ")
+    .replace(/Ãa/g, "ñ");
+  if (/Ã[\x80-\xBF]/.test(s)) {
+    try {
+      s = Buffer.from(s, "latin1").toString("utf8");
+    } catch {
+      // mantener s
+    }
   }
+  return fixOrtografiaComun(s);
+}
+
+/** Corrige errores ortográficos comunes (RAE). Ej.: MUÑZ, MUñZ → MUÑOZ */
+function fixOrtografiaComun(str) {
+  if (typeof str !== "string") return str;
+  return str.replace(/\bMU[ñÑ]Z\b/g, "MUÑOZ").replace(/\bmuñz\b/g, "muñoz");
 }
 
 function buildMapFromExcel(filePath) {
