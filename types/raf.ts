@@ -8,7 +8,7 @@ export const NIVELES: NivelRAF[] = [
 ];
 
 /** Solo niveles con examen (para vista Por nivel) */
-export const NIVELES_CON_EXAMEN: NivelRAF[] = [
+export const NIVELES_CON_EXAMEN: ("REQUIERE APOYO" | "EN DESARROLLO" | "ESPERADO")[] = [
   "REQUIERE APOYO",
   "EN DESARROLLO",
   "ESPERADO",

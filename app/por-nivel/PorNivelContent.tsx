@@ -16,8 +16,10 @@ type SortOrder = "asc" | "desc";
 
 type GrupoOption = { cct: string; grupo: string; label: string };
 
+type NivelesConExamen = "REQUIERE APOYO" | "EN DESARROLLO" | "ESPERADO";
+
 interface Props {
-  alumnosPorNivel: Record<NivelRAF, RowNivel[]>;
+  alumnosPorNivel: Record<NivelesConExamen, RowNivel[]>;
   escuelas: { cct: string }[];
   gruposOptions: GrupoOption[];
   nivelFiltro?: NivelRAF | null;
@@ -25,7 +27,7 @@ interface Props {
   initialGrupo?: string;
 }
 
-const NIVEL_TO_PARAM: Record<NivelRAF, string> = {
+const NIVEL_TO_PARAM: Record<NivelesConExamen, string> = {
   "REQUIERE APOYO": "REQUIERE_APOYO",
   "EN DESARROLLO": "EN_DESARROLLO",
   ESPERADO: "ESPERADO",
@@ -68,7 +70,7 @@ export default function PorNivelContent({
         const pb = b.alumno.porcentaje ?? 0;
         return sortOrder === "asc" ? pa - pb : pb - pa;
       });
-    const out: Record<"REQUIERE APOYO" | "EN DESARROLLO" | "ESPERADO", RowNivel[]> = {
+    const out: Record<NivelesConExamen, RowNivel[]> = {
       "REQUIERE APOYO": [],
       "EN DESARROLLO": [],
       ESPERADO: [],
@@ -84,7 +86,9 @@ export default function PorNivelContent({
   useEffect(() => {
     setExpandedNivel(nivelFiltro);
   }, [nivelFiltro]);
-  const nivelesAMostrar = expandedNivel ? [expandedNivel] : NIVELES_CON_EXAMEN;
+  const nivelesAMostrar: NivelesConExamen[] = expandedNivel && NIVELES_CON_EXAMEN.includes(expandedNivel as NivelesConExamen)
+    ? [expandedNivel as NivelesConExamen]
+    : NIVELES_CON_EXAMEN;
   const usarListaReducida = !expandedNivel;
 
   const handleVerLos3 = () => {
