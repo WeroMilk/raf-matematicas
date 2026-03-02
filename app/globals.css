@@ -336,7 +336,15 @@ body {
 }
 
 .animate-stagger-in {
-  animation: scaleIn var(--duration-normal) var(--ease-ios)   forwards;
+  animation: scaleIn var(--duration-normal) var(--ease-ios) forwards;
+}
+
+.animate-slide-up {
+  animation: slideUp var(--duration-normal) var(--ease-ios) forwards;
+}
+
+.animate-scale-in {
+  animation: scaleIn var(--duration-normal) var(--ease-ios) forwards;
 }
 
 .btn-ios {
