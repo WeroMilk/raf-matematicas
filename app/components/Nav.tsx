@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import LogoutButton from "@/app/components/LogoutButton";
 
 type Session = { tipo: "super" | "escuela"; cct?: string } | null;
@@ -44,9 +44,16 @@ const allLinks = [
 
 export default function Nav({ session }: { session?: Session }) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   if (pathname === "/login") return null;
 
   const links = session?.tipo === "escuela" ? allLinks.filter((l) => l.href !== "/escuelas") : allLinks;
+  const zona = searchParams.get("zona");
+
+  const hrefWithZona = (base: string) => {
+    if (!zona || session?.tipo !== "super") return base;
+    return base + (base.includes("?") ? "&" : "?") + `zona=${zona}`;
+  };
 
   return (
     <nav className="app-nav">
@@ -57,7 +64,7 @@ export default function Nav({ session }: { session?: Session }) {
           return (
             <Link
               key={href}
-              href={href}
+              href={hrefWithZona(href)}
               className={`nav-tab ${isActive ? "nav-tab--active" : "nav-tab--inactive"}`}
               aria-current={isActive ? "page" : undefined}
             >

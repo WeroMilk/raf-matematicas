@@ -2,9 +2,11 @@ import { cookies } from "next/headers";
 import BackButton from "@/app/components/BackButton";
 import PageHeader from "@/app/components/PageHeader";
 import PorNivelContent from "./PorNivelContent";
+import FiltroZona from "@/app/components/FiltroZona";
 import { getResultadosSync } from "@/lib/data-server";
 import { getAlumnosPorNivelSync } from "@/lib/data-server";
 import { getSession } from "@/lib/auth";
+import { getZonaFromCct, ZONAS_DISPONIBLES } from "@/lib/zonas";
 import type { NivelRAF } from "@/types/raf";
 import { NIVELES_CON_EXAMEN } from "@/types/raf";
 
@@ -21,15 +23,20 @@ function filterByCct<T extends { cct: string }>(arr: T[], cct: string): T[] {
 export default async function PorNivelPage({
   searchParams,
 }: {
-  searchParams: Promise<{ nivel?: string; grupo?: string }>;
+  searchParams: Promise<{ nivel?: string; grupo?: string; zona?: string }>;
 }) {
   const params = await searchParams;
   const nivelParam = params.nivel ?? "";
   const nivelFiltro: NivelRAF | null = PARAM_TO_NIVEL[nivelParam] ?? null;
   const grupoParam = params.grupo ?? "";
+  const zonaParam = params.zona;
+  const zonaNum = zonaParam && ZONAS_DISPONIBLES.includes(parseInt(zonaParam, 10))
+    ? parseInt(zonaParam, 10)
+    : null;
 
   const cookieStore = await cookies();
   const session = await getSession(cookieStore.get("raf_session")?.value ?? null);
+  const isSuper = session?.tipo === "super";
 
   let { escuelas } = getResultadosSync();
   let alumnosPorNivel = {
@@ -43,6 +50,12 @@ export default async function PorNivelPage({
     for (const nivel of NIVELES_CON_EXAMEN) {
       alumnosPorNivel[nivel] = filterByCct(alumnosPorNivel[nivel], session.cct);
     }
+  } else if (isSuper && zonaNum != null) {
+    escuelas = escuelas.filter((e) => getZonaFromCct(e.cct) === zonaNum);
+    const cctsZona = new Set(escuelas.map((e) => e.cct));
+    for (const nivel of NIVELES_CON_EXAMEN) {
+      alumnosPorNivel[nivel] = alumnosPorNivel[nivel].filter((r) => cctsZona.has(r.cct));
+    }
   }
 
   const gruposOptions = escuelas.flatMap((e) =>
@@ -53,13 +66,14 @@ export default async function PorNivelPage({
     }))
   );
 
+  const zonaHref = (path: string) =>
+    zonaNum != null ? `${path}${path.includes("?") ? "&" : "?"}zona=${zonaNum}` : path;
+  const backHref = nivelFiltro ? zonaHref("/por-nivel") : zonaHref("/");
+
   return (
     <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-0.5 overflow-hidden p-2 pb-2">
-      <PageHeader>
-        <BackButton
-          href={nivelFiltro ? "/por-nivel" : "/"}
-          label={nivelFiltro ? "Por nivel" : "Inicio"}
-        />
+      <PageHeader centerContent={isSuper ? <FiltroZona isSuper={isSuper} /> : undefined}>
+        <BackButton href={backHref} label={nivelFiltro ? "Por nivel" : "Inicio"} />
       </PageHeader>
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
         <PorNivelContent

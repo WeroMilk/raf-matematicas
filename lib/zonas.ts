@@ -51,5 +51,5 @@ export function getZonaFromCct(cct: string): number | null {
   return ESCUELA_A_ZONA[num] ?? null;
 }
 
-/** Zonas 1 a 18 (todas las zonas del sistema) */
-export const ZONAS_DISPONIBLES = Array.from({ length: 18 }, (_, i) => i + 1);
+/** Solo zonas que tienen escuelas asignadas (del mapeo) */
+export const ZONAS_DISPONIBLES = [...new Set(Object.values(ESCUELA_A_ZONA))].sort((a, b) => a - b);

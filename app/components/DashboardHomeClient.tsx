@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
-import type { ResultadosRAF, EscuelaResumen } from "@/types/raf";
-import { getZonaFromCct } from "@/lib/zonas";
+import { useSearchParams } from "next/navigation";
+import type { ResultadosRAF } from "@/types/raf";
+import { getZonaFromCct, ZONAS_DISPONIBLES } from "@/lib/zonas";
 import PageHeader from "@/app/components/PageHeader";
 import ScrollOnlyWhenNeeded from "@/app/components/ScrollOnlyWhenNeeded";
 import ChartPastelNiveles from "@/app/components/ChartPastelNiveles";
@@ -19,12 +20,19 @@ interface Props {
 }
 
 export default function DashboardHomeClient({ data, isSuper }: Props) {
-  const [zonaSeleccionada, setZonaSeleccionada] = useState<number | null>(null);
+  const searchParams = useSearchParams();
+  const zonaParam = searchParams.get("zona");
+  const zonaSeleccionada = zonaParam && ZONAS_DISPONIBLES.includes(parseInt(zonaParam, 10))
+    ? parseInt(zonaParam, 10)
+    : null;
 
   const escuelas = useMemo(() => {
     if (!isSuper || zonaSeleccionada == null) return data.escuelas;
     return data.escuelas.filter((e) => getZonaFromCct(e.cct) === zonaSeleccionada);
   }, [data.escuelas, isSuper, zonaSeleccionada]);
+
+  const zonaHref = (path: string) =>
+    zonaSeleccionada != null ? `${path}${path.includes("?") ? "&" : "?"}zona=${zonaSeleccionada}` : path;
 
   const totalAlumnos = escuelas.reduce((s, e) => s + e.totalEstudiantes, 0);
   const totalReq = escuelas.reduce((s, e) => s + e.requiereApoyo, 0);
@@ -45,11 +53,7 @@ export default function DashboardHomeClient({ data, isSuper }: Props) {
     return sumas.map((s) => (totalAlumnos ? Math.round((s / totalAlumnos) * 10) / 10 : 0));
   }, [escuelas, totalAlumnos]);
 
-  const centerContent = isSuper ? (
-    <div className="mr-4">
-      <FiltroZona value={zonaSeleccionada} onChange={setZonaSeleccionada} />
-    </div>
-  ) : undefined;
+  const centerContent = isSuper ? <FiltroZona isSuper={isSuper} /> : undefined;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden gap-1 animate-fade-in p-2 lg:gap-6 lg:p-0 lg:pb-8">
@@ -71,7 +75,7 @@ export default function DashboardHomeClient({ data, isSuper }: Props) {
           <>
             <section className="grid min-w-0 grid-cols-3 gap-2 lg:gap-4">
               <Link
-                href="/por-nivel?nivel=REQUIERE_APOYO"
+                href={zonaHref("/por-nivel?nivel=REQUIERE_APOYO")}
                 className="link-ios group relative card-ios min-w-0 rounded-2xl p-2.5 text-center text-white transition-transform shadow-md lg:p-4"
                 style={{ backgroundColor: COLORS.requiereApoyo }}
                 title={`${pctReq}%`}
@@ -83,7 +87,7 @@ export default function DashboardHomeClient({ data, isSuper }: Props) {
                 </span>
               </Link>
               <Link
-                href="/por-nivel?nivel=EN_DESARROLLO"
+                href={zonaHref("/por-nivel?nivel=EN_DESARROLLO")}
                 className="link-ios group relative card-ios min-w-0 rounded-2xl p-2.5 text-center text-white transition-transform shadow-md lg:p-4"
                 style={{ backgroundColor: COLORS.enDesarrollo }}
                 title={`${pctDes}%`}
@@ -95,7 +99,7 @@ export default function DashboardHomeClient({ data, isSuper }: Props) {
                 </span>
               </Link>
               <Link
-                href="/por-nivel?nivel=ESPERADO"
+                href={zonaHref("/por-nivel?nivel=ESPERADO")}
                 className="link-ios group relative card-ios min-w-0 rounded-2xl p-2.5 text-center text-white transition-transform shadow-md lg:p-4"
                 style={{ backgroundColor: COLORS.esperado }}
                 title={`${pctEsp}%`}
@@ -117,13 +121,13 @@ export default function DashboardHomeClient({ data, isSuper }: Props) {
 
             <section className="grid gap-2 lg:grid-cols-2 lg:gap-4">
               <Link
-                href="/escuelas"
+                href={zonaHref("/escuelas")}
                 className="link-ios card-ios flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-3 text-sm font-medium lg:px-5 lg:py-4 lg:text-base"
               >
                 Ver por escuela <span className="text-foreground/60">→</span>
               </Link>
               <Link
-                href="/por-nivel"
+                href={zonaHref("/por-nivel")}
                 className="link-ios card-ios flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-3 text-sm font-medium lg:px-5 lg:py-4 lg:text-base"
               >
                 Ver por nivel <span className="text-foreground/60">→</span>
