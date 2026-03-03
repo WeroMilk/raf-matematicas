@@ -37,8 +37,12 @@ export default function TablaAlumnos({ alumnos, cct }: Props) {
           return (
             <button
               type="button"
-              onClick={() => setAlumnoSeleccionado(alumno)}
-              className="text-left font-medium underline decoration-dotted hover:opacity-80 cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                setAlumnoSeleccionado(alumno);
+              }}
+              className="text-left font-medium underline decoration-dotted hover:opacity-80 cursor-pointer w-full text-start"
             >
               {nombre}
             </button>

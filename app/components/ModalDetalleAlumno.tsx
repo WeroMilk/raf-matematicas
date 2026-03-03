@@ -59,7 +59,7 @@ export default function ModalDetalleAlumno({ alumno, cct, onClose }: Props) {
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-alumno-titulo"
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
       onClick={handleClose}
     >
       <div

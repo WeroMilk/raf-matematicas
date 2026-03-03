@@ -113,7 +113,9 @@ export default function TablaAlumnosNivel({ alumnosConCct, maxRows, verTodosHref
                 <td className="px-0.5 py-px">
                   <button
                     type="button"
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
                       setAlumnoSeleccionado({
                         nombre: r.alumno.nombre,
                         apellido: r.alumno.apellido,
@@ -124,7 +126,7 @@ export default function TablaAlumnosNivel({ alumnosConCct, maxRows, verTodosHref
                       });
                       setCctSeleccionado(r.cct);
                     }}
-                    className="text-left font-medium underline decoration-dotted hover:opacity-80 cursor-pointer"
+                    className="text-left font-medium underline decoration-dotted hover:opacity-80 cursor-pointer w-full text-start"
                   >
                     {r.alumno.nombre} {r.alumno.apellido}
                   </button>

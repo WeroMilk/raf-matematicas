@@ -7,7 +7,7 @@ import { NIVELES_CON_EXAMEN, NIVEL_COLOR } from "@/types/raf";
 import TablaAlumnosNivel from "@/app/components/TablaAlumnosNivel";
 
 export type RowNivel = {
-  alumno: { nombre: string; apellido: string; grupo: string; porcentaje: number | null; nivel: NivelRAF };
+  alumno: { nombre: string; apellido: string; grupo: string; porcentaje: number | null; nivel: NivelRAF; respuestas?: string[] };
   cct: string;
 };
 
