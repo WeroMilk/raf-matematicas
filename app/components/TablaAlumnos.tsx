@@ -12,56 +12,74 @@ import {
 import { useState, useMemo } from "react";
 import type { AlumnoRAF } from "@/types/raf";
 import { NIVEL_COLOR } from "@/types/raf";
+import ModalDetalleAlumno from "@/app/components/ModalDetalleAlumno";
 
 const columnHelper = createColumnHelper<AlumnoRAF>();
 
-const columns = [
-  columnHelper.accessor((r) => `${r.nombre} ${r.apellido}`.trim(), {
-    id: "nombre",
-    header: "Alumno",
-    cell: (info) => info.getValue() || "—",
-  }),
-  columnHelper.accessor("grupo", { header: "Grupo" }),
-  columnHelper.accessor("porcentaje", {
-    header: "%",
-    cell: (info) => {
-      const v = info.getValue();
-      return v != null ? `${v}%` : "—";
-    },
-  }),
-  columnHelper.accessor("nivel", {
-    header: "Nivel",
-    cell: (info) => {
-      const v = info.getValue();
-      const label =
-        v === "REQUIERE APOYO"
-          ? "Apoyo"
-          : v === "EN DESARROLLO"
-            ? "Desarrollo"
-            : v === "ESPERADO"
-              ? "Esperado"
-              : v === "SIN EXAMEN"
-                ? "Sin examen"
-                : v;
-      return (
-        <span
-          className="rounded px-2 py-0.5 text-xs font-medium text-white"
-          style={{ backgroundColor: NIVEL_COLOR[v] ?? "#757575" }}
-        >
-          {label}
-        </span>
-      );
-    },
-  }),
-];
-
 interface Props {
   alumnos: AlumnoRAF[];
+  cct?: string;
 }
 
-export default function TablaAlumnos({ alumnos }: Props) {
+export default function TablaAlumnos({ alumnos, cct }: Props) {
   const [sorting, setSorting] = useState<SortingState>([{ id: "porcentaje", desc: true }]);
   const [filter, setFilter] = useState("");
+  const [alumnoSeleccionado, setAlumnoSeleccionado] = useState<AlumnoRAF | null>(null);
+
+  const columns = useMemo(
+    () => [
+      columnHelper.accessor((r) => `${r.nombre} ${r.apellido}`.trim(), {
+        id: "nombre",
+        header: "Alumno",
+        cell: (info) => {
+          const alumno = info.row.original;
+          const nombre = info.getValue() || "—";
+          return (
+            <button
+              type="button"
+              onClick={() => setAlumnoSeleccionado(alumno)}
+              className="text-left font-medium underline decoration-dotted hover:opacity-80 cursor-pointer"
+            >
+              {nombre}
+            </button>
+          );
+        },
+      }),
+      columnHelper.accessor("grupo", { header: "Grupo" }),
+      columnHelper.accessor("porcentaje", {
+        header: "%",
+        cell: (info) => {
+          const v = info.getValue();
+          return v != null ? `${v}%` : "—";
+        },
+      }),
+      columnHelper.accessor("nivel", {
+        header: "Nivel",
+        cell: (info) => {
+          const v = info.getValue();
+          const label =
+            v === "REQUIERE APOYO"
+              ? "Apoyo"
+              : v === "EN DESARROLLO"
+                ? "Desarrollo"
+                : v === "ESPERADO"
+                  ? "Esperado"
+                  : v === "SIN EXAMEN"
+                    ? "Sin examen"
+                    : v;
+          return (
+            <span
+              className="rounded px-2 py-0.5 text-xs font-medium text-white"
+              style={{ backgroundColor: NIVEL_COLOR[v] ?? "#757575" }}
+            >
+              {label}
+            </span>
+          );
+        },
+      }),
+    ],
+    []
+  );
 
   const table = useReactTable({
     data: alumnos,
@@ -114,6 +132,11 @@ export default function TablaAlumnos({ alumnos }: Props) {
           ))}
         </tbody>
       </table>
+      <ModalDetalleAlumno
+        alumno={alumnoSeleccionado}
+        cct={cct}
+        onClose={() => setAlumnoSeleccionado(null)}
+      />
     </div>
   );
 }

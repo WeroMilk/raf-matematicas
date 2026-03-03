@@ -3,9 +3,11 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import type { NivelRAF } from "@/types/raf";
+import type { AlumnoRAF } from "@/types/raf";
+import ModalDetalleAlumno from "@/app/components/ModalDetalleAlumno";
 
 type Row = {
-  alumno: { nombre: string; apellido: string; grupo: string; porcentaje: number | null; nivel: NivelRAF };
+  alumno: { nombre: string; apellido: string; grupo: string; porcentaje: number | null; nivel: NivelRAF; respuestas?: string[] };
   cct: string;
 };
 
@@ -21,6 +23,8 @@ export default function TablaAlumnosNivel({ alumnosConCct, maxRows, verTodosHref
   const [filtro, setFiltro] = useState("");
   const [sortCol, setSortCol] = useState<SortCol>("porcentaje");
   const [sortAsc, setSortAsc] = useState(false);
+  const [alumnoSeleccionado, setAlumnoSeleccionado] = useState<AlumnoRAF | null>(null);
+  const [cctSeleccionado, setCctSeleccionado] = useState<string | undefined>(undefined);
 
   const filtrados = useMemo(
     () =>
@@ -106,7 +110,25 @@ export default function TablaAlumnosNivel({ alumnosConCct, maxRows, verTodosHref
           <tbody>
             {visibles.map((r, i) => (
               <tr key={i} className="border-b border-border/50 transition-colors duration-150 hover:bg-[var(--fill-tertiary)]">
-                <td className="px-0.5 py-px">{r.alumno.nombre} {r.alumno.apellido}</td>
+                <td className="px-0.5 py-px">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAlumnoSeleccionado({
+                        nombre: r.alumno.nombre,
+                        apellido: r.alumno.apellido,
+                        grupo: r.alumno.grupo,
+                        porcentaje: r.alumno.porcentaje,
+                        nivel: r.alumno.nivel,
+                        respuestas: r.alumno.respuestas ?? [],
+                      });
+                      setCctSeleccionado(r.cct);
+                    }}
+                    className="text-left font-medium underline decoration-dotted hover:opacity-80 cursor-pointer"
+                  >
+                    {r.alumno.nombre} {r.alumno.apellido}
+                  </button>
+                </td>
                 <td className="px-0.5 py-px">{r.alumno.grupo}</td>
                 <td className="px-0.5 py-px">{r.alumno.porcentaje != null ? `${r.alumno.porcentaje}%` : "—"}</td>
                 <td className="px-0.5 py-px text-foreground/70">{r.cct}</td>
@@ -114,6 +136,14 @@ export default function TablaAlumnosNivel({ alumnosConCct, maxRows, verTodosHref
             ))}
           </tbody>
         </table>
+        <ModalDetalleAlumno
+          alumno={alumnoSeleccionado}
+          cct={cctSeleccionado}
+          onClose={() => {
+            setAlumnoSeleccionado(null);
+            setCctSeleccionado(undefined);
+          }}
+        />
         {mostrarVerTodos && (
           <p className="mt-1 text-center">
             <Link

@@ -98,7 +98,7 @@ export default async function GrupoPage({
 
       <section className="min-w-0 shrink-0">
         <h2 className="mb-2 text-xs font-semibold">Alumnos</h2>
-        <TablaAlumnos alumnos={grupoData.alumnos} />
+        <TablaAlumnos alumnos={grupoData.alumnos} cct={cct} />
       </section>
       </ScrollOnlyWhenNeeded>
     </div>
