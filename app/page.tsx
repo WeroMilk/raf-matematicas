@@ -7,8 +7,9 @@ export default async function HomePage() {
   const cookieStore = await cookies();
   const session = await getSession(cookieStore.get("raf_session")?.value ?? null);
   const isSuper = session?.tipo === "super";
+  const zonaForced = session?.tipo === "zona" ? session.zona : undefined;
 
   const data = getResultadosSync();
 
-  return <DashboardHomeClient data={data} isSuper={!!isSuper} />;
+  return <DashboardHomeClient data={data} isSuper={!!isSuper} zonaForced={zonaForced} />;
 }

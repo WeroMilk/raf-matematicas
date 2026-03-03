@@ -2,7 +2,7 @@ import * as crypto from "crypto";
 import * as fs from "fs";
 import * as path from "path";
 
-type AuthData = { superUsuario: string; escuelas: Record<string, string> };
+type AuthData = { superUsuario: string; zonas: Record<string, string> };
 
 function trimEnv(value: string | undefined): string {
   const s = (value ?? "").trim();
@@ -30,17 +30,17 @@ function load(): AuthData {
       return key && typeof parsed[key] === "string" ? (parsed[key] as string) : "";
     })();
     const fileSuperHash = typeof rawSuper === "string" ? rawSuper.trim() : "";
-    const escuelas =
-      parsed["escuelas"] && typeof parsed["escuelas"] === "object" && !Array.isArray(parsed["escuelas"])
-        ? (parsed["escuelas"] as Record<string, string>)
+    const zonas =
+      parsed["zonas"] && typeof parsed["zonas"] === "object" && !Array.isArray(parsed["zonas"])
+        ? (parsed["zonas"] as Record<string, string>)
         : {};
     const superHash = envSuperHash || fileSuperHash;
-    return { superUsuario: superHash, escuelas };
+    return { superUsuario: superHash, zonas };
   } catch (err) {
     if (process.env.NODE_ENV === "development") {
       console.error("[auth-data] Error leyendo", filePath, err);
     }
-    return { superUsuario: envSuperHash, escuelas: {} };
+    return { superUsuario: envSuperHash, zonas: {} };
   }
 }
 
@@ -55,7 +55,7 @@ function normalizePasswordForVerify(password: string): string {
     .replace(/[\u200B-\u200D\uFEFF\u00A0]/g, ""); // espacios normales + no-separables + BOM
 }
 
-export function verifyPassword(password: string): { tipo: "super" | "escuela"; cct?: string } | null {
+export function verifyPassword(password: string): { tipo: "super" | "zona"; zona?: number } | null {
   const normalized = normalizePasswordForVerify(password);
   if (!normalized) return null;
   const envSuperPassword = trimEnv(process.env.AUTH_SUPER_PASSWORD);
@@ -66,8 +66,11 @@ export function verifyPassword(password: string): { tipo: "super" | "escuela"; c
   const hash = hashPassword(normalized);
   const superHash = (data.superUsuario || "").trim();
   if (superHash && hash === superHash) return { tipo: "super" };
-  for (const [cct, h] of Object.entries(data.escuelas)) {
-    if (h != null && String(h).trim() === hash) return { tipo: "escuela", cct };
+  for (const [zonaStr, h] of Object.entries(data.zonas)) {
+    if (h != null && String(h).trim() === hash) {
+      const zona = parseInt(zonaStr, 10);
+      if (!isNaN(zona)) return { tipo: "zona", zona };
+    }
   }
   return null;
 }

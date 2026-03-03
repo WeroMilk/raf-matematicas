@@ -1,7 +1,7 @@
 const COOKIE_NAME = "raf_session";
 const EXPIRES_DAYS = 30;
 
-export type Session = { tipo: "super" | "escuela"; cct?: string };
+export type Session = { tipo: "super" | "zona"; zona?: number };
 
 function trimSecret(value: string | undefined): string {
   const s = (value ?? "").trim();
@@ -71,7 +71,7 @@ export async function createSessionCookie(session: Session): Promise<string> {
   const exp = Date.now() + EXPIRES_DAYS * 24 * 60 * 60 * 1000;
   const payload = JSON.stringify({
     t: session.tipo,
-    cct: session.cct ?? null,
+    zona: session.zona ?? null,
     exp,
   });
   const encoded = btoa(unescape(encodeURIComponent(payload)));
@@ -90,12 +90,12 @@ export async function getSessionFromCookie(cookieHeader: string | null): Promise
     if (!encoded || !sig) return null;
     if (!(await hmacVerify(encoded, sig, secret))) return null;
     const payload = decodeURIComponent(escape(atob(encoded)));
-    const data = JSON.parse(payload) as { t: string; cct: string | null; exp: number };
+    const data = JSON.parse(payload) as { t: string; zona: number | null; exp: number };
     if (data.exp < Date.now()) return null;
-    if (data.t !== "super" && data.t !== "escuela") return null;
+    if (data.t !== "super" && data.t !== "zona") return null;
     return {
       tipo: data.t,
-      cct: data.cct ?? undefined,
+      zona: data.zona ?? undefined,
     };
   } catch {
     return null;

@@ -17,19 +17,22 @@ const NUM_REACTIVOS = 12;
 interface Props {
   data: ResultadosRAF;
   isSuper: boolean;
+  zonaForced?: number;
 }
 
-export default function DashboardHomeClient({ data, isSuper }: Props) {
+export default function DashboardHomeClient({ data, isSuper, zonaForced }: Props) {
   const searchParams = useSearchParams();
   const zonaParam = searchParams.get("zona");
-  const zonaSeleccionada = zonaParam && ZONAS_DISPONIBLES.includes(parseInt(zonaParam, 10))
-    ? parseInt(zonaParam, 10)
-    : null;
+  const zonaFromUrl =
+    zonaParam && ZONAS_DISPONIBLES.includes(parseInt(zonaParam, 10))
+      ? parseInt(zonaParam, 10)
+      : null;
+  const zonaSeleccionada = zonaForced ?? (isSuper ? zonaFromUrl : null);
 
   const escuelas = useMemo(() => {
-    if (!isSuper || zonaSeleccionada == null) return data.escuelas;
+    if (zonaSeleccionada == null) return data.escuelas;
     return data.escuelas.filter((e) => getZonaFromCct(e.cct) === zonaSeleccionada);
-  }, [data.escuelas, isSuper, zonaSeleccionada]);
+  }, [data.escuelas, zonaSeleccionada]);
 
   const zonaHref = (path: string) =>
     zonaSeleccionada != null ? `${path}${path.includes("?") ? "&" : "?"}zona=${zonaSeleccionada}` : path;
@@ -53,7 +56,7 @@ export default function DashboardHomeClient({ data, isSuper }: Props) {
     return sumas.map((s) => (totalAlumnos ? Math.round((s / totalAlumnos) * 10) / 10 : 0));
   }, [escuelas, totalAlumnos]);
 
-  const centerContent = isSuper ? <FiltroZona isSuper={isSuper} /> : undefined;
+  const centerContent = isSuper && zonaForced == null ? <FiltroZona isSuper={isSuper} /> : undefined;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden gap-1 animate-fade-in p-2 lg:gap-6 lg:p-0 lg:pb-8">
@@ -66,7 +69,7 @@ export default function DashboardHomeClient({ data, isSuper }: Props) {
         {escuelas.length === 0 ? (
           <div className="card-ios rounded-2xl border border-border bg-card p-4 text-center text-sm">
             <p className="text-foreground/80">
-              {isSuper && zonaSeleccionada != null
+              {zonaSeleccionada != null
                 ? `No hay escuelas en la Zona ${zonaSeleccionada}.`
                 : "No hay datos. Coloca los archivos *_actualizado.xlsx en data/excel/ y ejecuta npm run build:data."}
             </p>
@@ -115,7 +118,7 @@ export default function DashboardHomeClient({ data, isSuper }: Props) {
             <section className="card-ios my-5 rounded-2xl border border-border bg-card p-3 lg:my-6 lg:p-4">
               <p className="text-sm font-semibold lg:text-base">
                 {totalAlumnos} Alumnos Evaluados · {escuelas.length} Escuelas Secundarias Técnicas · Primer Grado
-                {isSuper && zonaSeleccionada != null && ` · Zona ${zonaSeleccionada}`}
+                {zonaSeleccionada != null && ` · Zona ${zonaSeleccionada}`}
               </p>
             </section>
 
@@ -140,7 +143,7 @@ export default function DashboardHomeClient({ data, isSuper }: Props) {
                   porcentajes={porcentajesGlobales}
                   totalAlumnos={totalAlumnos}
                   title={
-                    isSuper && zonaSeleccionada != null
+                    zonaSeleccionada != null
                       ? `Aciertos por reactivo (Zona ${zonaSeleccionada})`
                       : "Aciertos por reactivo (todas las escuelas)"
                   }
@@ -152,7 +155,7 @@ export default function DashboardHomeClient({ data, isSuper }: Props) {
                   enDesarrollo={totalDes}
                   esperado={totalEsp}
                   title={
-                    isSuper && zonaSeleccionada != null
+                    zonaSeleccionada != null
                       ? `Por nivel (Zona ${zonaSeleccionada})`
                       : "Por nivel (todas las escuelas)"
                   }

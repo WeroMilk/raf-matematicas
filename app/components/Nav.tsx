@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import LogoutButton from "@/app/components/LogoutButton";
 
-type Session = { tipo: "super" | "escuela"; cct?: string } | null;
+type Session = { tipo: "super" | "zona"; zona?: number } | null;
 
 const allLinks = [
   {
@@ -47,12 +47,14 @@ export default function Nav({ session }: { session?: Session }) {
   const searchParams = useSearchParams();
   if (pathname === "/login") return null;
 
-  const links = session?.tipo === "escuela" ? allLinks.filter((l) => l.href !== "/escuelas") : allLinks;
-  const zona = searchParams.get("zona");
+  const links = allLinks;
+  const zona =
+    session?.tipo === "zona" ? session.zona : session?.tipo === "super" ? searchParams.get("zona") : null;
+  const zonaNum = typeof zona === "number" ? zona : zona ? parseInt(zona, 10) : null;
 
   const hrefWithZona = (base: string) => {
-    if (!zona || session?.tipo !== "super") return base;
-    return base + (base.includes("?") ? "&" : "?") + `zona=${zona}`;
+    if (zonaNum == null || !Number.isInteger(zonaNum)) return base;
+    return base + (base.includes("?") ? "&" : "?") + `zona=${zonaNum}`;
   };
 
   return (

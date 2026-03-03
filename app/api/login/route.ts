@@ -66,18 +66,18 @@ export async function POST(request: Request) {
     const session = verifyPassword(password);
     if (!session) {
       if (process.env.NODE_ENV === "development") {
-        console.warn("[login] Contraseña no coincide con superUsuario ni con ninguna escuela en auth-data.json");
+        console.warn("[login] Contraseña no coincide con superUsuario ni con ninguna zona en auth-data.json");
       }
       if (json) return NextResponse.json({ ok: false, error: "invalid" }, { status: 200 });
       return NextResponse.redirect(new URL("/login?error=invalid", request.url), 302);
     }
     if (process.env.NODE_ENV === "development") {
-      console.log("[login] OK tipo:", session.tipo, session.cct ?? "");
+      console.log("[login] OK tipo:", session.tipo, session.zona ?? "");
     }
     const value = await createSessionCookie(session);
     const redirectUrl =
-      session.tipo === "escuela" && session.cct
-        ? `${baseUrl}/escuela/${session.cct}`
+      session.tipo === "zona" && session.zona != null
+        ? `${baseUrl}/?zona=${session.zona}`
         : `${baseUrl}/`;
 
     if (json) {

@@ -18,6 +18,8 @@ export default async function EscuelaPage({ params }: { params: Promise<{ cct: s
   const cookieStore = await cookies();
   const session = await getSession(cookieStore.get("raf_session")?.value ?? null);
   const isSuper = session?.tipo === "super";
+  const zonaNum = session?.tipo === "zona" ? session.zona : null;
+  const backHref = zonaNum != null ? `/escuelas?zona=${zonaNum}` : "/escuelas";
 
   const total = escuela.totalEstudiantes;
   const pctApoyo = total ? Math.round((escuela.requiereApoyo / total) * 100) : 0;
@@ -28,7 +30,7 @@ export default async function EscuelaPage({ params }: { params: Promise<{ cct: s
     <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden px-2 pb-2 pt-1.5 min-w-0 lg:gap-6 lg:pt-2 lg:px-0 lg:pb-8">
       <PageHeader>
         <div className="flex flex-wrap items-center gap-2">
-          {isSuper && <BackButton href="/escuelas" label="Escuelas" />}
+          {(isSuper || session?.tipo === "zona") && <BackButton href={backHref} label="Escuelas" />}
         </div>
         <h1 className="mt-0 text-base font-bold lg:text-xl lg:tracking-tight">
           {escuela.buscador?.nombre ?? escuela.cct}

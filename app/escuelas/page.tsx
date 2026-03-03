@@ -17,14 +17,16 @@ export default async function EscuelasPage({
   const cookieStore = await cookies();
   const session = await getSession(cookieStore.get("raf_session")?.value ?? null);
   const isSuper = session?.tipo === "super";
+  const zonaForced = session?.tipo === "zona" ? session.zona : undefined;
+  const zonaParam = params.zona;
+  const zonaFromUrl =
+    zonaParam && ZONAS_DISPONIBLES.includes(parseInt(zonaParam, 10))
+      ? parseInt(zonaParam, 10)
+      : null;
+  const zonaNum = zonaForced ?? (isSuper ? zonaFromUrl : null);
 
   let escuelas = getEscuelasSync();
-  const zonaParam = params.zona;
-  const zonaNum = zonaParam && ZONAS_DISPONIBLES.includes(parseInt(zonaParam, 10))
-    ? parseInt(zonaParam, 10)
-    : null;
-
-  if (isSuper && zonaNum != null) {
+  if (zonaNum != null) {
     escuelas = escuelas.filter((e) => getZonaFromCct(e.cct) === zonaNum);
   }
 
@@ -33,7 +35,7 @@ export default async function EscuelasPage({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-1 overflow-hidden p-2">
-      <PageHeader centerContent={isSuper ? <FiltroZona isSuper={isSuper} /> : undefined}>
+      <PageHeader centerContent={isSuper && zonaForced == null ? <FiltroZona isSuper={isSuper} /> : undefined}>
         <BackButton href={zonaHref("/")} label="Inicio" />
         <h1 className="mt-0.5 text-base font-bold">Por escuela</h1>
         <p className="text-xs text-foreground/80">Selecciona una escuela.</p>
@@ -41,7 +43,7 @@ export default async function EscuelasPage({
 
       {escuelas.length === 0 ? (
         <p className="text-xs text-foreground/60">
-          {isSuper && zonaNum != null ? `No hay escuelas en la Zona ${zonaNum}.` : "No hay escuelas cargadas."}
+          {zonaNum != null ? `No hay escuelas en la Zona ${zonaNum}.` : "No hay escuelas cargadas."}
         </p>
       ) : (
         <ScrollOnlyWhenNeeded className="min-h-0 flex-1 overflow-x-hidden">

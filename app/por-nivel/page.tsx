@@ -16,10 +16,6 @@ const PARAM_TO_NIVEL: Record<string, NivelRAF> = {
   ESPERADO: "ESPERADO",
 };
 
-function filterByCct<T extends { cct: string }>(arr: T[], cct: string): T[] {
-  return arr.filter((x) => x.cct === cct);
-}
-
 export default async function PorNivelPage({
   searchParams,
 }: {
@@ -30,13 +26,14 @@ export default async function PorNivelPage({
   const nivelFiltro: NivelRAF | null = PARAM_TO_NIVEL[nivelParam] ?? null;
   const grupoParam = params.grupo ?? "";
   const zonaParam = params.zona;
-  const zonaNum = zonaParam && ZONAS_DISPONIBLES.includes(parseInt(zonaParam, 10))
-    ? parseInt(zonaParam, 10)
-    : null;
 
   const cookieStore = await cookies();
   const session = await getSession(cookieStore.get("raf_session")?.value ?? null);
   const isSuper = session?.tipo === "super";
+  const zonaForced = session?.tipo === "zona" ? session.zona : undefined;
+  const zonaNum = zonaForced ?? (isSuper && zonaParam && ZONAS_DISPONIBLES.includes(parseInt(zonaParam, 10))
+    ? parseInt(zonaParam, 10)
+    : null);
 
   let { escuelas } = getResultadosSync();
   let alumnosPorNivel = {
@@ -45,12 +42,7 @@ export default async function PorNivelPage({
     ESPERADO: getAlumnosPorNivelSync("ESPERADO"),
   } as Record<"REQUIERE APOYO" | "EN DESARROLLO" | "ESPERADO", { alumno: { nombre: string; apellido: string; grupo: string; porcentaje: number | null; nivel: NivelRAF }; cct: string }[]>;
 
-  if (session?.tipo === "escuela" && session.cct) {
-    escuelas = escuelas.filter((e) => e.cct === session.cct);
-    for (const nivel of NIVELES_CON_EXAMEN) {
-      alumnosPorNivel[nivel] = filterByCct(alumnosPorNivel[nivel], session.cct);
-    }
-  } else if (isSuper && zonaNum != null) {
+  if (zonaNum != null) {
     escuelas = escuelas.filter((e) => getZonaFromCct(e.cct) === zonaNum);
     const cctsZona = new Set(escuelas.map((e) => e.cct));
     for (const nivel of NIVELES_CON_EXAMEN) {
@@ -72,7 +64,7 @@ export default async function PorNivelPage({
 
   return (
     <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-0.5 overflow-hidden p-2 pb-2">
-      <PageHeader centerContent={isSuper ? <FiltroZona isSuper={isSuper} /> : undefined}>
+      <PageHeader centerContent={isSuper && zonaForced == null ? <FiltroZona isSuper={isSuper} /> : undefined}>
         <BackButton href={backHref} label={nivelFiltro ? "Por nivel" : "Inicio"} />
       </PageHeader>
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
@@ -81,7 +73,7 @@ export default async function PorNivelPage({
         escuelas={escuelas.map((e) => ({ cct: e.cct }))}
         gruposOptions={gruposOptions}
         nivelFiltro={nivelFiltro}
-        soloCct={session?.tipo === "escuela" ? session.cct : undefined}
+        soloCct={undefined}
         initialGrupo={grupoParam}
       />
       </div>
