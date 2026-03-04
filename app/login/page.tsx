@@ -105,7 +105,7 @@ export default function LoginPage() {
             {loading ? "Entrando…" : "Entrar"}
           </button>
         </form>
-        <p className="mt-auto pt-10 text-xs text-foreground/50">Mtra. Marta Camargo</p>
+        <p className="mt-auto pt-10 text-xs text-foreground/50">Mtra. Martha Camargo</p>
       </div>
     </div>
   );
