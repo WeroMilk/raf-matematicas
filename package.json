@@ -17,6 +17,7 @@
     "regenerate-super": "node scripts/regenerate-super-only.mjs",
     "ver-hash-super": "node scripts/ver-hash-super.mjs",
     "verificar-resultados": "node scripts/verificar-resultados-vs-excel.mjs",
+    "list-excel-columns": "node scripts/list-excel-columns.mjs",
     "lint": "eslint",
     "build:data:fusion": "node scripts/fusionar-base-lenguaje-matematicas.mjs",
     "build:data:solo-matematicas": "node scripts/parse-excel-to-json.mjs"

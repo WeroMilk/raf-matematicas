@@ -77,7 +77,13 @@ function calcularPorcentaje(row) {
   return total > 0 ? Math.round((aciertos / total) * 1000) / 10 : 0;
 }
 
+/** Obtiene la respuesta del alumno. Stu = opción real (A/B/C/D); Mark = C/X legacy */
 function respuesta(row, i) {
+  const val = row[`Stu${i}`];
+  if (val != null && String(val).trim()) {
+    const s = String(val).trim().toUpperCase();
+    if (/^[ABCD]$/.test(s)) return s;
+  }
   const m = row[`Mark${i}`];
   return m != null && String(m).trim() ? String(m).trim() : "-";
 }

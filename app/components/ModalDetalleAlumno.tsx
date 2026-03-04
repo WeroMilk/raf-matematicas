@@ -22,8 +22,9 @@ function usaFormatoCX(respuestas: string[]): boolean {
   });
 }
 
-/** Respuesta para mostrar: A/B/C/D si la tenemos; C/X legacy: correcto→correcta, incorrecto→? */
-function respuestaParaMostrar(resp: string, correcta: string, esCorrecto: boolean): string {
+/** Respuesta para mostrar: A/B/C/D si la tenemos; sin responder→X?; legacy incorrecto→? */
+function respuestaParaMostrar(resp: string, correcta: string, esCorrecto: boolean, sinResponder: boolean): string {
+  if (sinResponder) return "X?";
   const r = resp.toUpperCase().trim();
   if (OPCIONES_VALIDAS.includes(r as (typeof OPCIONES_VALIDAS)[number])) return r;
   if (esCorrecto) return correcta;
@@ -38,7 +39,10 @@ function getAciertosErrores(respuestas: string[]) {
   for (let i = 0; i < 12; i++) {
     const info = getReactivoInfo(i + 1);
     const resp = (respuestas[i] ?? "-").toUpperCase().trim();
-    if (!info || resp === "-" || resp === "") {
+    const sinResponder = resp === "-" || resp === "";
+    if (!info) continue;
+    if (sinResponder) {
+      errores.push({ num: i + 1, marcado: "-", correcta: info.respuestaCorrecta, marcadoDisplay: "X?" });
       continue;
     }
     const correcta = info.respuestaCorrecta;
@@ -50,7 +54,7 @@ function getAciertosErrores(respuestas: string[]) {
         num: i + 1,
         marcado: resp,
         correcta,
-        marcadoDisplay: respuestaParaMostrar(resp, correcta, false),
+        marcadoDisplay: respuestaParaMostrar(resp, correcta, false, false),
       });
     }
   }
@@ -79,7 +83,7 @@ export default function ModalDetalleAlumno({ alumno, cct, onClose }: Props) {
   const totalCorrectas = aciertos.length;
   const totalConExamen = aciertos.length + errores.length;
   const sinExamen = totalConExamen === 0;
-  const porcentajeCalculado = totalConExamen > 0 ? Math.round((totalCorrectas / totalConExamen) * 1000) / 10 : 0;
+  const porcentajeCalculado = 12 > 0 ? Math.round((totalCorrectas / 12) * 1000) / 10 : 0;
   const nivelCalculado =
     sinExamen ? alumno.nivel : porcentajeCalculado <= 50 ? "REQUIERE APOYO" : porcentajeCalculado <= 80 ? "EN DESARROLLO" : "ESPERADO";
 
@@ -145,7 +149,7 @@ export default function ModalDetalleAlumno({ alumno, cct, onClose }: Props) {
               {/* Total aciertos */}
               <div className="mb-4 rounded-xl border border-[var(--esperado)]/40 bg-[var(--esperado)]/8 px-4 py-3">
                 <p className="text-sm font-semibold text-[var(--esperado)]">
-                  {totalCorrectas} de {totalConExamen} correctas
+                  {totalCorrectas} de 12 correctas
                 </p>
                 <p className="text-xs text-[var(--foreground)]/70 mt-0.5">
                   {errores.length} incorrecta{errores.length !== 1 ? "s" : ""}
@@ -164,7 +168,7 @@ export default function ModalDetalleAlumno({ alumno, cct, onClose }: Props) {
                   const esCorrecto = formatoCX ? resp === "C" : (resp !== "-" && resp !== "" && resp === correcta);
                   const esError = resp !== "-" && resp !== "" && !esCorrecto;
                   const sinResponder = resp === "-" || resp === "";
-                  const letraMostrar = esCorrecto ? correcta : esError ? respuestaParaMostrar(resp, correcta, false) : null;
+                  const letraMostrar = esCorrecto ? correcta : esError ? respuestaParaMostrar(resp, correcta, false, false) : sinResponder ? "X?" : null;
 
                   return (
                     <div
@@ -172,16 +176,15 @@ export default function ModalDetalleAlumno({ alumno, cct, onClose }: Props) {
                       className={`flex flex-col items-center justify-center rounded-lg border px-2 py-2 text-center ${
                         esCorrecto
                           ? "border-[var(--esperado)] bg-[var(--esperado)]/15"
-                          : esError
+                          : esError || sinResponder
                             ? "border-[var(--requiere-apoyo)] bg-[var(--requiere-apoyo)]/10"
                             : "border-[var(--border)] bg-[var(--fill-tertiary)]/50"
                       }`}
-                      title={info ? `R${num}: ${info.evalua} - ${esCorrecto ? `Correcto (${correcta})` : esError ? `Marcó ${letraMostrar}, correcta ${correcta}` : "Sin responder"}` : ""}
+                      title={info ? `R${num}: ${info.evalua} - ${esCorrecto ? `Correcto (${correcta})` : sinResponder ? "Sin responder" : `Marcó ${letraMostrar}, correcta ${correcta}`}` : ""}
                     >
                       <span className="text-[10px] font-medium text-[var(--foreground)]/70">R{num}</span>
                       {esCorrecto && <span className="text-sm font-bold text-[var(--esperado)]">✓ {correcta}</span>}
-                      {esError && <span className="text-sm font-bold text-[var(--requiere-apoyo)]">✗ {letraMostrar}</span>}
-                      {sinResponder && <span className="text-xs text-[var(--foreground)]/50">—</span>}
+                      {(esError || sinResponder) && <span className="text-sm font-bold text-[var(--requiere-apoyo)]">✗ {letraMostrar}</span>}
                     </div>
                   );
                 })}
@@ -191,8 +194,10 @@ export default function ModalDetalleAlumno({ alumno, cct, onClose }: Props) {
               {errores.length > 0 && (
                 <div className="rounded-xl border border-[var(--border)] bg-[var(--fill-tertiary)]/30 px-4 py-3">
                   <p className="text-xs font-semibold text-[var(--foreground)]/80 mb-2">Errores (Reactivo · marcó · correcta)</p>
-                  {errores.some((e) => e.marcadoDisplay === "?") && (
-                    <p className="text-[10px] text-[var(--foreground)]/60 mb-1.5 italic">? = la fuente no registra la opción que eligió el alumno</p>
+                  {(errores.some((e) => e.marcadoDisplay === "?") || errores.some((e) => e.marcadoDisplay === "X?")) && (
+                    <p className="text-[10px] text-[var(--foreground)]/60 mb-1.5 italic">
+                      X? = sin responder · ? = la fuente no registra la opción
+                    </p>
                   )}
                   <div className="space-y-1">
                     {errores.map((e) => {

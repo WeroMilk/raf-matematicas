@@ -30,6 +30,9 @@ const OUT_FILE = path.join(OUT_DIR, "resultados.json");
 
 const LETRA_GRUPO = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
+/** Respuestas correctas de los 12 reactivos RAF Matemáticas (A, B, C o D) */
+const RESPUESTAS_CORRECTAS = ["C", "B", "A", "B", "A", "A", "A", "A", "C", "D", "C", "C"];
+
 function fixUtf8Mojibake(str) {
   if (typeof str !== "string") return str;
   if (!/Ã[\x80-\xBF]/.test(str)) return str;
@@ -91,7 +94,13 @@ function calcularPorcentaje(row) {
   return total > 0 ? Math.round((aciertos / total) * 1000) / 10 : 0;
 }
 
+/** Obtiene la respuesta del alumno. Stu = opción real (A/B/C/D); Mark = C/X legacy */
 function respuesta(row, i) {
+  const val = row[`Stu${i}`];
+  if (val != null && String(val).trim()) {
+    const s = String(val).trim().toUpperCase();
+    if (/^[ABCD]$/.test(s)) return s;
+  }
   const m = row[`Mark${i}`];
   return m != null && String(m).trim() ? String(m).trim() : "-";
 }
@@ -196,7 +205,10 @@ function main() {
             totalEsp++;
           }
           for (let i = 0; i < 12; i++) {
-            if (mat.respuestas[i] === "C") {
+            const resp = (mat.respuestas[i] ?? "").toUpperCase().trim();
+            const correcta = RESPUESTAS_CORRECTAS[i];
+            const esCorrecto = resp === correcta;
+            if (esCorrecto) {
               aciertosG[i]++;
               aciertosEsc[i]++;
             }
