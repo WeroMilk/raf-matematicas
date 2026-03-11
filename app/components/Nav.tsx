@@ -49,7 +49,7 @@ export default function Nav({ session }: { session?: Session }) {
 
   // Usuario escuela: solo mostrar "Inicio" que lleva a su escuela
   const isEscuela = session?.tipo === "escuela" && session.cct;
-  const escuelaHref = isEscuela ? `/escuela/${encodeURIComponent(session.cct)}` : null;
+  const escuelaHref = isEscuela && session.cct ? `/escuela/${encodeURIComponent(session.cct)}` : null;
 
   const links = isEscuela
     ? [{ ...allLinks[0], href: escuelaHref!, label: "Mi escuela" }]

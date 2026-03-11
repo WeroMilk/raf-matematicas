@@ -79,3 +79,21 @@ npm run sync-auth-escuelas
 ```
 
 Ese script añade hashes para CCTs nuevos (y escribe contraseñas en `lib/passwords-nuevos.txt`) y quita CCTs que ya no estén en resultados.
+
+## 4. Hice push pero no se desplegó en Vercel
+
+Si hiciste **push** en Git Bash y en Vercel no se inició un nuevo deploy:
+
+1. **Comprobar que el push llegó al remoto**
+   - En GitHub/GitLab/Bitbucket, abre el repo y revisa que el último commit esté en la rama que usas (normalmente `main`).
+   - Si no aparece, el push puede haber fallado (revisa que hiciste `git push origin main` o la rama correcta).
+
+2. **Redeploy manual en Vercel**
+   - Entra en [vercel.com](https://vercel.com) → tu proyecto.
+   - Pestaña **Deployments**.
+   - En el último deployment, clic en los **tres puntos (⋮)** → **Redeploy**.
+   - Confirma. Así Vercel vuelve a construir con el código actual del repositorio.
+
+3. **Si suele pasar**
+   - En Vercel → **Settings** → **Git**: revisa que el repositorio y la **Production Branch** (ej. `main`) sean los correctos.
+   - Cada push a esa rama debería disparar un deploy; si no, el enlace Git puede estar roto o haber que re-conectar el repo.
