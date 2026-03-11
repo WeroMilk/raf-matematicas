@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import LogoutButton from "@/app/components/LogoutButton";
 
-type Session = { tipo: "super" | "zona"; zona?: number } | null;
+type Session = { tipo: "super" | "zona" | "escuela"; zona?: number; cct?: string } | null;
 
 const allLinks = [
   {
@@ -47,7 +47,14 @@ export default function Nav({ session }: { session?: Session }) {
   const searchParams = useSearchParams();
   if (pathname === "/login") return null;
 
-  const links = allLinks;
+  // Usuario escuela: solo mostrar "Inicio" que lleva a su escuela
+  const isEscuela = session?.tipo === "escuela" && session.cct;
+  const escuelaHref = isEscuela ? `/escuela/${encodeURIComponent(session.cct)}` : null;
+
+  const links = isEscuela
+    ? [{ ...allLinks[0], href: escuelaHref!, label: "Mi escuela" }]
+    : allLinks;
+
   const zona =
     session?.tipo === "zona" ? session.zona : session?.tipo === "super" ? searchParams.get("zona") : null;
   const zonaNum = typeof zona === "number" ? zona : zona ? parseInt(zona, 10) : null;
@@ -57,16 +64,19 @@ export default function Nav({ session }: { session?: Session }) {
     return base + (base.includes("?") ? "&" : "?") + `zona=${zonaNum}`;
   };
 
+  const getHref = (href: string) => (isEscuela && href === "/" ? escuelaHref! : hrefWithZona(href));
+
   return (
     <nav className="app-nav">
       <div className="app-nav-glow" aria-hidden />
       <div className="app-nav-inner">
         {links.map(({ href, label, icon }) => {
-          const isActive = pathname === href;
+          const targetHref = getHref(href);
+          const isActive = pathname === targetHref || (isEscuela && pathname.startsWith("/escuela/") && targetHref.startsWith("/escuela/"));
           return (
             <Link
-              key={href}
-              href={hrefWithZona(href)}
+              key={targetHref}
+              href={targetHref}
               className={`nav-tab ${isActive ? "nav-tab--active" : "nav-tab--inactive"}`}
               aria-current={isActive ? "page" : undefined}
             >

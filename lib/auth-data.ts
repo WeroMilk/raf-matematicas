@@ -2,7 +2,11 @@ import * as crypto from "crypto";
 import * as fs from "fs";
 import * as path from "path";
 
-type AuthData = { superUsuario: string; zonas: Record<string, string> };
+type AuthData = {
+  superUsuario: string;
+  zonas: Record<string, string>;
+  escuelas: Record<string, string>;
+};
 
 function trimEnv(value: string | undefined): string {
   const s = (value ?? "").trim();
@@ -34,13 +38,17 @@ function load(): AuthData {
       parsed["zonas"] && typeof parsed["zonas"] === "object" && !Array.isArray(parsed["zonas"])
         ? (parsed["zonas"] as Record<string, string>)
         : {};
+    const escuelas =
+      parsed["escuelas"] && typeof parsed["escuelas"] === "object" && !Array.isArray(parsed["escuelas"])
+        ? (parsed["escuelas"] as Record<string, string>)
+        : {};
     const superHash = envSuperHash || fileSuperHash;
-    return { superUsuario: superHash, zonas };
+    return { superUsuario: superHash, zonas, escuelas };
   } catch (err) {
     if (process.env.NODE_ENV === "development") {
       console.error("[auth-data] Error leyendo", filePath, err);
     }
-    return { superUsuario: envSuperHash, zonas: {} };
+    return { superUsuario: envSuperHash, zonas: {}, escuelas: {} };
   }
 }
 
@@ -55,7 +63,9 @@ function normalizePasswordForVerify(password: string): string {
     .replace(/[\u200B-\u200D\uFEFF\u00A0]/g, ""); // espacios normales + no-separables + BOM
 }
 
-export function verifyPassword(password: string): { tipo: "super" | "zona"; zona?: number } | null {
+export function verifyPassword(
+  password: string
+): { tipo: "super" | "zona" | "escuela"; zona?: number; cct?: string } | null {
   const normalized = normalizePasswordForVerify(password);
   if (!normalized) return null;
   const envSuperPassword = trimEnv(process.env.AUTH_SUPER_PASSWORD);
@@ -70,6 +80,11 @@ export function verifyPassword(password: string): { tipo: "super" | "zona"; zona
     if (h != null && String(h).trim() === hash) {
       const zona = parseInt(zonaStr, 10);
       if (!isNaN(zona)) return { tipo: "zona", zona };
+    }
+  }
+  for (const [cct, h] of Object.entries(data.escuelas)) {
+    if (h != null && String(h).trim() === hash && cct.trim()) {
+      return { tipo: "escuela", cct: cct.trim() };
     }
   }
   return null;

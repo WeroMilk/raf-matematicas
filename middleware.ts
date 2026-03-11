@@ -36,9 +36,32 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // Usuario escuela: solo puede ver su escuela. Redirigir a /escuela/CCT si intenta otra ruta.
+  if (session.tipo === "escuela" && session.cct) {
+    const path = request.nextUrl.pathname;
+    const escuelaMatch = path.match(/^\/escuela\/([^/]+)(\/|$)/);
+    if (path === "/" || path === "/escuelas" || path === "/por-nivel") {
+      const redirectUrl = new URL(`/escuela/${encodeURIComponent(session.cct)}`, request.url);
+      return NextResponse.redirect(redirectUrl);
+    }
+    if (escuelaMatch) {
+      const cctInPath = decodeURIComponent(escuelaMatch[1]);
+      if (cctInPath !== session.cct) {
+        const redirectUrl = new URL(`/escuela/${encodeURIComponent(session.cct)}`, request.url);
+        return NextResponse.redirect(redirectUrl);
+      }
+    } else if (!path.startsWith("/escuela/")) {
+      const redirectUrl = new URL(`/escuela/${encodeURIComponent(session.cct)}`, request.url);
+      return NextResponse.redirect(redirectUrl);
+    }
+  }
+
   if (request.nextUrl.pathname === LOGIN) {
     if (session.tipo === "zona" && session.zona != null) {
       return NextResponse.redirect(new URL(`/?zona=${session.zona}`, request.url));
+    }
+    if (session.tipo === "escuela" && session.cct) {
+      return NextResponse.redirect(new URL(`/escuela/${encodeURIComponent(session.cct)}`, request.url));
     }
     return NextResponse.redirect(new URL("/", request.url));
   }
