@@ -22,6 +22,23 @@ function fixUtf8Mojibake(str) {
 
 const LETRA_GRUPO = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
+/** CCT SEP típico (ej. 26DST0058Q): en algunos exportes QuizClass trae el CCT y el grupo va en CustomID. */
+function esCctSEP(s) {
+  if (typeof s !== "string") return false;
+  const t = s.trim().toUpperCase();
+  return /^\d{2}[A-Z]{3}\d{4}[A-Z0-9]$/.test(t);
+}
+
+/** Texto de grupo: QuizClass salvo si es CCT, entonces CustomID (1AM, 1BM, …). */
+function obtenerGrupoRaw(row) {
+  const qc = row.QuizClass != null ? fixUtf8Mojibake(String(row.QuizClass)) : "";
+  if (esCctSEP(qc)) {
+    const custom = row.CustomID != null ? fixUtf8Mojibake(String(row.CustomID)) : "";
+    return custom.trim() || qc.trim();
+  }
+  return qc.trim();
+}
+
 function normalizarGrupo(grupo) {
   if (grupo == null || grupo === "") return "S/G";
   const s = String(grupo).toUpperCase().trim();
@@ -100,7 +117,7 @@ function procesarEscuela(filePath) {
   const hasQuizClass = Object.keys(data[0] || {}).some((k) => k === "QuizClass");
   const gruposSet = new Set();
   const rows = data.map((row) => {
-    const grupoRaw = hasQuizClass ? fixUtf8Mojibake(String(row.QuizClass ?? "")) : "";
+    const grupoRaw = hasQuizClass ? obtenerGrupoRaw(row) : "";
     const grupo = grupoRaw ? normalizarGrupo(grupoRaw) : "UNICO";
     gruposSet.add(grupo);
     const porcentaje = calcularPorcentaje(row);
@@ -236,10 +253,28 @@ function main() {
     }
   }
 
-  const out = { escuelas, generado: new Date().toISOString() };
+  let escuelasOut = escuelas;
+  if (process.env.MERGE_RESULTADOS_JSON === "1" && fs.existsSync(OUT_FILE)) {
+    try {
+      const prev = JSON.parse(fs.readFileSync(OUT_FILE, "utf8"));
+      const byCct = new Map((prev.escuelas || []).map((e) => [e.cct, e]));
+      for (const e of escuelas) {
+        const anterior = byCct.get(e.cct);
+        const fusion = { ...e };
+        if (anterior?.buscador) fusion.buscador = anterior.buscador;
+        byCct.set(e.cct, fusion);
+      }
+      escuelasOut = [...byCct.values()].sort((a, b) => a.cct.localeCompare(b.cct));
+      console.log("Fusión: " + escuelas.length + " desde Excel + existentes → " + escuelasOut.length + " escuelas");
+    } catch (err) {
+      console.warn("No se pudo fusionar con resultados.json previo:", err.message);
+    }
+  }
+
+  const out = { escuelas: escuelasOut, generado: new Date().toISOString() };
   fs.mkdirSync(OUT_DIR, { recursive: true });
   fs.writeFileSync(OUT_FILE, JSON.stringify(out, null, 2), "utf8");
-  console.log("OK: " + escuelas.length + " escuelas → public/data/resultados.json");
+  console.log("OK: " + escuelasOut.length + " escuelas → public/data/resultados.json");
 }
 
 main();

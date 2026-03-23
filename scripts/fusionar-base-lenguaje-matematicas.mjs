@@ -43,6 +43,21 @@ function fixUtf8Mojibake(str) {
   }
 }
 
+function esCctSEP(s) {
+  if (typeof s !== "string") return false;
+  const t = s.trim().toUpperCase();
+  return /^\d{2}[A-Z]{3}\d{4}[A-Z0-9]$/.test(t);
+}
+
+function obtenerGrupoRaw(row) {
+  const qc = row.QuizClass != null ? fixUtf8Mojibake(String(row.QuizClass)) : "";
+  if (esCctSEP(qc)) {
+    const custom = row.CustomID != null ? fixUtf8Mojibake(String(row.CustomID)) : "";
+    return custom.trim() || qc.trim();
+  }
+  return qc.trim();
+}
+
 function normalizarGrupo(grupo) {
   if (grupo == null || grupo === "") return "S/G";
   const s = String(grupo).toUpperCase().trim();
@@ -126,9 +141,8 @@ function extraerResultadosMatematicas() {
       const sheet = wb.Sheets[wb.SheetNames[0]];
       const data = XLSX.utils.sheet_to_json(sheet);
       const hasQuizClass = Object.keys(data[0] || {}).some((k) => k === "QuizClass");
-      const grupoCol = hasQuizClass ? "QuizClass" : null;
       for (const row of data) {
-        const grupoRaw = grupoCol ? fixUtf8Mojibake(String(row[grupoCol] ?? "")) : "";
+        const grupoRaw = hasQuizClass ? obtenerGrupoRaw(row) : "";
         const grupo = grupoRaw ? normalizarGrupo(grupoRaw) : "UNICO";
         const nombre = fixUtf8Mojibake(String(row.FirstName ?? "")).trim().slice(0, 50);
         const apellido = fixUtf8Mojibake(String(row.LastName ?? "")).trim().slice(0, 50);

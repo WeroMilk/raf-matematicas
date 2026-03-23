@@ -25,6 +25,7 @@ const ESCUELA_A_ZONA: Record<number, number> = {
   54: 12,
   55: 1,
   56: 11,
+  58: 7,
   60: 10,
   61: 12,
   65: 3,
