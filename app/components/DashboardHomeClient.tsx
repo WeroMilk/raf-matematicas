@@ -90,7 +90,7 @@ export default function DashboardHomeClient({ data, cobertura, isSuper, zonaForc
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden gap-1 animate-fade-in p-2 lg:gap-4 lg:p-0">
       <PageHeader centerContent={centerContent}>
         <h1 className="text-base font-bold text-foreground lg:text-xl lg:tracking-tight">RAF Matemáticas</h1>
-        <p className="text-xs text-foreground/80 lg:text-sm">Secundarias Técnicas · SEC Sonora · Hermosillo</p>
+        <p className="text-xs text-foreground/80 lg:text-sm">Secundarias Técnicas · SEC Sonora</p>
         <p className="text-xs text-foreground/70 lg:text-sm">Mtra. Martha Camargo</p>
       </PageHeader>
 
