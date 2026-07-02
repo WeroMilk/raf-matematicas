@@ -3,12 +3,13 @@ import BackButton from "@/app/components/BackButton";
 import PageHeader from "@/app/components/PageHeader";
 import PorNivelContent from "./PorNivelContent";
 import FiltroZona from "@/app/components/FiltroZona";
-import { getResultadosSync } from "@/lib/data-server";
-import { getAlumnosPorNivelSync } from "@/lib/data-server";
+import SelectorEvaluacion from "@/app/components/SelectorEvaluacion";
+import { getEscuelasSync, getAlumnosPorNivelSync, getAlumnosPorNivelComparativaSync } from "@/lib/data-server";
 import { getSession } from "@/lib/auth";
 import { getZonaFromCct, ZONAS_DISPONIBLES } from "@/lib/zonas";
 import type { NivelRAF } from "@/types/raf";
 import { NIVELES_CON_EXAMEN } from "@/types/raf";
+import { EVALUACION_ATERRIZAJE_2026, EVALUACION_DESPEGUE_2025, parseModoVista } from "@/lib/evaluaciones";
 
 const PARAM_TO_NIVEL: Record<string, NivelRAF> = {
   REQUIERE_APOYO: "REQUIERE APOYO",
@@ -19,9 +20,11 @@ const PARAM_TO_NIVEL: Record<string, NivelRAF> = {
 export default async function PorNivelPage({
   searchParams,
 }: {
-  searchParams: Promise<{ nivel?: string; grupo?: string; zona?: string }>;
+  searchParams: Promise<{ nivel?: string; grupo?: string; zona?: string; eval?: string }>;
 }) {
   const params = await searchParams;
+  const evalMode = parseModoVista(params.eval ?? null);
+  const evalId = evalMode === "aterrizaje-2026" ? EVALUACION_ATERRIZAJE_2026 : EVALUACION_DESPEGUE_2025;
   const nivelParam = params.nivel ?? "";
   const nivelFiltro: NivelRAF | null = PARAM_TO_NIVEL[nivelParam] ?? null;
   const grupoParam = params.grupo ?? "";
@@ -35,18 +38,49 @@ export default async function PorNivelPage({
     ? parseInt(zonaParam, 10)
     : null);
 
-  let { escuelas } = getResultadosSync();
-  let alumnosPorNivel = {
-    "REQUIERE APOYO": getAlumnosPorNivelSync("REQUIERE APOYO"),
-    "EN DESARROLLO": getAlumnosPorNivelSync("EN DESARROLLO"),
-    ESPERADO: getAlumnosPorNivelSync("ESPERADO"),
-  } as Record<"REQUIERE APOYO" | "EN DESARROLLO" | "ESPERADO", { alumno: { nombre: string; apellido: string; grupo: string; porcentaje: number | null; nivel: NivelRAF }; cct: string }[]>;
+  let escuelas = getEscuelasSync(evalId);
+  const buildAlumnosPorNivel = () => {
+    if (evalMode === "comparar") {
+      const cctsZona =
+        zonaNum != null ? new Set(getEscuelasSync(EVALUACION_DESPEGUE_2025).filter((e) => getZonaFromCct(e.cct) === zonaNum).map((e) => e.cct)) : undefined;
+      return {
+        "REQUIERE APOYO": getAlumnosPorNivelComparativaSync("REQUIERE APOYO", cctsZona),
+        "EN DESARROLLO": getAlumnosPorNivelComparativaSync("EN DESARROLLO", cctsZona),
+        ESPERADO: getAlumnosPorNivelComparativaSync("ESPERADO", cctsZona),
+      };
+    }
+    return {
+      "REQUIERE APOYO": getAlumnosPorNivelSync("REQUIERE APOYO", evalId),
+      "EN DESARROLLO": getAlumnosPorNivelSync("EN DESARROLLO", evalId),
+      ESPERADO: getAlumnosPorNivelSync("ESPERADO", evalId),
+    };
+  };
+
+  let alumnosPorNivel = buildAlumnosPorNivel() as Record<
+    "REQUIERE APOYO" | "EN DESARROLLO" | "ESPERADO",
+    { alumno: { nombre: string; apellido: string; grupo: string; porcentaje: number | null; nivel: NivelRAF }; cct: string }[]
+  >;
+
+  let alumnosPorNivel2026: typeof alumnosPorNivel | undefined;
+  if (evalMode === "comparar") {
+    alumnosPorNivel2026 = {
+      "REQUIERE APOYO": getAlumnosPorNivelSync("REQUIERE APOYO", EVALUACION_ATERRIZAJE_2026),
+      "EN DESARROLLO": getAlumnosPorNivelSync("EN DESARROLLO", EVALUACION_ATERRIZAJE_2026),
+      ESPERADO: getAlumnosPorNivelSync("ESPERADO", EVALUACION_ATERRIZAJE_2026),
+    };
+  }
 
   if (zonaNum != null) {
     escuelas = escuelas.filter((e) => getZonaFromCct(e.cct) === zonaNum);
     const cctsZona = new Set(escuelas.map((e) => e.cct));
-    for (const nivel of NIVELES_CON_EXAMEN) {
-      alumnosPorNivel[nivel] = alumnosPorNivel[nivel].filter((r) => cctsZona.has(r.cct));
+    if (evalMode !== "comparar") {
+      for (const nivel of NIVELES_CON_EXAMEN) {
+        alumnosPorNivel[nivel] = alumnosPorNivel[nivel].filter((r) => cctsZona.has(r.cct));
+      }
+    } else if (alumnosPorNivel2026) {
+      for (const nivel of NIVELES_CON_EXAMEN) {
+        alumnosPorNivel2026[nivel] = alumnosPorNivel2026[nivel].filter((r) => cctsZona.has(r.cct));
+      }
     }
   }
 
@@ -58,24 +92,55 @@ export default async function PorNivelPage({
     }))
   );
 
-  const zonaHref = (path: string) =>
-    zonaNum != null ? `${path}${path.includes("?") ? "&" : "?"}zona=${zonaNum}` : path;
-  const backHref = nivelFiltro ? zonaHref("/por-nivel") : zonaHref("/");
+  const qsParts = [
+    zonaNum != null ? `zona=${zonaNum}` : "",
+    evalMode !== "despegue-2025" ? `eval=${evalMode}` : "",
+  ].filter(Boolean);
+  const qs = qsParts.length ? `?${qsParts.join("&")}` : "";
+  const backHref = nivelFiltro ? `/por-nivel${qs}` : `/${qs}`;
 
   return (
-    <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-0.5 overflow-hidden p-2 pb-2">
-      <PageHeader centerContent={isSuper && zonaForced == null ? <FiltroZona isSuper={isSuper} /> : undefined}>
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-1 overflow-hidden p-2">
+      <PageHeader
+        centerContent={
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <SelectorEvaluacion compact />
+            {isSuper && zonaForced == null && <FiltroZona isSuper={isSuper} />}
+          </div>
+        }
+      >
         <BackButton href={backHref} label={nivelFiltro ? "Por nivel" : "Inicio"} />
+        <h1 className="mt-0.5 text-base font-bold">
+          {nivelFiltro
+            ? `Por nivel: ${nivelFiltro === "REQUIERE APOYO" ? "Requieren apoyo" : nivelFiltro === "EN DESARROLLO" ? "En desarrollo" : "Esperado"}`
+            : "Por nivel"}
+        </h1>
+        <p className="text-xs text-foreground/80 max-lg:hidden">
+          {evalMode === "comparar"
+            ? "Comparativa 2025 vs 2026 por alumno (agrupado por nivel Despegue 2025)."
+            : nivelFiltro
+              ? "Lista completa."
+              : "Organiza por escuela o grupo."}
+        </p>
+        <p className="text-xs text-foreground/80 lg:hidden">
+          {evalMode === "comparar"
+            ? "Comparativa 2025 vs 2026"
+            : nivelFiltro
+              ? "Lista completa"
+              : "Toca un nivel para ver alumnos"}
+        </p>
       </PageHeader>
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
         <PorNivelContent
-        alumnosPorNivel={alumnosPorNivel}
-        escuelas={escuelas.map((e) => ({ cct: e.cct }))}
-        gruposOptions={gruposOptions}
-        nivelFiltro={nivelFiltro}
-        soloCct={undefined}
-        initialGrupo={grupoParam}
-      />
+          alumnosPorNivel={alumnosPorNivel}
+          alumnosPorNivel2026={alumnosPorNivel2026}
+          escuelas={escuelas.map((e) => ({ cct: e.cct }))}
+          gruposOptions={gruposOptions}
+          nivelFiltro={nivelFiltro}
+          soloCct={undefined}
+          initialGrupo={grupoParam}
+          evalMode={evalMode}
+        />
       </div>
     </div>
   );

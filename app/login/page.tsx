@@ -42,7 +42,7 @@ export default function LoginPage() {
         </div>
         <div className="mt-12 flex flex-col gap-2">
           <h1 className="text-xl font-bold tracking-tight text-foreground">RAF Matemáticas</h1>
-          <p className="text-sm text-foreground/70">Ingresa la contraseña de tu E.S.T.</p>
+          <p className="text-sm text-foreground/70">Ingresa la contraseña de tu C.T.</p>
         </div>
         <form
           action="/api/login"
@@ -100,13 +100,15 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="link-ios w-full rounded-xl bg-primary py-3.5 font-medium text-primary-foreground disabled:opacity-60"
+            className="btn-guinda w-full rounded-xl py-3.5 font-medium disabled:opacity-60"
           >
             {loading ? "Entrando…" : "Entrar"}
           </button>
         </form>
-        <p className="mt-auto pt-10 text-xs text-foreground/50">Mtra. Martha Camargo</p>
-        <p className="text-xs text-foreground/50">Software Desarrollado por Luis Alfonso Silvas</p>
+        <div className="mt-auto flex flex-col gap-2 pt-10 text-xs text-foreground/50">
+          <p className="leading-tight">Base de Datos creada por:</p>
+          <p className="leading-tight">Mtra. Martha Camargo y Luis Silvas.</p>
+        </div>
       </div>
     </div>
   );

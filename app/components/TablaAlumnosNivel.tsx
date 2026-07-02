@@ -1,28 +1,79 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import Link from "next/link";
 import type { NivelRAF } from "@/types/raf";
 import type { AlumnoRAF } from "@/types/raf";
 import ModalDetalleAlumno from "@/app/components/ModalDetalleAlumno";
 
 type Row = {
-  alumno: { nombre: string; apellido: string; grupo: string; porcentaje: number | null; nivel: NivelRAF; respuestas?: string[] };
+  alumno: {
+    nombre: string;
+    apellido: string;
+    grupo: string;
+    porcentaje: number | null;
+    nivel: NivelRAF;
+    respuestas?: string[];
+    porcentaje2025?: number | null;
+    porcentaje2026?: number | null;
+    deltaPorcentaje?: number | null;
+    alumno2025?: AlumnoRAF | null;
+    alumno2026?: AlumnoRAF | null;
+  };
   cct: string;
 };
 
-type SortCol = "alumno" | "grupo" | "porcentaje" | "cct";
-
 interface Props {
   alumnosConCct: Row[];
-  maxRows?: number;
-  verTodosHref?: string;
+  comparativa?: boolean;
+  layout?: "column" | "grid";
+  fillHeight?: boolean;
 }
 
-export default function TablaAlumnosNivel({ alumnosConCct, maxRows, verTodosHref }: Props) {
+const TENDENCIA_COLOR: Record<string, string> = {
+  mejoro: "#2E7D32",
+  bajo: "#D32F2F",
+  igual: "#757575",
+  solo_2025: "#4472C4",
+  solo_2026: "#2E7D32",
+};
+
+function deltaColor(delta: number | null | undefined): string {
+  if (delta == null) return "#757575";
+  if (delta > 0) return TENDENCIA_COLOR.mejoro;
+  if (delta < 0) return TENDENCIA_COLOR.bajo;
+  return TENDENCIA_COLOR.igual;
+}
+
+function formatearNombre(nombre: string, apellido: string): string {
+  const cap = (s: string) =>
+    s
+      .toLowerCase()
+      .split(/\s+/)
+      .map((w) => (w ? w.charAt(0).toUpperCase() + w.slice(1) : ""))
+      .join(" ");
+  return `${cap(nombre)} ${cap(apellido)}`.trim();
+}
+
+function textoCambio(r: Row): { text: string; color: string } {
+  if (r.alumno.deltaPorcentaje != null) {
+    const d = r.alumno.deltaPorcentaje;
+    return {
+      text: `${d > 0 ? "+" : ""}${d}%`,
+      color: deltaColor(d),
+    };
+  }
+  if (r.alumno.porcentaje2026 == null) return { text: "Solo 2025", color: TENDENCIA_COLOR.solo_2025 };
+  if (r.alumno.porcentaje2025 == null) return { text: "Solo 2026", color: TENDENCIA_COLOR.solo_2026 };
+  return { text: "—", color: "#757575" };
+}
+
+export default function TablaAlumnosNivel({
+  alumnosConCct,
+  comparativa = false,
+  layout = "column",
+  fillHeight = false,
+}: Props) {
   const [filtro, setFiltro] = useState("");
-  const [sortCol, setSortCol] = useState<SortCol>("porcentaje");
-  const [sortAsc, setSortAsc] = useState(false);
   const [alumnoSeleccionado, setAlumnoSeleccionado] = useState<AlumnoRAF | null>(null);
   const [cctSeleccionado, setCctSeleccionado] = useState<string | undefined>(undefined);
 
@@ -38,125 +89,209 @@ export default function TablaAlumnosNivel({ alumnosConCct, maxRows, verTodosHref
     [alumnosConCct, filtro]
   );
 
-  const ordenados = useMemo(() => {
-    const dir = sortAsc ? 1 : -1;
-    return [...filtrados].sort((a, b) => {
-      if (sortCol === "alumno") {
-        const na = `${a.alumno.nombre} ${a.alumno.apellido}`.toLowerCase();
-        const nb = `${b.alumno.nombre} ${b.alumno.apellido}`.toLowerCase();
-        return dir * (na < nb ? -1 : na > nb ? 1 : 0);
-      }
-      if (sortCol === "grupo") {
-        return dir * (a.alumno.grupo < b.alumno.grupo ? -1 : a.alumno.grupo > b.alumno.grupo ? 1 : 0);
-      }
-      if (sortCol === "porcentaje") {
-        const pa = a.alumno.porcentaje ?? 0;
-        const pb = b.alumno.porcentaje ?? 0;
-        return dir * (pa - pb);
-      }
-      return dir * (a.cct < b.cct ? -1 : a.cct > b.cct ? 1 : 0);
-    });
-  }, [filtrados, sortCol, sortAsc]);
+  const total = filtrados.length;
 
-  const limit = maxRows ?? ordenados.length;
-  const visibles = ordenados.slice(0, limit);
-  const total = ordenados.length;
-  const hayMas = total > limit;
-  const mostrarVerTodos = hayMas && maxRows != null && verTodosHref;
-
-  const handleSort = (col: SortCol) => {
-    if (sortCol === col) setSortAsc((s) => !s);
-    else {
-      setSortCol(col);
-      setSortAsc(col === "porcentaje" ? false : true);
-    }
+  const abrirAlumno = (alumno: AlumnoRAF | null | undefined, cct: string) => {
+    if (!alumno) return;
+    setAlumnoSeleccionado(alumno);
+    setCctSeleccionado(cct);
   };
 
-  const Th = ({ col, label }: { col: SortCol; label: string }) => (
-    <th className="px-0.5 py-1 sm:py-0.5">
-      <button
-        type="button"
-        onClick={() => handleSort(col)}
-        className="touch-target min-h-[44px] w-full text-left font-semibold underline decoration-dotted hover:opacity-80 sm:min-h-0 sm:min-w-0"
-        title={`Ordenar por ${label}`}
-      >
-        {label}
-        {sortCol === col && (sortAsc ? " ↑" : " ↓")}
-      </button>
-    </th>
-  );
+  const fmtPct = (v: number | null | undefined) => (v != null ? `${v}%` : "—");
+
+  const alumnoFallback = (r: Row): AlumnoRAF => ({
+    nombre: r.alumno.nombre,
+    apellido: r.alumno.apellido,
+    grupo: r.alumno.grupo,
+    porcentaje: r.alumno.porcentaje,
+    nivel: r.alumno.nivel,
+    respuestas: r.alumno.respuestas ?? [],
+  });
+
+  const listClass =
+    layout === "grid"
+      ? "grid grid-cols-1 gap-2.5 pb-2 md:grid-cols-2 xl:grid-cols-3"
+      : "flex flex-col gap-2.5 pb-2";
+
+  const rootClass = fillHeight
+    ? "flex min-h-0 min-w-0 flex-1 flex-col max-w-full"
+    : "flex min-h-0 min-w-0 flex-col max-w-full";
+
+  const useCompactTable = layout === "column";
 
   return (
-    <div className="flex min-h-0 min-w-0 flex-col size-full max-w-full">
-      <div className="mb-0.5 shrink-0">
+    <div className={rootClass}>
+      <div className="mb-2 shrink-0">
         <input
           type="search"
-          placeholder="Buscar..."
+          placeholder="Buscar alumno..."
           value={filtro}
           onChange={(e) => setFiltro(e.target.value)}
-          className="w-full rounded border border-border bg-background px-1.5 py-0.5 text-[10px]"
+          className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs"
         />
-      </div>
-      <div className="min-h-0 flex-1 overflow-y-auto overflow-x-auto" style={{ WebkitOverflowScrolling: "touch" }}>
-        <table className="w-full min-w-[220px] text-left text-[10px] sm:text-xs" role="grid">
-          <thead>
-            <tr className="border-b border-border font-semibold">
-              <Th col="alumno" label="Alumno" />
-              <Th col="grupo" label="Grupo" />
-              <Th col="porcentaje" label="%" />
-              <Th col="cct" label="CCT" />
-            </tr>
-          </thead>
-          <tbody>
-            {visibles.map((r, i) => (
-              <tr key={i} className="border-b border-border/50 transition-colors duration-150 hover:bg-[var(--fill-tertiary)]">
-                <td className="px-0.5 py-px">
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      e.preventDefault();
-                      setAlumnoSeleccionado({
-                        nombre: r.alumno.nombre,
-                        apellido: r.alumno.apellido,
-                        grupo: r.alumno.grupo,
-                        porcentaje: r.alumno.porcentaje,
-                        nivel: r.alumno.nivel,
-                        respuestas: r.alumno.respuestas ?? [],
-                      });
-                      setCctSeleccionado(r.cct);
-                    }}
-                    className="text-left font-medium underline decoration-dotted hover:opacity-80 cursor-pointer w-full text-start"
-                  >
-                    {r.alumno.nombre} {r.alumno.apellido}
-                  </button>
-                </td>
-                <td className="px-0.5 py-px">{r.alumno.grupo}</td>
-                <td className="px-0.5 py-px">{r.alumno.porcentaje != null ? `${r.alumno.porcentaje}%` : "—"}</td>
-                <td className="px-0.5 py-px text-foreground/70">{r.cct}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <ModalDetalleAlumno
-          alumno={alumnoSeleccionado}
-          cct={cctSeleccionado}
-          onClose={() => {
-            setAlumnoSeleccionado(null);
-            setCctSeleccionado(undefined);
-          }}
-        />
-        {mostrarVerTodos && (
-          <p className="mt-1 text-center">
-            <Link
-              href={verTodosHref}
-              className="text-[10px] font-medium text-[var(--gris-iphone)] underline hover:opacity-80"
-            >
-              Ver todos ({total})
-            </Link>
+        {total > 0 && (
+          <p className="mt-1.5 text-[11px] text-foreground/50">
+            {total.toLocaleString("es-MX")} alumnos
           </p>
         )}
       </div>
+
+      {useCompactTable ? (
+        <div
+          className={`min-h-0 overflow-x-auto overflow-y-auto rounded-xl border border-border bg-card text-[11px] ${
+            fillHeight ? "flex-1" : ""
+          }`}
+        >
+          <table className="w-full min-w-[420px]">
+            <thead className="sticky top-0 z-10 bg-white">
+              <tr className="border-b bg-white">
+                <th className="bg-white px-2 py-1.5 text-left font-semibold">Alumno</th>
+                <th className="bg-white px-2 py-1.5 text-left font-semibold">Grupo</th>
+                {comparativa ? (
+                  <>
+                    <th className="bg-white px-2 py-1.5 text-center font-semibold">% 2025</th>
+                    <th className="bg-white px-2 py-1.5 text-center font-semibold">% 2026</th>
+                    <th className="bg-white px-2 py-1.5 text-center font-semibold">Cambio</th>
+                  </>
+                ) : (
+                  <th className="bg-white px-2 py-1.5 text-center font-semibold">%</th>
+                )}
+                <th className="bg-white px-2 py-1.5 text-left font-semibold">CCT</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtrados.map((r, i) => {
+                const cambio = comparativa ? textoCambio(r) : null;
+                const nombre = formatearNombre(r.alumno.nombre, r.alumno.apellido);
+                return (
+                  <tr
+                    key={`${r.cct}-${r.alumno.nombre}-${r.alumno.apellido}-${i}`}
+                    className="border-b border-border/60 hover:bg-[var(--fill-tertiary)]"
+                  >
+                    <td className="px-2 py-1.5">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          abrirAlumno(r.alumno.alumno2025 ?? r.alumno.alumno2026 ?? alumnoFallback(r), r.cct)
+                        }
+                        className="text-left font-medium leading-snug hover:underline"
+                      >
+                        {nombre}
+                      </button>
+                    </td>
+                    <td className="px-2 py-1.5 text-foreground/70">{r.alumno.grupo}</td>
+                    {comparativa ? (
+                      <>
+                        <td className="px-2 py-1.5 text-center">
+                          <button
+                            type="button"
+                            onClick={() => abrirAlumno(r.alumno.alumno2025, r.cct)}
+                            className="font-semibold text-[#4472C4] hover:underline"
+                          >
+                            {fmtPct(r.alumno.porcentaje2025)}
+                          </button>
+                        </td>
+                        <td className="px-2 py-1.5 text-center">
+                          <button
+                            type="button"
+                            onClick={() => abrirAlumno(r.alumno.alumno2026, r.cct)}
+                            className="font-semibold text-[#2E7D32] hover:underline"
+                          >
+                            {fmtPct(r.alumno.porcentaje2026)}
+                          </button>
+                        </td>
+                        <td className="px-2 py-1.5 text-center font-semibold" style={{ color: cambio?.color }}>
+                          {cambio?.text}
+                        </td>
+                      </>
+                    ) : (
+                      <td className="px-2 py-1.5 text-center font-semibold">{fmtPct(r.alumno.porcentaje)}</td>
+                    )}
+                    <td className="px-2 py-1.5 text-[10px] text-foreground/50">{r.cct}</td>
+                  </tr>
+                );
+              })}
+              {filtrados.length === 0 && (
+                <tr>
+                  <td colSpan={comparativa ? 6 : 4} className="px-4 py-8 text-center text-sm text-foreground/50">
+                    Sin resultados
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <ul className={listClass}>
+          {filtrados.map((r, i) => {
+            const cambio = comparativa ? textoCambio(r) : null;
+            return (
+              <li
+                key={`${r.cct}-${r.alumno.nombre}-${r.alumno.apellido}-${i}`}
+                className="rounded-xl border border-border bg-card p-3 shadow-sm"
+              >
+                <button
+                  type="button"
+                  onClick={() => abrirAlumno(r.alumno.alumno2025 ?? r.alumno.alumno2026 ?? alumnoFallback(r), r.cct)}
+                  className="w-full text-left"
+                >
+                  <p className="text-sm font-semibold leading-snug text-foreground">
+                    {formatearNombre(r.alumno.nombre, r.alumno.apellido)}
+                  </p>
+                  <p className="mt-0.5 text-xs text-foreground/50">
+                    Grupo {r.alumno.grupo} · {r.cct}
+                  </p>
+                </button>
+                {comparativa ? (
+                  <div className="mt-2.5 grid grid-cols-3 gap-1.5 border-t border-border/60 pt-2.5">
+                    <button
+                      type="button"
+                      onClick={() => abrirAlumno(r.alumno.alumno2025, r.cct)}
+                      className="rounded-lg bg-[#4472C4]/8 px-1.5 py-1.5 text-center"
+                    >
+                      <div className="text-[9px] font-medium uppercase tracking-wide text-[#4472C4]">2025</div>
+                      <div className="mt-0.5 text-sm font-bold text-foreground">{fmtPct(r.alumno.porcentaje2025)}</div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => abrirAlumno(r.alumno.alumno2026, r.cct)}
+                      className="rounded-lg bg-[#2E7D32]/8 px-1.5 py-1.5 text-center"
+                    >
+                      <div className="text-[9px] font-medium uppercase tracking-wide text-[#2E7D32]">2026</div>
+                      <div className="mt-0.5 text-sm font-bold text-foreground">{fmtPct(r.alumno.porcentaje2026)}</div>
+                    </button>
+                    <div className="rounded-lg bg-[var(--fill-tertiary)] px-1.5 py-1.5 text-center">
+                      <div className="text-[9px] font-medium uppercase tracking-wide text-foreground/50">Cambio</div>
+                      <div className="mt-0.5 text-sm font-bold" style={{ color: cambio?.color }}>
+                        {cambio?.text}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mt-2.5 flex items-center justify-between border-t border-border/60 pt-2.5">
+                    <span className="text-xs text-foreground/50">Porcentaje</span>
+                    <span className="text-base font-bold text-foreground">{fmtPct(r.alumno.porcentaje)}</span>
+                  </div>
+                )}
+              </li>
+            );
+          })}
+          {filtrados.length === 0 && (
+            <li className="rounded-xl border border-dashed border-border px-4 py-8 text-center text-sm text-foreground/50">
+              Sin resultados
+            </li>
+          )}
+        </ul>
+      )}
+
+      <ModalDetalleAlumno
+        alumno={alumnoSeleccionado}
+        cct={cctSeleccionado}
+        onClose={() => {
+          setAlumnoSeleccionado(null);
+          setCctSeleccionado(undefined);
+        }}
+      />
     </div>
   );
 }

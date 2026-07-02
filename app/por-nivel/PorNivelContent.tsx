@@ -1,10 +1,13 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import type { NivelRAF } from "@/types/raf";
 import { NIVELES_CON_EXAMEN, NIVEL_COLOR } from "@/types/raf";
+import { parseModoVista } from "@/lib/evaluaciones";
+import { appendNavParams } from "@/lib/evaluacion-url";
 import TablaAlumnosNivel from "@/app/components/TablaAlumnosNivel";
+import DropdownIos from "@/app/components/DropdownIos";
 
 export type RowNivel = {
   alumno: { nombre: string; apellido: string; grupo: string; porcentaje: number | null; nivel: NivelRAF; respuestas?: string[] };
@@ -20,11 +23,13 @@ type NivelesConExamen = "REQUIERE APOYO" | "EN DESARROLLO" | "ESPERADO";
 
 interface Props {
   alumnosPorNivel: Record<NivelesConExamen, RowNivel[]>;
+  alumnosPorNivel2026?: Record<NivelesConExamen, RowNivel[]>;
   escuelas: { cct: string }[];
   gruposOptions: GrupoOption[];
   nivelFiltro?: NivelRAF | null;
   soloCct?: string;
   initialGrupo?: string;
+  evalMode?: "despegue-2025" | "aterrizaje-2026" | "comparar";
 }
 
 const NIVEL_TO_PARAM: Record<NivelesConExamen, string> = {
@@ -33,13 +38,26 @@ const NIVEL_TO_PARAM: Record<NivelesConExamen, string> = {
   ESPERADO: "ESPERADO",
 };
 
+const VIEW_MODE_OPTIONS = [
+  { value: "todos", label: "Todas las escuelas" },
+  { value: "escuela", label: "Por escuela" },
+  { value: "grupo", label: "Por grupo" },
+] as const;
+
+const SORT_OPTIONS = [
+  { value: "desc", label: "Descendente (mayor a menor)" },
+  { value: "asc", label: "Ascendente (menor a mayor)" },
+] as const;
+
 export default function PorNivelContent({
   alumnosPorNivel,
+  alumnosPorNivel2026,
   escuelas,
   gruposOptions,
   nivelFiltro = null,
   soloCct,
   initialGrupo = "",
+  evalMode = "despegue-2025",
 }: Props) {
   const grupoValido =
     initialGrupo &&
@@ -53,17 +71,31 @@ export default function PorNivelContent({
   const [selectedGrupo, setSelectedGrupo] = useState(grupoValido ? initialGrupo : "");
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const evalModeFromUrl = parseModoVista(searchParams.get("eval"));
+  const zonaParam = searchParams.get("zona");
+  const zonaNum = zonaParam ? parseInt(zonaParam, 10) : null;
+
+  const irANivel = (nivel: NivelesConExamen) => {
+    const href = appendNavParams(`/por-nivel?nivel=${NIVEL_TO_PARAM[nivel]}`, {
+      evalMode: evalModeFromUrl,
+      zona: Number.isFinite(zonaNum) ? zonaNum : null,
+    });
+    setExpandedNivel(nivel);
+    router.push(href);
+  };
+
+  const filterRow = (r: RowNivel) => {
+    if (viewMode === "todos") return true;
+    if (viewMode === "escuela") return r.cct === selectedCct;
+    if (viewMode === "grupo") {
+      const [cct, grupo] = selectedGrupo.split("|");
+      return r.cct === cct && r.alumno.grupo === grupo;
+    }
+    return true;
+  };
 
   const dataPorNivel = useMemo(() => {
-    const filterRow = (r: RowNivel) => {
-      if (viewMode === "todos") return true;
-      if (viewMode === "escuela") return r.cct === selectedCct;
-      if (viewMode === "grupo") {
-        const [cct, grupo] = selectedGrupo.split("|");
-        return r.cct === cct && r.alumno.grupo === grupo;
-      }
-      return true;
-    };
     const sortRows = (rows: RowNivel[]) =>
       [...rows].sort((a, b) => {
         const pa = a.alumno.porcentaje ?? 0;
@@ -82,6 +114,29 @@ export default function PorNivelContent({
     return out;
   }, [alumnosPorNivel, viewMode, selectedCct, selectedGrupo, sortOrder]);
 
+  const conteosPorNivel = useMemo(() => {
+    const out: Record<NivelesConExamen, { n2025: number; n2026: number }> = {
+      "REQUIERE APOYO": { n2025: 0, n2026: 0 },
+      "EN DESARROLLO": { n2025: 0, n2026: 0 },
+      ESPERADO: { n2025: 0, n2026: 0 },
+    };
+    for (const nivel of NIVELES_CON_EXAMEN) {
+      out[nivel].n2025 = alumnosPorNivel[nivel].filter(filterRow).length;
+      out[nivel].n2026 = alumnosPorNivel2026?.[nivel]?.filter(filterRow).length ?? 0;
+    }
+    return out;
+  }, [alumnosPorNivel, alumnosPorNivel2026, viewMode, selectedCct, selectedGrupo]);
+
+  const escuelaOptions = useMemo(
+    () => [{ value: "", label: "Selecciona escuela" }, ...escuelas.map((e) => ({ value: e.cct, label: e.cct }))],
+    [escuelas]
+  );
+
+  const grupoOptionsList = useMemo(
+    () => [{ value: "", label: "Selecciona grupo" }, ...gruposOptions.map((opt) => ({ value: `${opt.cct}|${opt.grupo}`, label: opt.label }))],
+    [gruposOptions]
+  );
+
   const [expandedNivel, setExpandedNivel] = useState<NivelRAF | null>(nivelFiltro);
   useEffect(() => {
     setExpandedNivel(nivelFiltro);
@@ -89,155 +144,171 @@ export default function PorNivelContent({
   const nivelesAMostrar: NivelesConExamen[] = expandedNivel && NIVELES_CON_EXAMEN.includes(expandedNivel as NivelesConExamen)
     ? [expandedNivel as NivelesConExamen]
     : NIVELES_CON_EXAMEN;
-  const usarListaReducida = !expandedNivel;
-
-  const handleVerLos3 = () => {
-    setExpandedNivel(null);
-    router.push("/por-nivel");
-  };
 
   return (
-    <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-1 p-2 pb-2 animate-fade-in overflow-hidden">
-      <header className="shrink-0 space-y-0.5">
-        <h1 className="text-base font-bold mt-0">
-          {expandedNivel
-            ? `Por nivel: ${expandedNivel === "REQUIERE APOYO" ? "Requieren apoyo" : expandedNivel === "EN DESARROLLO" ? "En desarrollo" : "Esperado"}`
-            : "Por nivel"}
-        </h1>
-        <p className="text-xs text-foreground/80">
-          {expandedNivel
-            ? "Lista completa. Toca «Ver los 3 niveles» para volver."
-            : "Toca una sección para ver solo esa lista. Organiza por escuela o grupo y ordena por %."}
-        </p>
-        {expandedNivel && (
-          <button
-            type="button"
-            onClick={handleVerLos3}
-            className="block text-left text-xs font-medium text-[var(--gris-iphone)] underline hover:opacity-80"
-          >
-            ← Ver los 3 niveles
-          </button>
-        )}
-      </header>
-
-      <section className="card-ios shrink-0 space-y-2 rounded-2xl border border-border bg-card p-3">
-        <div className="flex flex-wrap items-center gap-2">
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-2 pb-2 animate-fade-in overflow-hidden">
+      <section className="card-ios shrink-0 space-y-2.5 rounded-2xl border border-border bg-card p-3 max-lg:space-y-3">
+        <div className="flex flex-col gap-2 max-lg:gap-2.5 lg:flex-row lg:flex-wrap lg:items-center">
           {!soloCct && (
             <>
-              <label className="text-xs font-semibold">Organizar por:</label>
-              <select
+              <label className="text-xs font-semibold lg:shrink-0">Organizar por:</label>
+              <DropdownIos
+                options={[...VIEW_MODE_OPTIONS]}
                 value={viewMode}
-                onChange={(e) => {
-                  setViewMode(e.target.value as ViewMode);
-                  if (e.target.value !== "escuela") setSelectedCct("");
-                  if (e.target.value !== "grupo") setSelectedGrupo("");
+                onChange={(next) => {
+                  setViewMode(next as ViewMode);
+                  if (next !== "escuela") setSelectedCct("");
+                  if (next !== "grupo") setSelectedGrupo("");
                 }}
-                className="select-ios rounded-xl border border-border bg-[var(--fill-tertiary)] px-3 py-2 text-xs"
-              >
-                <option value="todos">Todas las escuelas</option>
-                <option value="escuela">Por escuela</option>
-                <option value="grupo">Por grupo</option>
-              </select>
+                title="Organizar por"
+                ariaLabel="Organizar por"
+                className="lg:w-auto lg:min-w-[160px]"
+              />
 
               {viewMode === "escuela" && (
-                <select
+                <DropdownIos
+                  options={escuelaOptions}
                   value={selectedCct}
-                  onChange={(e) => setSelectedCct(e.target.value)}
-                  className="select-ios min-w-[120px] rounded-xl border border-border bg-[var(--fill-tertiary)] px-3 py-2 text-xs"
-                >
-                  <option value="">Selecciona escuela</option>
-                  {escuelas.map((e) => (
-                    <option key={e.cct} value={e.cct}>
-                      {e.cct}
-                    </option>
-                  ))}
-                </select>
+                  onChange={setSelectedCct}
+                  placeholder="Selecciona escuela"
+                  title="Seleccionar escuela"
+                  ariaLabel="Seleccionar escuela"
+                  className="lg:w-auto lg:min-w-[160px]"
+                  minPanelWidth={240}
+                />
               )}
 
               {viewMode === "grupo" && (
-                <select
+                <DropdownIos
+                  options={grupoOptionsList}
                   value={selectedGrupo}
-                  onChange={(e) => setSelectedGrupo(e.target.value)}
-                  className="select-ios min-w-[140px] rounded-xl border border-border bg-[var(--fill-tertiary)] px-3 py-2 text-xs"
-                >
-                  <option value="">Selecciona grupo</option>
-                  {gruposOptions.map((opt) => (
-                    <option key={`${opt.cct}-${opt.grupo}`} value={`${opt.cct}|${opt.grupo}`}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
+                  onChange={setSelectedGrupo}
+                  placeholder="Selecciona grupo"
+                  title="Seleccionar grupo"
+                  ariaLabel="Seleccionar grupo"
+                  className="lg:w-auto lg:min-w-[180px]"
+                  minPanelWidth={280}
+                />
               )}
             </>
           )}
           {soloCct && <span className="text-xs text-foreground/70">Solo tu escuela: {soloCct}</span>}
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <label className="text-xs font-semibold">Ordenar %:</label>
-          <select
+        <div className="flex flex-col gap-2 lg:flex-row lg:flex-wrap lg:items-center">
+          <label className="text-xs font-semibold lg:shrink-0">Ordenar %:</label>
+          <DropdownIos
+            options={[...SORT_OPTIONS]}
             value={sortOrder}
-            onChange={(e) => setSortOrder(e.target.value as SortOrder)}
-            className="select-ios rounded-xl border border-border bg-[var(--fill-tertiary)] px-3 py-2 text-xs"
-          >
-            <option value="desc">Descendente (mayor a menor)</option>
-            <option value="asc">Ascendente (menor a mayor)</option>
-          </select>
+            onChange={(next) => setSortOrder(next as SortOrder)}
+            title="Ordenar porcentaje"
+            ariaLabel="Ordenar porcentaje"
+            className="lg:w-auto lg:min-w-[220px]"
+            minPanelWidth={260}
+          />
         </div>
       </section>
 
       <div
-        className={`flex min-h-0 flex-1 flex-col gap-1.5 overflow-hidden ${!expandedNivel ? "pb-4" : ""}`}
+        className={`flex min-h-0 flex-1 flex-col gap-2 overflow-hidden ${
+          !expandedNivel ? "max-md:overflow-y-auto por-nivel-cards-stack" : ""
+        }`}
       >
-        {nivelesAMostrar.map((nivel) => {
-          const alumnos = dataPorNivel[nivel];
-          const color = NIVEL_COLOR[nivel];
-          const label =
-            nivel === "REQUIERE APOYO"
-              ? "Requieren apoyo"
-              : nivel === "EN DESARROLLO"
-                ? "En desarrollo"
-                : "Esperado";
-          const isExpanded = !!expandedNivel;
-          return (
-            <section
-              key={nivel}
-              className="card-ios flex min-h-0 flex-1 flex-col rounded-xl border border-border bg-card p-2 overflow-hidden"
-              {...(!isExpanded && {
-                role: "button",
-                tabIndex: 0,
-                onClick: () => {
-                  setExpandedNivel(nivel);
-                  router.push(`/por-nivel?nivel=${NIVEL_TO_PARAM[nivel]}`);
-                },
-                onKeyDown: (e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    setExpandedNivel(nivel);
-                    router.push(`/por-nivel?nivel=${NIVEL_TO_PARAM[nivel]}`);
-                  }
-                },
-              })}
-            >
-              <h2
-                className="mb-1 shrink-0 rounded-lg px-2 py-1 text-[11px] font-semibold text-white"
-                style={{ backgroundColor: color }}
+        {/* Móvil colapsado: tarjetas resumen */}
+        {!expandedNivel && (
+          <div className="flex flex-col gap-2 md:hidden">
+            {NIVELES_CON_EXAMEN.map((nivel) => {
+              const conteos = conteosPorNivel[nivel];
+              const color = NIVEL_COLOR[nivel];
+              const label =
+                nivel === "REQUIERE APOYO"
+                  ? "Requieren apoyo"
+                  : nivel === "EN DESARROLLO"
+                    ? "En desarrollo"
+                    : "Esperado";
+              return (
+                <button
+                  key={nivel}
+                  type="button"
+                  onClick={() => irANivel(nivel)}
+                  className="por-nivel-resumen-card card-ios flex w-full items-stretch overflow-hidden rounded-2xl border border-border bg-card text-left shadow-sm transition-transform active:scale-[0.99]"
+                >
+                  <div className="w-1.5 shrink-0" style={{ backgroundColor: color }} aria-hidden />
+                  <div className="flex min-w-0 flex-1 items-center gap-3 px-4 py-4">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-foreground">{label}</p>
+                      {evalMode === "comparar" && alumnosPorNivel2026 ? (
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          <span className="rounded-full bg-[#4472C4]/12 px-2.5 py-1 text-[11px] font-medium text-[#4472C4]">
+                            2025: {conteos.n2025.toLocaleString("es-MX")}
+                          </span>
+                          <span className="rounded-full bg-[#2E7D32]/12 px-2.5 py-1 text-[11px] font-medium text-[#2E7D32]">
+                            2026: {conteos.n2026.toLocaleString("es-MX")}
+                          </span>
+                        </div>
+                      ) : (
+                        <p className="mt-1 text-xs text-foreground/60">
+                          {dataPorNivel[nivel].length.toLocaleString("es-MX")} alumnos
+                        </p>
+                      )}
+                      <p className="mt-2 text-[11px] font-medium text-foreground/45">Toca para ver la lista</p>
+                    </div>
+                    <svg className="size-5 shrink-0 text-foreground/30" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Listas completas: escritorio (3 columnas) o nivel expandido */}
+        <div
+          className={`min-h-0 flex-1 overflow-hidden ${
+            expandedNivel
+              ? "flex flex-col"
+              : "por-nivel-desktop-grid hidden md:grid md:grid-cols-3 md:gap-3"
+          }`}
+        >
+          {nivelesAMostrar.map((nivel) => {
+            const alumnos = dataPorNivel[nivel];
+            const color = NIVEL_COLOR[nivel];
+            const label =
+              nivel === "REQUIERE APOYO"
+                ? "Requieren apoyo"
+                : nivel === "EN DESARROLLO"
+                  ? "En desarrollo"
+                  : "Esperado";
+            const conteos = conteosPorNivel[nivel];
+            const tituloConteo =
+              evalMode === "comparar" && alumnosPorNivel2026
+                ? `${label} · 2025: ${conteos.n2025} · 2026: ${conteos.n2026}`
+                : `${label} (${alumnos.length})`;
+
+            return (
+              <section
+                key={nivel}
+                className="card-ios flex min-h-0 flex-col overflow-hidden rounded-2xl border border-border bg-card"
               >
-                {label} ({alumnos.length}){!isExpanded ? " — toca para ampliar" : ""}
-              </h2>
-              <div
-                className={`min-h-0 flex-1 overflow-y-auto overflow-x-auto overscroll-contain ${isExpanded ? "lista-expandida-por-nivel" : "lista-mini-por-nivel"}`}
-                style={{ WebkitOverflowScrolling: "touch", minHeight: 0 }}
-                onClick={isExpanded ? undefined : (e) => e.stopPropagation()}
-              >
-                <TablaAlumnosNivel
-                  alumnosConCct={alumnos}
-                  maxRows={undefined}
-                  verTodosHref={undefined}
-                />
-              </div>
-            </section>
-          );
-        })}
+                <h2
+                  className="shrink-0 rounded-t-2xl px-3 py-2.5 text-sm font-semibold text-white"
+                  style={{ backgroundColor: color }}
+                >
+                  {tituloConteo}
+                </h2>
+                <div className="lista-expandida-por-nivel flex min-h-0 flex-1 flex-col p-2">
+                  <TablaAlumnosNivel
+                    alumnosConCct={alumnos}
+                    comparativa={evalMode === "comparar"}
+                    layout={expandedNivel ? "grid" : "column"}
+                    fillHeight
+                  />
+                </div>
+              </section>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

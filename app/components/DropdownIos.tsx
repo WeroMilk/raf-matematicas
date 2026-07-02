@@ -2,17 +2,19 @@
 
 import { useState, useRef, useEffect, useId, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { useSearchParams, usePathname, useRouter } from "next/navigation";
-import { ZONAS_DISPONIBLES } from "@/lib/zonas";
+
+export type DropdownOption = { value: string; label: string };
 
 interface Props {
-  isSuper: boolean;
+  options: DropdownOption[];
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  title?: string;
+  ariaLabel?: string;
+  className?: string;
+  minPanelWidth?: number;
 }
-
-const OPTIONS: { value: number | null; label: string }[] = [
-  { value: null, label: "Todas las zonas" },
-  ...ZONAS_DISPONIBLES.map((z) => ({ value: z, label: `Zona ${z}` })),
-];
 
 function ChevronIcon({ open }: { open: boolean }) {
   return (
@@ -41,35 +43,31 @@ function CheckIcon() {
   );
 }
 
-export default function FiltroZona({ isSuper }: Props) {
-  const searchParams = useSearchParams();
-  const pathname = usePathname();
-  const router = useRouter();
+export default function DropdownIos({
+  options,
+  value,
+  onChange,
+  placeholder = "Seleccionar",
+  title,
+  ariaLabel,
+  className = "",
+  minPanelWidth = 220,
+}: Props) {
   const [open, setOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [menuRect, setMenuRect] = useState<{ top: number; left: number; width: number } | null>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const listId = useId();
 
-  const zonaParam = searchParams.get("zona");
-  const value = zonaParam ? parseInt(zonaParam, 10) : null;
-  const isValid = value != null && ZONAS_DISPONIBLES.includes(value);
-  const selectedValue = isValid ? value : null;
-  const selectedLabel = OPTIONS.find((o) => o.value === selectedValue)?.label ?? "Todas las zonas";
+  const selectedLabel = options.find((o) => o.value === value)?.label ?? placeholder;
+  const sheetTitle = title ?? ariaLabel ?? placeholder;
 
-  const handleChange = useCallback(
-    (zona: number | null) => {
-      const params = new URLSearchParams(searchParams.toString());
-      if (zona != null) {
-        params.set("zona", String(zona));
-      } else {
-        params.delete("zona");
-      }
-      const qs = params.toString();
-      router.replace(qs ? `${pathname}?${qs}` : pathname);
+  const handleSelect = useCallback(
+    (next: string) => {
+      onChange(next);
       setOpen(false);
     },
-    [pathname, router, searchParams]
+    [onChange]
   );
 
   const updateLayout = useCallback(() => {
@@ -80,12 +78,12 @@ export default function FiltroZona({ isSuper }: Props) {
       setMenuRect({
         top: rect.bottom + 8,
         left: rect.left,
-        width: Math.max(rect.width, 220),
+        width: Math.max(rect.width, minPanelWidth),
       });
     } else {
       setMenuRect(null);
     }
-  }, [open]);
+  }, [open, minPanelWidth]);
 
   useEffect(() => {
     updateLayout();
@@ -111,28 +109,26 @@ export default function FiltroZona({ isSuper }: Props) {
     };
   }, [open, isMobile]);
 
-  if (!isSuper) return null;
-
   const optionList = (
-    <ul role="listbox" id={listId} aria-label="Filtrar por zona" className="m-0 list-none p-1.5">
-      {OPTIONS.map((opt) => {
-        const isSelected = opt.value === selectedValue;
+    <ul role="listbox" id={listId} aria-label={ariaLabel ?? sheetTitle} className="m-0 list-none p-1.5">
+      {options.map((opt) => {
+        const isSelected = opt.value === value;
         return (
-          <li key={opt.value ?? "all"} role="presentation">
+          <li key={opt.value || "__empty"} role="presentation">
             <button
               type="button"
               role="option"
               aria-selected={isSelected}
-              onClick={() => handleChange(opt.value)}
+              onClick={() => handleSelect(opt.value)}
               className={`dropdown-ios__option flex w-full items-center justify-between gap-3 rounded-xl px-3.5 py-3 text-left text-sm font-medium transition-colors sm:py-2.5 ${
                 isSelected
                   ? "bg-[#7b2d3e]/10 text-[#7b2d3e]"
                   : "text-foreground hover:bg-[var(--fill-tertiary)] active:bg-[var(--fill-secondary)]"
               }`}
             >
-              <span>{opt.label}</span>
+              <span className="min-w-0 break-words">{opt.label}</span>
               {isSelected && (
-                <span className="text-[#7b2d3e]">
+                <span className="shrink-0 text-[#7b2d3e]">
                   <CheckIcon />
                 </span>
               )}
@@ -167,11 +163,11 @@ export default function FiltroZona({ isSuper }: Props) {
               onClick={(e) => e.stopPropagation()}
               role="dialog"
               aria-modal="true"
-              aria-label="Filtrar por zona"
+              aria-label={sheetTitle}
             >
               <div className="border-b border-border/60 px-4 py-3">
                 <p className="text-center text-xs font-semibold uppercase tracking-wide text-foreground/50">
-                  Filtrar por zona
+                  {sheetTitle}
                 </p>
               </div>
               <div className="max-h-[min(60dvh,420px)] overflow-y-auto">{optionList}</div>
@@ -197,7 +193,7 @@ export default function FiltroZona({ isSuper }: Props) {
     );
 
   return (
-    <div className="relative w-full min-w-[160px] max-w-[200px] sm:max-w-[220px]">
+    <div className={`relative w-full min-w-0 ${className}`}>
       <button
         ref={triggerRef}
         type="button"
@@ -205,9 +201,9 @@ export default function FiltroZona({ isSuper }: Props) {
         aria-expanded={open}
         aria-controls={listId}
         onClick={() => setOpen((v) => !v)}
-        className="dropdown-ios__trigger select-ios flex w-full min-h-[40px] items-center justify-between gap-2 rounded-xl border border-border bg-card px-3.5 py-2.5 text-sm font-medium text-foreground shadow-sm transition-[box-shadow,transform,border-color] hover:border-[#7b2d3e]/30 hover:shadow-md active:scale-[0.98]"
+        className="dropdown-ios__trigger select-ios flex w-full min-h-[40px] items-center justify-between gap-2 rounded-xl border border-border bg-[var(--fill-tertiary)] px-3 py-2.5 text-xs font-medium text-foreground shadow-sm transition-[box-shadow,transform,border-color] hover:border-[#7b2d3e]/30 hover:shadow-md active:scale-[0.98] lg:py-2"
       >
-        <span className="truncate">{selectedLabel}</span>
+        <span className="truncate text-left">{selectedLabel}</span>
         <ChevronIcon open={open} />
       </button>
       {menu}

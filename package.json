@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "npm run build:data && npm run merge-buscador && next build",
+    "build": "npm run build:data:2026 && next build",
     "build:data": "node scripts/build-data.mjs",
     "merge-buscador": "node scripts/merge-buscador-escuelas.mjs",
     "generate-auth": "node scripts/generate-auth.mjs",
@@ -20,6 +20,7 @@
     "list-excel-columns": "node scripts/list-excel-columns.mjs",
     "lint": "eslint",
     "build:data:fusion": "node scripts/fusionar-base-lenguaje-matematicas.mjs",
+    "build:data:2026": "node scripts/build-data-2026.mjs",
     "build:data:solo-matematicas": "node scripts/parse-excel-to-json.mjs"
   },
   "dependencies": {

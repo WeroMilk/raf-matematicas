@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import LogoutButton from "@/app/components/LogoutButton";
+import { parseModoVista } from "@/lib/evaluaciones";
+import { appendNavParams } from "@/lib/evaluacion-url";
 
 type Session = { tipo: "super" | "zona" | "escuela"; zona?: number; cct?: string } | null;
 
@@ -58,13 +60,12 @@ export default function Nav({ session }: { session?: Session }) {
   const zona =
     session?.tipo === "zona" ? session.zona : session?.tipo === "super" ? searchParams.get("zona") : null;
   const zonaNum = typeof zona === "number" ? zona : zona ? parseInt(zona, 10) : null;
+  const evalMode = parseModoVista(searchParams.get("eval"));
 
-  const hrefWithZona = (base: string) => {
-    if (zonaNum == null || !Number.isInteger(zonaNum)) return base;
-    return base + (base.includes("?") ? "&" : "?") + `zona=${zonaNum}`;
+  const getHref = (href: string) => {
+    const base = isEscuela && href === "/" ? escuelaHref! : href;
+    return appendNavParams(base, { evalMode, zona: zonaNum });
   };
-
-  const getHref = (href: string) => (isEscuela && href === "/" ? escuelaHref! : hrefWithZona(href));
 
   return (
     <nav className="app-nav">

@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { getResultadosSync } from "@/lib/data-server";
+import { getResultadosMultiSync, getCobertura2026Resumen } from "@/lib/data-server";
 import { getSession } from "@/lib/auth";
 import DashboardHomeClient from "@/app/components/DashboardHomeClient";
 
@@ -9,7 +9,8 @@ export default async function HomePage() {
   const isSuper = session?.tipo === "super";
   const zonaForced = session?.tipo === "zona" ? session.zona : undefined;
 
-  const data = getResultadosSync();
+  const data = getResultadosMultiSync();
+  const cobertura = getCobertura2026Resumen();
 
-  return <DashboardHomeClient data={data} isSuper={!!isSuper} zonaForced={zonaForced} />;
+  return <DashboardHomeClient data={data} cobertura={cobertura} isSuper={!!isSuper} zonaForced={zonaForced} />;
 }

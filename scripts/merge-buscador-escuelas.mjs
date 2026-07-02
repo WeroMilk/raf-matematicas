@@ -15,6 +15,7 @@ import XLSX from "xlsx";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
 const RESULTADOS_PATH = path.join(ROOT, "public", "data", "resultados.json");
+const NOMBRES_OFICIALES_PATH = path.join(ROOT, "data", "nombres-escuelas-oficiales.json");
 
 const EXCEL_EN_REPO = path.join(ROOT, "data", "buscador", "Buscador de Escuelas en Linea.xlsx");
 const DEFAULT_EXCEL =
@@ -54,10 +55,29 @@ function fixUtf8Mojibake(str) {
   return fixOrtografiaComun(s);
 }
 
-/** Corrige errores ortográficos comunes (RAE). Ej.: MUÑZ, MUñZ → MUÑOZ */
+/** Corrige errores ortográficos comunes (RAE / mojibake del buscador SEP). */
 function fixOrtografiaComun(str) {
   if (typeof str !== "string") return str;
-  return str.replace(/\bMU[ñÑ]Z\b/g, "MUÑOZ").replace(/\bmuñz\b/g, "muñoz");
+  return str
+    .replace(/MUÃOZ/gi, "MUÑOZ")
+    .replace(/\bMUÑZ\b/gi, "MUÑOZ")
+    .replace(/BRISEÃO/gi, "BRISEÑO")
+    .replace(/\bBRISEÑ\b/gi, "BRISEÑO")
+    .replace(/PEÃA/gi, "PEÑA")
+    .replace(/\bPEÑ\b/gi, "PEÑA")
+    .replace(/VIDAÃA/gi, "VIDAÑA")
+    .replace(/SEPùLVEDA/gi, "SEPULVEDA")
+    .replace(/SAñUDO/gi, "SANUDO");
+}
+
+function loadNombresOficiales() {
+  if (!fs.existsSync(NOMBRES_OFICIALES_PATH)) return {};
+  return JSON.parse(fs.readFileSync(NOMBRES_OFICIALES_PATH, "utf8"));
+}
+
+function nombreOficial(cct, fallback) {
+  const map = loadNombresOficiales();
+  return map[cct] ?? fixOrtografiaComun(fallback ?? cct);
 }
 
 function buildMapFromExcel(filePath) {
@@ -84,7 +104,7 @@ function buildMapFromExcel(filePath) {
       return s != null ? fixUtf8Mojibake(s) : undefined;
     };
     map.set(cct, {
-      nombre: get("NOMBRE"),
+      nombre: nombreOficial(cct, get("NOMBRE")),
       turno: get("TURNO"),
       nivelEducativo: get("NIVEL EDUCATIVO"),
       zona: get("ZONA"),
@@ -116,16 +136,36 @@ function main() {
 
   const resultados = JSON.parse(fs.readFileSync(RESULTADOS_PATH, "utf8"));
   let merged = 0;
-  for (const esc of resultados.escuelas || []) {
-    const info = buscadorMap.get(esc.cct);
-    if (info) {
-      esc.buscador = info;
-      merged++;
+
+  const aplicarBuscador = (escuelas) => {
+    for (const esc of escuelas || []) {
+      const info = buscadorMap.get(esc.cct);
+      if (info) {
+        esc.buscador = {
+          ...info,
+          nombre: nombreOficial(esc.cct, info.nombre),
+        };
+        merged++;
+      } else if (loadNombresOficiales()[esc.cct]) {
+        esc.buscador = { ...(esc.buscador || {}), nombre: nombreOficial(esc.cct) };
+        merged++;
+      }
     }
+  };
+
+  if (Array.isArray(resultados.evaluaciones)) {
+    for (const ev of resultados.evaluaciones) {
+      aplicarBuscador(ev.escuelas);
+    }
+  } else {
+    aplicarBuscador(resultados.escuelas);
   }
 
   fs.writeFileSync(RESULTADOS_PATH, JSON.stringify(resultados, null, 2), "utf8");
-  console.log("Escuelas en resultados:", (resultados.escuelas || []).length);
+  const totalEscuelas = Array.isArray(resultados.evaluaciones)
+    ? resultados.evaluaciones.reduce((s, e) => s + (e.escuelas?.length ?? 0), 0)
+    : (resultados.escuelas || []).length;
+  console.log("Escuelas en resultados:", totalEscuelas);
   console.log("Escuelas actualizadas con datos del Buscador:", merged);
   console.log("Guardado:", RESULTADOS_PATH);
 }

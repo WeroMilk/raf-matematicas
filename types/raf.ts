@@ -73,7 +73,63 @@ export interface EscuelaResumen {
   buscador?: EscuelaInfoBuscador;
 }
 
-export interface ResultadosRAF {
+export type EvaluacionId = "despegue-2025" | "aterrizaje-2026";
+
+export type ModoVista = EvaluacionId | "comparar";
+
+export interface EvaluacionRAF {
+  id: EvaluacionId;
+  nombre: string;
+  nombreCorto: string;
   escuelas: EscuelaResumen[];
+}
+
+export interface ResultadosMultiRAF {
+  evaluaciones: EvaluacionRAF[];
   generado: string;
+}
+
+/** Formato legacy (una sola evaluación) o multi-eval */
+export interface ResultadosRAF {
+  escuelas?: EscuelaResumen[];
+  evaluaciones?: EvaluacionRAF[];
+  generado: string;
+}
+
+export type TendenciaComparativa = "mejoro" | "igual" | "bajo" | "solo_2025" | "solo_2026";
+
+export interface KPIsNivel {
+  requiereApoyo: number;
+  enDesarrollo: number;
+  esperado: number;
+  total: number;
+}
+
+export interface ComparativaKPIs {
+  despegue2025: KPIsNivel;
+  aterrizaje2026: KPIsNivel;
+  delta: {
+    requiereApoyo: number;
+    enDesarrollo: number;
+    esperado: number;
+  };
+}
+
+export interface AlumnoComparativa {
+  nombre: string;
+  apellido: string;
+  grupo: string;
+  alumno2025: AlumnoRAF | null;
+  alumno2026: AlumnoRAF | null;
+  deltaPorcentaje: number | null;
+  tendencia: TendenciaComparativa;
+}
+
+export type Cobertura2026 = "completo" | "parcial" | "sin_datos";
+
+export interface CoberturaEscuela {
+  cct: string;
+  alumnos2025: number;
+  alumnos2026: number;
+  cobertura: Cobertura2026;
 }

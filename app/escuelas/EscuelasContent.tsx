@@ -2,8 +2,14 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { NIVEL_COLOR } from "@/types/raf";
-import type { EscuelaResumen } from "@/types/raf";
+import type { CoberturaEscuela, EscuelaResumen } from "@/types/raf";
+import { parseModoVista } from "@/lib/evaluaciones";
+import { appendNavParams } from "@/lib/evaluacion-url";
+import { tendenciaEscuela } from "@/lib/comparativa";
+import { nombreEscuela } from "@/lib/nombres-escuelas";
+import type { ResultadosMultiRAF } from "@/types/raf";
 
 type SortOption = "numero-asc" | "numero-desc" | "categoria";
 
@@ -19,10 +25,22 @@ const CATEGORIA_ORDER = { "REQUIERE APOYO": 0, "EN DESARROLLO": 1, ESPERADO: 2 }
 
 interface Props {
   escuelas: EscuelaResumen[];
+  coberturas?: CoberturaEscuela[];
+  dataMulti?: ResultadosMultiRAF;
 }
 
-export default function EscuelasContent({ escuelas }: Props) {
+function badgeCobertura(c?: CoberturaEscuela) {
+  if (!c || c.alumnos2026 === 0) return { label: "Sin 2026", color: "#757575" };
+  if (c.cobertura === "completo") return { label: "Completo", color: "#2E7D32" };
+  return { label: `Parcial ${c.alumnos2026}/${c.alumnos2025}`, color: "#F9A825" };
+}
+
+export default function EscuelasContent({ escuelas, coberturas, dataMulti }: Props) {
   const [sort, setSort] = useState<SortOption>("numero-asc");
+  const searchParams = useSearchParams();
+  const evalMode = parseModoVista(searchParams.get("eval"));
+  const nav = (p: string) => appendNavParams(p, { evalMode });
+  const cobMap = useMemo(() => new Map((coberturas ?? []).map((c) => [c.cct, c])), [coberturas]);
 
   const sorted = useMemo(() => {
     const list = escuelas.map((e) => ({ escuela: e, nivel: getNivel(e) }));
@@ -79,6 +97,8 @@ export default function EscuelasContent({ escuelas }: Props) {
           const color = NIVEL_COLOR[nivel];
           const tagLabel =
             nivel === "REQUIERE APOYO" ? "Apoyo" : nivel === "EN DESARROLLO" ? "Desarrollo" : "Esperado";
+          const cov = badgeCobertura(cobMap.get(e.cct));
+          const tend = evalMode === "comparar" && dataMulti ? tendenciaEscuela(dataMulti, e.cct) : null;
           return (
             <li
               key={e.cct}
@@ -86,19 +106,26 @@ export default function EscuelasContent({ escuelas }: Props) {
               style={{ animationDelay: `${Math.min(i * 25, 400)}ms` }}
             >
               <Link
-                href={`/escuela/${e.cct}`}
+                href={nav(`/escuela/${e.cct}`)}
                 className="link-ios card-ios flex flex-col items-center justify-center rounded-2xl border border-border bg-card p-2.5 text-center shadow-sm"
               >
-                <span className="truncate w-full text-xs font-semibold leading-tight" title={e.buscador?.nombre ?? e.cct}>
-                  {e.buscador?.nombre ?? e.cct}
+                <span className="truncate w-full text-xs font-semibold leading-tight" title={nombreEscuela(e.cct, e.buscador?.nombre)}>
+                  {nombreEscuela(e.cct, e.buscador?.nombre)}
                 </span>
                 <span className="mt-0.5 truncate w-full text-[10px] text-foreground/70">{e.cct}</span>
-                <span
-                  className="mt-1.5 rounded-full px-2 py-0.5 text-[10px] font-medium text-white"
-                  style={{ backgroundColor: color }}
-                >
+                <span className="mt-1.5 rounded-full px-2 py-0.5 text-[10px] font-medium text-white" style={{ backgroundColor: color }}>
                   {tagLabel}
                 </span>
+                {(evalMode === "aterrizaje-2026" || evalMode === "comparar") && (
+                  <span className="mt-1 rounded-full px-2 py-0.5 text-[9px] font-medium text-white" style={{ backgroundColor: cov.color }}>
+                    {cov.label}
+                  </span>
+                )}
+                {tend && (
+                  <span className="mt-0.5 text-[9px] text-foreground/60">
+                    {tend === "mejoro" ? "↑ Tendencia positiva" : tend === "bajo" ? "↓ Requiere atención" : "≈ Estable"}
+                  </span>
+                )}
               </Link>
             </li>
           );

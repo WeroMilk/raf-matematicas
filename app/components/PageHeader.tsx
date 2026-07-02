@@ -28,7 +28,7 @@ export default function PageHeader({
         </div>
       </div>
       {centerContent && (
-        <div className="flex shrink-0 items-center order-2 sm:mr-4 sm:self-center">
+        <div className="order-2 mb-3 flex shrink-0 items-center sm:mb-0 sm:mr-4 sm:self-center">
           {centerContent}
         </div>
       )}

@@ -37,8 +37,11 @@ function randomPassword(length = 12) {
   return s;
 }
 
-const resultados = JSON.parse(fs.readFileSync(RESULTADOS_PATH, "utf8"));
-const cctsEnResultados = new Set((resultados.escuelas || []).map((e) => e.cct));
+const resultados = JSON.parse(fs.readFileSync(RESULTADOS_PATH, "utf8").replace(/^\uFEFF/, ""));
+const escuelasList = Array.isArray(resultados.evaluaciones)
+  ? resultados.evaluaciones.flatMap((e) => e.escuelas || [])
+  : resultados.escuelas || [];
+const cctsEnResultados = new Set(escuelasList.map((e) => e.cct));
 
 const authData = JSON.parse(fs.readFileSync(AUTH_DATA_PATH, "utf8"));
 const escuelas = { ...(authData.escuelas || {}) };

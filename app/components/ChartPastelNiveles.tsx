@@ -12,9 +12,10 @@ interface Props {
   enDesarrollo: number;
   esperado: number;
   title?: string;
+  fillHeight?: boolean;
 }
 
-export default function ChartPastelNiveles({ requiereApoyo, enDesarrollo, esperado, title }: Props) {
+export default function ChartPastelNiveles({ requiereApoyo, enDesarrollo, esperado, title, fillHeight = false }: Props) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
@@ -26,10 +27,12 @@ export default function ChartPastelNiveles({ requiereApoyo, enDesarrollo, espera
   if (data.length === 0) return null;
   const total = requiereApoyo + enDesarrollo + esperado;
 
-  const chartContainerClass = "h-28 w-full min-w-0 min-h-[7rem] sm:h-32 sm:min-h-[8rem] lg:h-40 lg:min-h-[10rem]";
+  const chartContainerClass = fillHeight
+    ? "min-h-[6rem] w-full min-w-0 flex-1"
+    : "h-52 w-full min-w-0 min-h-[13rem] sm:h-32 sm:min-h-[8rem] lg:h-40 lg:min-h-[10rem]";
 
   return (
-    <div className="w-full min-w-0">
+    <div className={fillHeight ? "flex h-full min-h-0 w-full min-w-0 flex-col" : "w-full min-w-0"}>
       {title && <h3 className="mb-1 text-xs font-semibold">{title}</h3>}
       <div className={chartContainerClass}>
         {!mounted ? (
@@ -41,8 +44,8 @@ export default function ChartPastelNiveles({ requiereApoyo, enDesarrollo, espera
               data={data}
               cx="50%"
               cy="50%"
-              innerRadius={22}
-              outerRadius={38}
+              innerRadius={fillHeight ? "42%" : "38%"}
+              outerRadius={fillHeight ? "72%" : "62%"}
               paddingAngle={2}
               dataKey="value"
               label={false}
@@ -59,7 +62,8 @@ export default function ChartPastelNiveles({ requiereApoyo, enDesarrollo, espera
               }
             />
             <Legend
-              wrapperStyle={{ fontSize: 9 }}
+              verticalAlign="bottom"
+              wrapperStyle={{ fontSize: fillHeight ? 11 : 10, paddingTop: 4 }}
               formatter={(value, entry) => {
                 const pct = total ? Math.round(((entry?.payload?.value ?? 0) / total) * 100) : 0;
                 return `${value} ${pct}%`;
