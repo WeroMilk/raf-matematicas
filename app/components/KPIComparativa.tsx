@@ -29,32 +29,54 @@ export default function KPIComparativa({ comparativa, compact = false }: Props) 
     { key: "esperado", label: "Esperado", color: COLORS.esperado, invert: false },
   ] as const;
 
+  const cardPad = compact ? "p-3 sm:p-2" : "p-3.5 sm:p-3 lg:p-4";
+  const titleClass = compact ? "text-sm sm:text-xs" : "text-sm sm:text-base lg:text-lg";
+
   return (
-    <div className={`grid grid-cols-3 gap-2 ${compact ? "" : "lg:gap-4"}`}>
+    <div className={`grid grid-cols-3 gap-2.5 sm:gap-2 ${compact ? "" : "lg:gap-4"}`}>
       {items.map(({ key, label, color, invert }) => (
         <div
           key={key}
-          className={`card-ios rounded-2xl border border-border bg-card text-center ${compact ? "p-2" : "p-3 lg:p-4"}`}
+          className={`card-ios min-h-[92px] min-w-0 overflow-hidden rounded-2xl border border-border bg-card text-center sm:min-h-0 ${cardPad}`}
         >
-          <div className={`mb-1 font-bold ${compact ? "text-sm" : "text-base lg:text-lg"}`} style={{ color }}>
+          <div className={`mb-1.5 font-bold leading-tight sm:mb-1 ${titleClass}`} style={{ color }}>
             {label}
           </div>
-          <div className="flex items-center justify-center gap-2">
-            <div>
+
+          {/* Móvil: años apilados para que los números no se salgan */}
+          <div className="space-y-1 sm:hidden">
+            <div className="flex items-baseline justify-between gap-1 px-0.5">
+              <span className="shrink-0 text-[9px] uppercase text-foreground/50">2025</span>
+              <span className="min-w-0 truncate font-bold tabular-nums text-sm leading-none">
+                {despegue2025[key].toLocaleString("es-MX")}
+              </span>
+            </div>
+            <div className="flex items-baseline justify-between gap-1 px-0.5">
+              <span className="shrink-0 text-[9px] uppercase text-foreground/50">2026</span>
+              <span className="min-w-0 truncate font-bold tabular-nums text-sm leading-none">
+                {aterrizaje2026[key].toLocaleString("es-MX")}
+              </span>
+            </div>
+          </div>
+
+          {/* Escritorio: comparativa horizontal */}
+          <div className="hidden items-center justify-center gap-2 sm:flex">
+            <div className="min-w-0">
               <div className="text-[9px] uppercase text-foreground/50">2025</div>
-              <div className={`font-bold ${compact ? "text-sm" : "text-lg"}`}>
-                {despegue2025[key]}
+              <div className={`font-bold tabular-nums ${compact ? "text-sm" : "text-lg"}`}>
+                {despegue2025[key].toLocaleString("es-MX")}
               </div>
             </div>
-            <div className="text-foreground/30">→</div>
-            <div>
+            <div className="shrink-0 text-foreground/30">→</div>
+            <div className="min-w-0">
               <div className="text-[9px] uppercase text-foreground/50">2026</div>
-              <div className={`font-bold ${compact ? "text-sm" : "text-lg"}`}>
-                {aterrizaje2026[key]}
+              <div className={`font-bold tabular-nums ${compact ? "text-sm" : "text-lg"}`}>
+                {aterrizaje2026[key].toLocaleString("es-MX")}
               </div>
             </div>
           </div>
-          <div className="mt-1">
+
+          <div className="mt-1.5 sm:mt-1">
             <DeltaBadge value={delta[key]} invert={invert} />
           </div>
         </div>

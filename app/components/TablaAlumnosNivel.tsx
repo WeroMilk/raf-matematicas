@@ -222,7 +222,8 @@ export default function TablaAlumnosNivel({
           </table>
         </div>
       ) : (
-        <ul className={listClass}>
+        <div className={fillHeight ? "min-h-0 flex-1 overflow-y-auto overflow-x-hidden" : undefined}>
+          <ul className={listClass}>
           {filtrados.map((r, i) => {
             const cambio = comparativa ? textoCambio(r) : null;
             return (
@@ -282,6 +283,7 @@ export default function TablaAlumnosNivel({
             </li>
           )}
         </ul>
+        </div>
       )}
 
       <ModalDetalleAlumno

@@ -145,6 +145,51 @@ export default function PorNivelContent({
     ? [expandedNivel as NivelesConExamen]
     : NIVELES_CON_EXAMEN;
 
+  const renderListasNivel = (fillHeight: boolean) =>
+    nivelesAMostrar.map((nivel) => {
+      const alumnos = dataPorNivel[nivel];
+      const color = NIVEL_COLOR[nivel];
+      const label =
+        nivel === "REQUIERE APOYO"
+          ? "Requieren apoyo"
+          : nivel === "EN DESARROLLO"
+            ? "En desarrollo"
+            : "Esperado";
+      const conteos = conteosPorNivel[nivel];
+      const tituloConteo =
+        evalMode === "comparar" && alumnosPorNivel2026
+          ? `${label} · 2025: ${conteos.n2025} · 2026: ${conteos.n2026}`
+          : `${label} (${alumnos.length})`;
+
+      return (
+        <section
+          key={nivel}
+          className={`card-ios flex flex-col overflow-hidden rounded-2xl border border-border bg-card ${
+            fillHeight ? "min-h-0 flex-1" : ""
+          }`}
+        >
+          <h2
+            className="shrink-0 rounded-t-2xl px-3 py-2.5 text-sm font-semibold text-white"
+            style={{ backgroundColor: color }}
+          >
+            {tituloConteo}
+          </h2>
+          <div
+            className={`lista-expandida-por-nivel flex flex-col p-2 ${
+              fillHeight ? "min-h-0 flex-1" : "por-nivel-lista-scroll-movil"
+            }`}
+          >
+            <TablaAlumnosNivel
+              alumnosConCct={alumnos}
+              comparativa={evalMode === "comparar"}
+              layout={expandedNivel ? "grid" : "column"}
+              fillHeight={fillHeight}
+            />
+          </div>
+        </section>
+      );
+    });
+
   return (
     <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-2 pb-2 animate-fade-in overflow-hidden">
       <section className="card-ios shrink-0 space-y-2.5 rounded-2xl border border-border bg-card p-3 max-lg:space-y-3">
@@ -264,51 +309,20 @@ export default function PorNivelContent({
         )}
 
         {/* Listas completas: escritorio (3 columnas) o nivel expandido */}
-        <div
-          className={`min-h-0 flex-1 overflow-hidden ${
-            expandedNivel
-              ? "flex flex-col"
-              : "por-nivel-desktop-grid hidden md:grid md:grid-cols-3 md:gap-3"
-          }`}
-        >
-          {nivelesAMostrar.map((nivel) => {
-            const alumnos = dataPorNivel[nivel];
-            const color = NIVEL_COLOR[nivel];
-            const label =
-              nivel === "REQUIERE APOYO"
-                ? "Requieren apoyo"
-                : nivel === "EN DESARROLLO"
-                  ? "En desarrollo"
-                  : "Esperado";
-            const conteos = conteosPorNivel[nivel];
-            const tituloConteo =
-              evalMode === "comparar" && alumnosPorNivel2026
-                ? `${label} · 2025: ${conteos.n2025} · 2026: ${conteos.n2026}`
-                : `${label} (${alumnos.length})`;
-
-            return (
-              <section
-                key={nivel}
-                className="card-ios flex min-h-0 flex-col overflow-hidden rounded-2xl border border-border bg-card"
-              >
-                <h2
-                  className="shrink-0 rounded-t-2xl px-3 py-2.5 text-sm font-semibold text-white"
-                  style={{ backgroundColor: color }}
-                >
-                  {tituloConteo}
-                </h2>
-                <div className="lista-expandida-por-nivel flex min-h-0 flex-1 flex-col p-2">
-                  <TablaAlumnosNivel
-                    alumnosConCct={alumnos}
-                    comparativa={evalMode === "comparar"}
-                    layout={expandedNivel ? "grid" : "column"}
-                    fillHeight
-                  />
-                </div>
-              </section>
-            );
-          })}
-        </div>
+        {expandedNivel ? (
+          <>
+            <div className="por-nivel-expandido flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-contain pb-4 md:hidden">
+              {renderListasNivel(false)}
+            </div>
+            <div className="hidden min-h-0 flex-1 flex-col overflow-hidden md:flex">
+              {renderListasNivel(true)}
+            </div>
+          </>
+        ) : (
+          <div className="por-nivel-desktop-grid hidden min-h-0 flex-1 md:grid md:grid-cols-3 md:gap-3">
+            {renderListasNivel(true)}
+          </div>
+        )}
       </div>
     </div>
   );

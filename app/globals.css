@@ -187,6 +187,18 @@ body {
   }
 }
 
+@media (max-width: 767px) {
+  .por-nivel-expandido {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .por-nivel-expandido .lista-expandida-por-nivel,
+  .por-nivel-lista-scroll-movil {
+    min-height: 0;
+    overflow: visible;
+  }
+}
+
 .page-container {
   width: 100%;
   min-width: 0;

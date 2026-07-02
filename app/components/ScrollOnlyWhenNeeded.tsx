@@ -31,7 +31,12 @@ export default function ScrollOnlyWhenNeeded({
     requestAnimationFrame(update);
     const ro = new ResizeObserver(() => requestAnimationFrame(update));
     ro.observe(el);
-    return () => ro.disconnect();
+    const mo = new MutationObserver(() => requestAnimationFrame(update));
+    mo.observe(el, { childList: true, subtree: true, attributes: true, characterData: true });
+    return () => {
+      ro.disconnect();
+      mo.disconnect();
+    };
   }, []);
 
   return (

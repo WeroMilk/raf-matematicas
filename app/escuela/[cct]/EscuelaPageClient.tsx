@@ -70,67 +70,69 @@ export default function EscuelaPageClient({ cct, data, backHref, showBack, cober
         </p>
       </PageHeader>
 
-      {evalMode === "comparar" ? (
-        <>
-          {cmp.aterrizaje2026.total === 0 ? (
-            <p className="text-sm text-foreground/70 px-1">Sin datos 2026 para comparar en esta escuela.</p>
-          ) : (
-            <KPIComparativa comparativa={cmp} compact />
-          )}
-          <section className="card-ios rounded-2xl border p-3">
-            <ChartComparativaNiveles
-              requiereApoyo2025={cmp.despegue2025.requiereApoyo}
-              enDesarrollo2025={cmp.despegue2025.enDesarrollo}
-              esperado2025={cmp.despegue2025.esperado}
-              requiereApoyo2026={cmp.aterrizaje2026.requiereApoyo}
-              enDesarrollo2026={cmp.aterrizaje2026.enDesarrollo}
-              esperado2026={cmp.aterrizaje2026.esperado}
-              title="Por nivel"
-            />
-          </section>
-        </>
-      ) : escuela ? (
-        <>
-          <section className="grid grid-cols-3 gap-2 shrink-0">
-            {[
-              { n: escuela.requiereApoyo, l: "Apoyo", c: COLORS.requiereApoyo, q: "REQUIERE_APOYO" },
-              { n: escuela.enDesarrollo, l: "Desarrollo", c: COLORS.enDesarrollo, q: "EN_DESARROLLO" },
-              { n: escuela.esperado, l: "Esperado", c: COLORS.esperado, q: "ESPERADO" },
-            ].map((k) => (
-              <Link key={k.q} href={nav(`/por-nivel?nivel=${k.q}`)} className="card-ios rounded-2xl p-2 text-center text-white" style={{ backgroundColor: k.c }}>
-                <div className="text-sm font-bold lg:text-2xl">{k.n}</div>
-                <div className="text-[10px] opacity-90">{k.l}</div>
-              </Link>
-            ))}
-          </section>
-          <section className="grid gap-3 lg:grid-cols-2 shrink-0">
+      <ScrollOnlyWhenNeeded className="flex min-h-0 flex-1 flex-col gap-2 overflow-x-hidden pb-6 lg:gap-6 lg:pb-8">
+        {evalMode === "comparar" ? (
+          <>
+            {cmp.aterrizaje2026.total === 0 ? (
+              <p className="text-sm text-foreground/70 px-1">Sin datos 2026 para comparar en esta escuela.</p>
+            ) : (
+              <KPIComparativa comparativa={cmp} compact />
+            )}
             <section className="card-ios rounded-2xl border p-3">
-              <ChartBarrasReactivos porcentajes={escuela.porcentajesReactivos} totalAlumnos={escuela.totalEstudiantes} title="Aciertos por reactivo" />
+              <ChartComparativaNiveles
+                requiereApoyo2025={cmp.despegue2025.requiereApoyo}
+                enDesarrollo2025={cmp.despegue2025.enDesarrollo}
+                esperado2025={cmp.despegue2025.esperado}
+                requiereApoyo2026={cmp.aterrizaje2026.requiereApoyo}
+                enDesarrollo2026={cmp.aterrizaje2026.enDesarrollo}
+                esperado2026={cmp.aterrizaje2026.esperado}
+                title="Por nivel"
+              />
             </section>
-            <section className="card-ios rounded-2xl border p-3">
-              <ChartPastelNiveles requiereApoyo={escuela.requiereApoyo} enDesarrollo={escuela.enDesarrollo} esperado={escuela.esperado} title="Por nivel" />
-            </section>
-          </section>
-        </>
-      ) : null}
-
-      <ScrollOnlyWhenNeeded className="min-h-0 flex-1 overflow-x-hidden pb-8">
-        <h2 className="mb-2 text-xs font-semibold">Grupos{tend && evalMode === "comparar" ? ` · tendencia: ${tend}` : ""}</h2>
-        <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
-          {(evalMode === "comparar" ? escuela2025?.grupos ?? [] : escuela?.grupos ?? []).map((g) => {
-            const g26 = escuela2026?.grupos.find((x) => x.nombre === g.nombre);
-            return (
-              <li key={g.nombre}>
-                <Link href={nav(`/escuela/${cct}/grupo/${encodeURIComponent(g.nombre)}`)} className="card-ios block rounded-xl border p-2 text-center text-xs">
-                  <span className="font-semibold">{g.nombre}</span>
-                  <span className="mt-1 block text-foreground/70">
-                    {evalMode === "comparar" ? `${g.total} → ${g26?.total ?? 0}` : `${g.total} · Apoyo: ${g.requiereApoyo}`}
-                  </span>
+          </>
+        ) : escuela ? (
+          <>
+            <section className="grid grid-cols-3 gap-2 shrink-0">
+              {[
+                { n: escuela.requiereApoyo, l: "Apoyo", c: COLORS.requiereApoyo, q: "REQUIERE_APOYO" },
+                { n: escuela.enDesarrollo, l: "Desarrollo", c: COLORS.enDesarrollo, q: "EN_DESARROLLO" },
+                { n: escuela.esperado, l: "Esperado", c: COLORS.esperado, q: "ESPERADO" },
+              ].map((k) => (
+                <Link key={k.q} href={nav(`/por-nivel?nivel=${k.q}`)} className="card-ios rounded-2xl p-2 text-center text-white" style={{ backgroundColor: k.c }}>
+                  <div className="text-sm font-bold lg:text-2xl">{k.n}</div>
+                  <div className="text-[10px] opacity-90">{k.l}</div>
                 </Link>
-              </li>
-            );
-          })}
-        </ul>
+              ))}
+            </section>
+            <section className="grid gap-3 lg:grid-cols-2 shrink-0">
+              <section className="card-ios rounded-2xl border p-3">
+                <ChartBarrasReactivos porcentajes={escuela.porcentajesReactivos} totalAlumnos={escuela.totalEstudiantes} title="Aciertos por reactivo" />
+              </section>
+              <section className="card-ios rounded-2xl border p-3">
+                <ChartPastelNiveles requiereApoyo={escuela.requiereApoyo} enDesarrollo={escuela.enDesarrollo} esperado={escuela.esperado} title="Por nivel" />
+              </section>
+            </section>
+          </>
+        ) : null}
+
+        <section className="shrink-0">
+          <h2 className="mb-2 text-xs font-semibold">Grupos{tend && evalMode === "comparar" ? ` · tendencia: ${tend}` : ""}</h2>
+          <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
+            {(evalMode === "comparar" ? escuela2025?.grupos ?? [] : escuela?.grupos ?? []).map((g) => {
+              const g26 = escuela2026?.grupos.find((x) => x.nombre === g.nombre);
+              return (
+                <li key={g.nombre}>
+                  <Link href={nav(`/escuela/${cct}/grupo/${encodeURIComponent(g.nombre)}`)} className="card-ios block rounded-xl border p-2 text-center text-xs">
+                    <span className="font-semibold">{g.nombre}</span>
+                    <span className="mt-1 block text-foreground/70">
+                      {evalMode === "comparar" ? `${g.total} → ${g26?.total ?? 0}` : `${g.total} · Apoyo: ${g.requiereApoyo}`}
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
       </ScrollOnlyWhenNeeded>
     </div>
   );
