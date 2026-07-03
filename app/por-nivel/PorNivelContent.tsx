@@ -8,6 +8,7 @@ import { parseModoVista } from "@/lib/evaluaciones";
 import { appendNavParams } from "@/lib/evaluacion-url";
 import TablaAlumnosNivel from "@/app/components/TablaAlumnosNivel";
 import DropdownIos from "@/app/components/DropdownIos";
+import FiltroZona from "@/app/components/FiltroZona";
 
 export type RowNivel = {
   alumno: { nombre: string; apellido: string; grupo: string; porcentaje: number | null; nivel: NivelRAF; respuestas?: string[] };
@@ -30,6 +31,8 @@ interface Props {
   soloCct?: string;
   initialGrupo?: string;
   evalMode?: "despegue-2025" | "aterrizaje-2026" | "comparar";
+  isSuper?: boolean;
+  zonaForced?: number;
 }
 
 const NIVEL_TO_PARAM: Record<NivelesConExamen, string> = {
@@ -58,6 +61,8 @@ export default function PorNivelContent({
   soloCct,
   initialGrupo = "",
   evalMode = "despegue-2025",
+  isSuper = false,
+  zonaForced,
 }: Props) {
   const grupoValido =
     initialGrupo &&
@@ -169,7 +174,7 @@ export default function PorNivelContent({
           }`}
         >
           <h2
-            className="shrink-0 rounded-t-2xl px-3 py-2.5 text-sm font-semibold text-white"
+            className="shrink-0 rounded-t-2xl px-3 py-2.5 text-sm font-semibold text-white max-md:px-4 max-md:py-3 max-md:text-base"
             style={{ backgroundColor: color }}
           >
             {tituloConteo}
@@ -184,6 +189,7 @@ export default function PorNivelContent({
               comparativa={evalMode === "comparar"}
               layout={expandedNivel ? "grid" : "column"}
               fillHeight={fillHeight}
+              enlargedMobile={!!expandedNivel}
             />
           </div>
         </section>
@@ -192,23 +198,32 @@ export default function PorNivelContent({
 
   return (
     <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-2 pb-2 animate-fade-in overflow-hidden">
-      <section className="card-ios shrink-0 space-y-2.5 rounded-2xl border border-border bg-card p-3 max-lg:space-y-3">
-        <div className="flex flex-col gap-2 max-lg:gap-2.5 lg:flex-row lg:flex-wrap lg:items-center">
+      <section className="card-ios shrink-0 space-y-2 rounded-2xl border border-border bg-card p-2.5 max-lg:p-2.5 lg:space-y-2.5 lg:p-3">
+        <div className="flex flex-col gap-2 lg:flex-row lg:flex-wrap lg:items-center">
           {!soloCct && (
             <>
-              <label className="text-xs font-semibold lg:shrink-0">Organizar por:</label>
-              <DropdownIos
-                options={[...VIEW_MODE_OPTIONS]}
-                value={viewMode}
-                onChange={(next) => {
-                  setViewMode(next as ViewMode);
-                  if (next !== "escuela") setSelectedCct("");
-                  if (next !== "grupo") setSelectedGrupo("");
-                }}
-                title="Organizar por"
-                ariaLabel="Organizar por"
-                className="lg:w-auto lg:min-w-[160px]"
-              />
+              <div className="flex min-w-0 flex-row items-stretch gap-2 max-lg:w-full">
+                {isSuper && zonaForced == null && (
+                  <div className="min-w-0 flex-1">
+                    <FiltroZona isSuper={isSuper} className="max-w-none" />
+                  </div>
+                )}
+                <div className={`min-w-0 ${isSuper && zonaForced == null ? "flex-1" : "w-full lg:w-auto"}`}>
+                  <span className="mb-1 hidden text-xs font-semibold lg:block">Organizar por:</span>
+                  <DropdownIos
+                    options={[...VIEW_MODE_OPTIONS]}
+                    value={viewMode}
+                    onChange={(next) => {
+                      setViewMode(next as ViewMode);
+                      if (next !== "escuela") setSelectedCct("");
+                      if (next !== "grupo") setSelectedGrupo("");
+                    }}
+                    title="Organizar por"
+                    ariaLabel="Organizar por"
+                    className="w-full lg:w-auto lg:min-w-[160px]"
+                  />
+                </div>
+              </div>
 
               {viewMode === "escuela" && (
                 <DropdownIos
@@ -218,7 +233,7 @@ export default function PorNivelContent({
                   placeholder="Selecciona escuela"
                   title="Seleccionar escuela"
                   ariaLabel="Seleccionar escuela"
-                  className="lg:w-auto lg:min-w-[160px]"
+                  className="w-full lg:w-auto lg:min-w-[160px]"
                   minPanelWidth={240}
                 />
               )}
@@ -231,7 +246,7 @@ export default function PorNivelContent({
                   placeholder="Selecciona grupo"
                   title="Seleccionar grupo"
                   ariaLabel="Seleccionar grupo"
-                  className="lg:w-auto lg:min-w-[180px]"
+                  className="w-full lg:w-auto lg:min-w-[180px]"
                   minPanelWidth={280}
                 />
               )}
@@ -311,8 +326,8 @@ export default function PorNivelContent({
         {/* Listas completas: escritorio (3 columnas) o nivel expandido */}
         {expandedNivel ? (
           <>
-            <div className="por-nivel-expandido flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-contain pb-4 md:hidden">
-              {renderListasNivel(false)}
+            <div className="por-nivel-expandido flex min-h-0 flex-1 flex-col overflow-hidden md:hidden">
+              {renderListasNivel(true)}
             </div>
             <div className="hidden min-h-0 flex-1 flex-col overflow-hidden md:flex">
               {renderListasNivel(true)}

@@ -190,9 +190,17 @@ body {
 @media (max-width: 767px) {
   .por-nivel-expandido {
     -webkit-overflow-scrolling: touch;
+    min-height: 0;
+    flex: 1;
   }
 
-  .por-nivel-expandido .lista-expandida-por-nivel,
+  .por-nivel-expandido .lista-expandida-por-nivel {
+    min-height: 0;
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
   .por-nivel-lista-scroll-movil {
     min-height: 0;
     overflow: visible;

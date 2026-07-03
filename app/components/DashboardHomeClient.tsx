@@ -79,16 +79,12 @@ export default function DashboardHomeClient({ data, cobertura, isSuper, zonaForc
     return agregarGlobal(data, ccts);
   }, [data, escuelas2025, escuelas2026]);
 
-  const centerContent = (
-    <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-      <SelectorEvaluacion />
-      {isSuper && zonaForced == null && <FiltroZona isSuper={isSuper} />}
-    </div>
-  );
-
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden gap-1 animate-fade-in p-2 lg:gap-4 lg:p-0">
-      <PageHeader centerContent={centerContent}>
+      <PageHeader
+        belowLogoOnMobile={<SelectorEvaluacion compact />}
+        centerContent={isSuper && zonaForced == null ? <FiltroZona isSuper={isSuper} /> : undefined}
+      >
         <h1 className="text-base font-bold text-foreground lg:text-xl lg:tracking-tight">RAF Matemáticas</h1>
         <p className="text-xs text-foreground/80 lg:text-sm">Secundarias Técnicas · SEC Sonora</p>
         <p className="text-xs text-foreground/70 lg:text-sm">Mtra. Martha Camargo</p>

@@ -27,6 +27,7 @@ interface Props {
   comparativa?: boolean;
   layout?: "column" | "grid";
   fillHeight?: boolean;
+  enlargedMobile?: boolean;
 }
 
 const TENDENCIA_COLOR: Record<string, string> = {
@@ -72,6 +73,7 @@ export default function TablaAlumnosNivel({
   comparativa = false,
   layout = "column",
   fillHeight = false,
+  enlargedMobile = false,
 }: Props) {
   const [filtro, setFiltro] = useState("");
   const [alumnoSeleccionado, setAlumnoSeleccionado] = useState<AlumnoRAF | null>(null);
@@ -110,7 +112,9 @@ export default function TablaAlumnosNivel({
 
   const listClass =
     layout === "grid"
-      ? "grid grid-cols-1 gap-2.5 pb-2 md:grid-cols-2 xl:grid-cols-3"
+      ? enlargedMobile
+        ? "flex flex-col gap-3 pb-3 md:grid md:grid-cols-2 md:gap-2.5 xl:grid-cols-3"
+        : "grid grid-cols-1 gap-2.5 pb-2 md:grid-cols-2 xl:grid-cols-3"
       : "flex flex-col gap-2.5 pb-2";
 
   const rootClass = fillHeight
@@ -127,10 +131,12 @@ export default function TablaAlumnosNivel({
           placeholder="Buscar alumno..."
           value={filtro}
           onChange={(e) => setFiltro(e.target.value)}
-          className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs"
+          className={`w-full rounded-xl border border-border bg-background px-3 py-2 ${
+            enlargedMobile ? "text-sm py-2.5" : "text-xs"
+          }`}
         />
         {total > 0 && (
-          <p className="mt-1.5 text-[11px] text-foreground/50">
+          <p className={`mt-1.5 text-foreground/50 ${enlargedMobile ? "text-xs" : "text-[11px]"}`}>
             {total.toLocaleString("es-MX")} alumnos
           </p>
         )}
@@ -229,49 +235,59 @@ export default function TablaAlumnosNivel({
             return (
               <li
                 key={`${r.cct}-${r.alumno.nombre}-${r.alumno.apellido}-${i}`}
-                className="rounded-xl border border-border bg-card p-3 shadow-sm"
+                className={`rounded-xl border border-border bg-card shadow-sm ${
+                  enlargedMobile ? "p-4" : "p-3"
+                }`}
               >
                 <button
                   type="button"
                   onClick={() => abrirAlumno(r.alumno.alumno2025 ?? r.alumno.alumno2026 ?? alumnoFallback(r), r.cct)}
                   className="w-full text-left"
                 >
-                  <p className="text-sm font-semibold leading-snug text-foreground">
+                  <p
+                    className={`font-semibold leading-snug text-foreground ${
+                      enlargedMobile ? "text-base" : "text-sm"
+                    }`}
+                  >
                     {formatearNombre(r.alumno.nombre, r.alumno.apellido)}
                   </p>
-                  <p className="mt-0.5 text-xs text-foreground/50">
+                  <p className={`mt-1 text-foreground/55 ${enlargedMobile ? "text-sm" : "text-xs"}`}>
                     Grupo {r.alumno.grupo} · {r.cct}
                   </p>
                 </button>
                 {comparativa ? (
-                  <div className="mt-2.5 grid grid-cols-3 gap-1.5 border-t border-border/60 pt-2.5">
+                  <div
+                    className={`grid grid-cols-3 gap-2 border-t border-border/60 pt-3 ${
+                      enlargedMobile ? "mt-3" : "mt-2.5"
+                    }`}
+                  >
                     <button
                       type="button"
                       onClick={() => abrirAlumno(r.alumno.alumno2025, r.cct)}
-                      className="rounded-lg bg-[#4472C4]/8 px-1.5 py-1.5 text-center"
+                      className={`rounded-lg bg-[#4472C4]/8 text-center ${enlargedMobile ? "px-2 py-2.5" : "px-1.5 py-1.5"}`}
                     >
-                      <div className="text-[9px] font-medium uppercase tracking-wide text-[#4472C4]">2025</div>
-                      <div className="mt-0.5 text-sm font-bold text-foreground">{fmtPct(r.alumno.porcentaje2025)}</div>
+                      <div className={`font-medium uppercase tracking-wide text-[#4472C4] ${enlargedMobile ? "text-[10px]" : "text-[9px]"}`}>2025</div>
+                      <div className={`mt-0.5 font-bold text-foreground ${enlargedMobile ? "text-lg" : "text-sm"}`}>{fmtPct(r.alumno.porcentaje2025)}</div>
                     </button>
                     <button
                       type="button"
                       onClick={() => abrirAlumno(r.alumno.alumno2026, r.cct)}
-                      className="rounded-lg bg-[#2E7D32]/8 px-1.5 py-1.5 text-center"
+                      className={`rounded-lg bg-[#2E7D32]/8 text-center ${enlargedMobile ? "px-2 py-2.5" : "px-1.5 py-1.5"}`}
                     >
-                      <div className="text-[9px] font-medium uppercase tracking-wide text-[#2E7D32]">2026</div>
-                      <div className="mt-0.5 text-sm font-bold text-foreground">{fmtPct(r.alumno.porcentaje2026)}</div>
+                      <div className={`font-medium uppercase tracking-wide text-[#2E7D32] ${enlargedMobile ? "text-[10px]" : "text-[9px]"}`}>2026</div>
+                      <div className={`mt-0.5 font-bold text-foreground ${enlargedMobile ? "text-lg" : "text-sm"}`}>{fmtPct(r.alumno.porcentaje2026)}</div>
                     </button>
-                    <div className="rounded-lg bg-[var(--fill-tertiary)] px-1.5 py-1.5 text-center">
-                      <div className="text-[9px] font-medium uppercase tracking-wide text-foreground/50">Cambio</div>
-                      <div className="mt-0.5 text-sm font-bold" style={{ color: cambio?.color }}>
+                    <div className={`rounded-lg bg-[var(--fill-tertiary)] text-center ${enlargedMobile ? "px-2 py-2.5" : "px-1.5 py-1.5"}`}>
+                      <div className={`font-medium uppercase tracking-wide text-foreground/50 ${enlargedMobile ? "text-[10px]" : "text-[9px]"}`}>Cambio</div>
+                      <div className={`mt-0.5 font-bold ${enlargedMobile ? "text-lg" : "text-sm"}`} style={{ color: cambio?.color }}>
                         {cambio?.text}
                       </div>
                     </div>
                   </div>
                 ) : (
-                  <div className="mt-2.5 flex items-center justify-between border-t border-border/60 pt-2.5">
-                    <span className="text-xs text-foreground/50">Porcentaje</span>
-                    <span className="text-base font-bold text-foreground">{fmtPct(r.alumno.porcentaje)}</span>
+                  <div className={`flex items-center justify-between border-t border-border/60 pt-3 ${enlargedMobile ? "mt-3" : "mt-2.5"}`}>
+                    <span className={enlargedMobile ? "text-sm text-foreground/50" : "text-xs text-foreground/50"}>Porcentaje</span>
+                    <span className={`font-bold text-foreground ${enlargedMobile ? "text-xl" : "text-base"}`}>{fmtPct(r.alumno.porcentaje)}</span>
                   </div>
                 )}
               </li>

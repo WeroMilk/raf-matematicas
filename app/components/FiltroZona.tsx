@@ -7,6 +7,7 @@ import { ZONAS_DISPONIBLES } from "@/lib/zonas";
 
 interface Props {
   isSuper: boolean;
+  className?: string;
 }
 
 const OPTIONS: { value: number | null; label: string }[] = [
@@ -41,7 +42,7 @@ function CheckIcon() {
   );
 }
 
-export default function FiltroZona({ isSuper }: Props) {
+export default function FiltroZona({ isSuper, className = "" }: Props) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
@@ -197,7 +198,7 @@ export default function FiltroZona({ isSuper }: Props) {
     );
 
   return (
-    <div className="relative w-full min-w-[160px] max-w-[200px] sm:max-w-[220px]">
+    <div className={`relative w-full min-w-0 max-w-[200px] sm:max-w-[220px] ${className}`}>
       <button
         ref={triggerRef}
         type="button"

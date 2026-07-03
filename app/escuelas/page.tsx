@@ -40,12 +40,8 @@ export default async function EscuelasPage({
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-1 overflow-hidden p-2">
       <PageHeader
-        centerContent={
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-            <SelectorEvaluacion compact />
-            {isSuper && zonaForced == null && <FiltroZona isSuper={isSuper} />}
-          </div>
-        }
+        belowLogoOnMobile={<SelectorEvaluacion compact />}
+        centerContent={isSuper && zonaForced == null ? <FiltroZona isSuper={isSuper} /> : undefined}
       >
         <BackButton href={backHref} label="Inicio" />
         <h1 className="mt-0.5 text-base font-bold">Por escuela</h1>

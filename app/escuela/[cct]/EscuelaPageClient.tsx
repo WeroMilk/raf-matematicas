@@ -42,7 +42,7 @@ export default function EscuelaPageClient({ cct, data, backHref, showBack, cober
   if (evalMode === "aterrizaje-2026" && !escuela2026) {
     return (
       <div className="flex min-h-0 flex-1 flex-col gap-2 p-2">
-        <PageHeader centerContent={<SelectorEvaluacion compact />}>
+        <PageHeader belowLogoOnMobile={<SelectorEvaluacion compact />}>
           {showBack && <BackButton href={nav(backHref)} label="Escuelas" />}
           <h1 className="mt-3 text-base font-bold">{nombre}</h1>
         </PageHeader>
@@ -58,7 +58,7 @@ export default function EscuelaPageClient({ cct, data, backHref, showBack, cober
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden px-2 pb-2 pt-1.5 min-w-0 lg:gap-6 lg:pt-2 lg:px-0 lg:pb-8">
-      <PageHeader centerContent={<SelectorEvaluacion compact />}>
+      <PageHeader belowLogoOnMobile={<SelectorEvaluacion compact />}>
         {showBack && <BackButton href={nav(backHref)} label="Escuelas" />}
         <h1 className="mt-3 text-base font-bold lg:text-xl">{nombre}</h1>
         <p className="text-xs text-foreground/80">{cct}</p>

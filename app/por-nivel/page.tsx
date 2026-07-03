@@ -2,7 +2,6 @@ import { cookies } from "next/headers";
 import BackButton from "@/app/components/BackButton";
 import PageHeader from "@/app/components/PageHeader";
 import PorNivelContent from "./PorNivelContent";
-import FiltroZona from "@/app/components/FiltroZona";
 import SelectorEvaluacion from "@/app/components/SelectorEvaluacion";
 import { getEscuelasSync, getAlumnosPorNivelSync, getAlumnosPorNivelComparativaSync } from "@/lib/data-server";
 import { getSession } from "@/lib/auth";
@@ -101,14 +100,7 @@ export default async function PorNivelPage({
 
   return (
     <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-1 overflow-hidden p-2">
-      <PageHeader
-        centerContent={
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-            <SelectorEvaluacion compact />
-            {isSuper && zonaForced == null && <FiltroZona isSuper={isSuper} />}
-          </div>
-        }
-      >
+      <PageHeader belowLogoOnMobile={<SelectorEvaluacion compact />}>
         <BackButton href={backHref} label={nivelFiltro ? "Por nivel" : "Inicio"} />
         <h1 className="mt-0.5 text-base font-bold">
           {nivelFiltro
@@ -140,6 +132,8 @@ export default async function PorNivelPage({
           soloCct={undefined}
           initialGrupo={grupoParam}
           evalMode={evalMode}
+          isSuper={isSuper}
+          zonaForced={zonaForced}
         />
       </div>
     </div>

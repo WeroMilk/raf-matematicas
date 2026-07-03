@@ -35,7 +35,7 @@ export default function GrupoPageClient({ cct, grupo, data }: { cct: string; gru
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden p-2 min-w-0">
-      <PageHeader centerContent={<SelectorEvaluacion compact />}>
+      <PageHeader belowLogoOnMobile={<SelectorEvaluacion compact />}>
         <BackButton href={nav(`/escuela/${cct}`)} label={escuela2025?.cct ?? cct} />
         <h1 className="mt-0.5 text-base font-bold">Grupo {grupo}</h1>
         <p className="text-xs text-foreground/80">
