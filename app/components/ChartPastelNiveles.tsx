@@ -33,8 +33,8 @@ export default function ChartPastelNiveles({ requiereApoyo, enDesarrollo, espera
 
   return (
     <div className={fillHeight ? "flex h-full min-h-0 w-full min-w-0 flex-col" : "w-full min-w-0"}>
-      {title && <h3 className="mb-1 text-xs font-semibold">{title}</h3>}
-      <div className={chartContainerClass}>
+      {title && <h3 className="chart-title">{title}</h3>}
+      <div className={`chart-card__plot ${chartContainerClass}`}>
         {!mounted ? (
           <div className="h-full w-full animate-pulse rounded-lg bg-[var(--fill-tertiary)]" aria-hidden />
         ) : (

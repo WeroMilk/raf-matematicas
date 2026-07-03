@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import type { NivelRAF } from "@/types/raf";
 import type { AlumnoRAF } from "@/types/raf";
 import ModalDetalleAlumno from "@/app/components/ModalDetalleAlumno";
+import { inicialesAlumno, colorNivel } from "@/lib/avatar";
 
 type Row = {
   alumno: {
@@ -117,7 +118,7 @@ export default function TablaAlumnosNivel({
         : "grid grid-cols-1 gap-2.5 pb-2 md:grid-cols-2 xl:grid-cols-3"
       : "flex flex-col gap-2.5 pb-2";
 
-  const rootClass = fillHeight
+  const rootClass = fillHeight && !enlargedMobile
     ? "flex min-h-0 min-w-0 flex-1 flex-col max-w-full"
     : "flex min-h-0 min-w-0 flex-col max-w-full";
 
@@ -145,7 +146,7 @@ export default function TablaAlumnosNivel({
       {useCompactTable ? (
         <div
           className={`min-h-0 overflow-x-auto overflow-y-auto rounded-xl border border-border bg-card text-[11px] ${
-            fillHeight ? "flex-1" : ""
+            fillHeight && !enlargedMobile ? "flex-1" : ""
           }`}
         >
           <table className="w-full min-w-[420px]">
@@ -228,7 +229,7 @@ export default function TablaAlumnosNivel({
           </table>
         </div>
       ) : (
-        <div className={fillHeight ? "min-h-0 flex-1 overflow-y-auto overflow-x-hidden" : undefined}>
+        <div className={fillHeight && !enlargedMobile ? "min-h-0 flex-1 overflow-y-auto overflow-x-hidden" : undefined}>
           <ul className={listClass}>
           {filtrados.map((r, i) => {
             const cambio = comparativa ? textoCambio(r) : null;
@@ -242,18 +243,27 @@ export default function TablaAlumnosNivel({
                 <button
                   type="button"
                   onClick={() => abrirAlumno(r.alumno.alumno2025 ?? r.alumno.alumno2026 ?? alumnoFallback(r), r.cct)}
-                  className="w-full text-left"
+                  className="flex w-full items-center gap-3 text-left"
                 >
-                  <p
-                    className={`font-semibold leading-snug text-foreground ${
-                      enlargedMobile ? "text-base" : "text-sm"
-                    }`}
+                  <span
+                    className={`avatar-initial ${enlargedMobile ? "size-11 text-sm" : ""}`}
+                    style={{ backgroundColor: colorNivel(r.alumno.nivel) }}
+                    aria-hidden
                   >
-                    {formatearNombre(r.alumno.nombre, r.alumno.apellido)}
-                  </p>
-                  <p className={`mt-1 text-foreground/55 ${enlargedMobile ? "text-sm" : "text-xs"}`}>
-                    Grupo {r.alumno.grupo} · {r.cct}
-                  </p>
+                    {inicialesAlumno(r.alumno.nombre, r.alumno.apellido)}
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <p
+                      className={`font-semibold leading-snug text-foreground ${
+                        enlargedMobile ? "text-base" : "text-sm"
+                      }`}
+                    >
+                      {formatearNombre(r.alumno.nombre, r.alumno.apellido)}
+                    </p>
+                    <p className={`mt-0.5 text-foreground/55 ${enlargedMobile ? "text-sm" : "text-xs"}`}>
+                      Grupo {r.alumno.grupo} · {r.cct}
+                    </p>
+                  </span>
                 </button>
                 {comparativa ? (
                   <div

@@ -9,7 +9,7 @@ export default function LogoutButton() {
     <button
       type="button"
       onClick={handleLogout}
-      className="btn-ios touch-target mb-1 inline-flex min-h-[44px] min-w-[44px] items-center justify-center gap-1 rounded-xl bg-red-600 px-3 py-2 text-xs font-medium text-white lg:text-sm"
+      className="btn-ios touch-target mb-1 inline-flex min-h-[44px] min-w-[44px] items-center justify-center gap-1 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 transition-colors hover:bg-red-600 hover:text-white lg:text-sm"
       title="Cerrar sesión"
     >
       <svg

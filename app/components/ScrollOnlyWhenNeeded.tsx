@@ -29,11 +29,15 @@ export default function ScrollOnlyWhenNeeded({
 
     update();
     requestAnimationFrame(update);
+    const t1 = window.setTimeout(update, 120);
+    const t2 = window.setTimeout(update, 400);
     const ro = new ResizeObserver(() => requestAnimationFrame(update));
     ro.observe(el);
     const mo = new MutationObserver(() => requestAnimationFrame(update));
     mo.observe(el, { childList: true, subtree: true, attributes: true, characterData: true });
     return () => {
+      window.clearTimeout(t1);
+      window.clearTimeout(t2);
       ro.disconnect();
       mo.disconnect();
     };

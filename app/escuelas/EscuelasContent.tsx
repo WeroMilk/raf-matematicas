@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, type CSSProperties } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { NIVEL_COLOR } from "@/types/raf";
@@ -61,7 +61,7 @@ export default function EscuelasContent({ escuelas, coberturas, dataMulti }: Pro
             onClick={() => setSort("numero-asc")}
             className={`btn-ios rounded-full px-3 py-2 text-xs font-medium transition-colors ${
               sort === "numero-asc"
-                ? "bg-[#8e8e93] text-white"
+                ? "pill-active"
                 : "bg-[var(--fill-tertiary)] text-foreground hover:bg-[var(--fill-secondary)]"
             }`}
           >
@@ -72,7 +72,7 @@ export default function EscuelasContent({ escuelas, coberturas, dataMulti }: Pro
             onClick={() => setSort("numero-desc")}
             className={`btn-ios rounded-full px-3 py-2 text-xs font-medium transition-colors ${
               sort === "numero-desc"
-                ? "bg-[#8e8e93] text-white"
+                ? "pill-active"
                 : "bg-[var(--fill-tertiary)] text-foreground hover:bg-[var(--fill-secondary)]"
             }`}
           >
@@ -83,7 +83,7 @@ export default function EscuelasContent({ escuelas, coberturas, dataMulti }: Pro
             onClick={() => setSort("categoria")}
             className={`btn-ios rounded-full px-3 py-2 text-xs font-medium transition-colors ${
               sort === "categoria"
-                ? "bg-[#8e8e93] text-white"
+                ? "pill-active"
                 : "bg-[var(--fill-tertiary)] text-foreground hover:bg-[var(--fill-secondary)]"
             }`}
           >
@@ -107,7 +107,8 @@ export default function EscuelasContent({ escuelas, coberturas, dataMulti }: Pro
             >
               <Link
                 href={nav(`/escuela/${e.cct}`)}
-                className="link-ios card-ios flex flex-col items-center justify-center rounded-2xl border border-border bg-card p-2.5 text-center shadow-sm"
+                className="school-card link-ios card-ios flex flex-col items-center justify-center rounded-2xl border border-border bg-card p-2.5 text-center shadow-sm"
+                style={{ "--school-accent": color } as CSSProperties}
               >
                 <span className="truncate w-full text-xs font-semibold leading-tight" title={nombreEscuela(e.cct, e.buscador?.nombre)}>
                   {nombreEscuela(e.cct, e.buscador?.nombre)}

@@ -37,7 +37,7 @@ export default function KPIComparativa({ comparativa, compact = false }: Props) 
       {items.map(({ key, label, color, invert }) => (
         <div
           key={key}
-          className={`card-ios min-h-[92px] min-w-0 overflow-hidden rounded-2xl border border-border bg-card text-center sm:min-h-0 ${cardPad}`}
+          className={`card-ios min-h-[92px] min-w-0 overflow-hidden rounded-2xl border border-border bg-card text-center shadow-sm sm:min-h-0 ${cardPad}`}
         >
           <div className={`mb-1.5 font-bold leading-tight sm:mb-1 ${titleClass}`} style={{ color }}>
             {label}
@@ -89,7 +89,7 @@ export function KPIComparativaResumen({ comparativa }: Props) {
   const d = comparativa.despegue2025;
   const a = comparativa.aterrizaje2026;
   return (
-    <p className="text-xs text-foreground/75">
+    <p className="rounded-xl border border-border bg-[var(--guinda-muted)] px-3 py-2 text-xs text-foreground/80">
       <span style={{ color: EVALUACIONES_META["despegue-2025"].color }} className="font-semibold">
         Despegue 2025:
       </span>{" "}

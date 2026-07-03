@@ -55,8 +55,8 @@ export default function ChartComparativaNiveles({
 
   return (
     <div className={fillHeight ? "flex h-full min-h-0 flex-col" : "w-full"}>
-      {title && <h3 className="mb-1 text-xs font-semibold">{title}</h3>}
-      <div className={fillHeight ? "min-h-[6rem] flex-1" : "h-52 min-h-[13rem]"}>
+      {title && <h3 className="chart-title">{title}</h3>}
+      <div className={`chart-card__plot ${fillHeight ? "min-h-[6rem] flex-1" : "h-52 min-h-[13rem]"}`}>
         {mounted && (
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data} margin={{ bottom: 4 }}>
@@ -95,8 +95,8 @@ export function ChartBarrasReactivosComparativa({
 
   return (
     <div className={fillHeight ? "flex h-full min-h-0 flex-col" : "w-full"}>
-      {title && <h3 className="mb-1 text-xs font-semibold">{title}</h3>}
-      <div className={fillHeight ? "min-h-[6rem] flex-1" : "h-44 min-h-[11rem]"}>
+      {title && <h3 className="chart-title">{title}</h3>}
+      <div className={`chart-card__plot ${fillHeight ? "min-h-[6rem] flex-1" : "h-44 min-h-[11rem]"}`}>
         {mounted && (
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data} margin={{ bottom: 4 }}>

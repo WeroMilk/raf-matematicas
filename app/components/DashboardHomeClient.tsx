@@ -16,6 +16,9 @@ import ChartBarrasReactivos from "@/app/components/ChartBarrasReactivos";
 import ChartComparativaNiveles, { ChartBarrasReactivosComparativa } from "@/app/components/ChartComparativaNiveles";
 import FiltroZona from "@/app/components/FiltroZona";
 import SelectorEvaluacion from "@/app/components/SelectorEvaluacion";
+import KpiNivelCard from "@/app/components/KpiNivelCard";
+import EmptyState from "@/app/components/EmptyState";
+import ComparativaLegend from "@/app/components/ComparativaLegend";
 import BannerCobertura2026 from "@/app/components/BannerCobertura2026";
 import KPIComparativa, { KPIComparativaResumen } from "@/app/components/KPIComparativa";
 import { COLORS } from "@/types/raf";
@@ -85,9 +88,9 @@ export default function DashboardHomeClient({ data, cobertura, isSuper, zonaForc
         belowLogoOnMobile={<SelectorEvaluacion compact />}
         centerContent={isSuper && zonaForced == null ? <FiltroZona isSuper={isSuper} /> : undefined}
       >
-        <h1 className="text-base font-bold text-foreground lg:text-xl lg:tracking-tight">RAF Matemáticas</h1>
-        <p className="text-xs text-foreground/80 lg:text-sm">Secundarias Técnicas · SEC Sonora</p>
-        <p className="text-xs text-foreground/70 lg:text-sm">Mtra. Martha Camargo</p>
+        <h1 className="page-title text-base lg:text-xl">RAF Matemáticas</h1>
+        <p className="page-subtitle text-xs lg:text-sm">Secundarias Técnicas · SEC Sonora</p>
+        <p className="page-subtitle text-xs lg:text-sm">Mtra. Martha Camargo</p>
       </PageHeader>
 
       <ScrollOnlyWhenNeeded className="flex min-h-0 flex-1 flex-col overflow-x-hidden">
@@ -102,24 +105,30 @@ export default function DashboardHomeClient({ data, cobertura, isSuper, zonaForc
         )}
 
         {escuelas.length === 0 && evalMode !== "comparar" ? (
-          <div className="card-ios rounded-2xl border border-border bg-card p-4 text-center text-sm">
-            <p className="text-foreground/80">
-              {evalMode === "aterrizaje-2026"
-                ? "Aún no hay datos de Aterrizaje 2026 para esta selección."
+          <EmptyState
+            title={
+              evalMode === "aterrizaje-2026"
+                ? "Sin datos de Aterrizaje 2026"
                 : zonaSeleccionada != null
-                  ? `No hay escuelas en la Zona ${zonaSeleccionada}.`
-                  : "No hay datos cargados."}
-            </p>
-          </div>
+                  ? `Sin escuelas en la Zona ${zonaSeleccionada}`
+                  : "Sin datos cargados"
+            }
+            description={
+              evalMode === "aterrizaje-2026"
+                ? "Aún no hay resultados para esta selección."
+                : "Prueba otra zona o evaluación."
+            }
+          />
         ) : (
           <>
             {evalMode === "comparar" ? (
               <>
                 <section className="shrink-0 space-y-2">
                   <KPIComparativaResumen comparativa={comparativa} />
+                  <ComparativaLegend />
                   <KPIComparativa comparativa={comparativa} />
                 </section>
-                <section className="card-ios my-2 rounded-2xl border border-border bg-card p-3 text-sm">
+                <section className="card-ios my-2 rounded-2xl border border-border bg-card p-3 text-sm text-foreground/75">
                   Comparativa entre escuelas con datos en ambas evaluaciones
                   {zonaSeleccionada != null && ` · Zona ${zonaSeleccionada}`}
                 </section>
@@ -127,41 +136,60 @@ export default function DashboardHomeClient({ data, cobertura, isSuper, zonaForc
             ) : (
               <div className="shrink-0">
                 <section className="grid min-w-0 grid-cols-3 gap-2 lg:gap-4">
-                  <Link href={navHref("/por-nivel?nivel=REQUIERE_APOYO")} className="link-ios group relative card-ios min-w-0 rounded-2xl p-2.5 text-center text-white shadow-md lg:p-4" style={{ backgroundColor: COLORS.requiereApoyo }}>
-                    <div className="text-lg font-bold lg:text-2xl">{totalReq}</div>
-                    <div className="text-[10px] opacity-95 lg:text-sm">Requieren apoyo</div>
-                  </Link>
-                  <Link href={navHref("/por-nivel?nivel=EN_DESARROLLO")} className="link-ios group relative card-ios min-w-0 rounded-2xl p-2.5 text-center text-white shadow-md lg:p-4" style={{ backgroundColor: COLORS.enDesarrollo }}>
-                    <div className="text-lg font-bold lg:text-2xl">{totalDes}</div>
-                    <div className="text-[10px] opacity-95 lg:text-sm">En desarrollo</div>
-                  </Link>
-                  <Link href={navHref("/por-nivel?nivel=ESPERADO")} className="link-ios group relative card-ios min-w-0 rounded-2xl p-2.5 text-center text-white shadow-md lg:p-4" style={{ backgroundColor: COLORS.esperado }}>
-                    <div className="text-lg font-bold lg:text-2xl">{totalEsp}</div>
-                    <div className="text-[10px] opacity-95 lg:text-sm">Esperado</div>
-                  </Link>
+                  <KpiNivelCard
+                    href={navHref("/por-nivel?nivel=REQUIERE_APOYO")}
+                    count={totalReq}
+                    label="Requieren apoyo"
+                    pct={pctReq}
+                    baseColor={COLORS.requiereApoyo}
+                    variant="apoyo"
+                  />
+                  <KpiNivelCard
+                    href={navHref("/por-nivel?nivel=EN_DESARROLLO")}
+                    count={totalDes}
+                    label="En desarrollo"
+                    pct={pctDes}
+                    baseColor={COLORS.enDesarrollo}
+                    variant="desarrollo"
+                  />
+                  <KpiNivelCard
+                    href={navHref("/por-nivel?nivel=ESPERADO")}
+                    count={totalEsp}
+                    label="Esperado"
+                    pct={pctEsp}
+                    baseColor={COLORS.esperado}
+                    variant="esperado"
+                  />
                 </section>
                 <section className="card-ios my-2 rounded-2xl border border-border bg-card p-3 lg:my-3 lg:p-4">
                   <p className="text-sm font-semibold lg:text-base">
-                    {totalAlumnos} Alumnos Evaluados · {escuelas.length} Escuelas · {evalNombre}
+                    <span className="tabular-nums">{totalAlumnos.toLocaleString("es-MX")}</span> alumnos evaluados ·{" "}
+                    <span className="tabular-nums">{escuelas.length}</span> escuelas · {evalNombre}
                     {zonaSeleccionada != null && ` · Zona ${zonaSeleccionada}`}
                   </p>
                 </section>
               </div>
             )}
 
-            <section className="grid gap-2 lg:grid-cols-2 lg:gap-4 shrink-0">
-              <Link href={navHref("/escuelas")} className="link-ios card-ios flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-3 text-sm font-medium">
-                Ver por escuela <span className="text-foreground/60">→</span>
+            <section className="grid shrink-0 gap-2 lg:grid-cols-2 lg:gap-4">
+              <Link href={navHref("/escuelas")} className="nav-link-card link-ios">
+                Ver por escuela
+                <span className="nav-link-card__arrow" aria-hidden>
+                  →
+                </span>
               </Link>
-              <Link href={navHref("/por-nivel")} className="link-ios card-ios flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-3 text-sm font-medium">
-                Ver por nivel <span className="text-foreground/60">→</span>
+              <Link href={navHref("/por-nivel")} className="nav-link-card link-ios">
+                Ver por nivel
+                <span className="nav-link-card__arrow" aria-hidden>
+                  →
+                </span>
               </Link>
             </section>
 
-            <section className={isLgUp ? "grid min-h-0 flex-1 grid-cols-2 gap-4 pt-3" : "flex flex-col gap-3 pt-2"}>
+            <section className={isLgUp ? "grid min-h-0 flex-1 shrink-0 grid-cols-2 gap-4 pt-3" : "flex shrink-0 flex-col gap-3 pt-2"}>
               {evalMode === "comparar" ? (
                 <>
-                  <section className="card-ios flex flex-col rounded-2xl border border-border bg-card p-3 min-h-[200px]">
+                  <section className="chart-card flex min-h-[200px] flex-col p-3">
                     <ChartComparativaNiveles
                       fillHeight={isLgUp}
                       requiereApoyo2025={comparativa.despegue2025.requiereApoyo}
@@ -173,7 +201,7 @@ export default function DashboardHomeClient({ data, cobertura, isSuper, zonaForc
                       title="Niveles: Despegue vs Aterrizaje"
                     />
                   </section>
-                  <section className="card-ios flex flex-col rounded-2xl border border-border bg-card p-3 min-h-[200px]">
+                  <section className="chart-card flex min-h-[200px] flex-col p-3">
                     <ChartBarrasReactivosComparativa
                       fillHeight={isLgUp}
                       porcentajes2025={porcentajes2025}
@@ -184,10 +212,10 @@ export default function DashboardHomeClient({ data, cobertura, isSuper, zonaForc
                 </>
               ) : (
                 <>
-                  <section className={`card-ios flex flex-col rounded-2xl border border-border bg-card p-3 ${isLgUp ? "min-h-0 flex-1" : ""}`}>
+                  <section className={`chart-card flex flex-col p-3 ${isLgUp ? "min-h-0 flex-1" : ""}`}>
                     <ChartBarrasReactivos fillHeight={isLgUp} porcentajes={porcentajesGlobales} totalAlumnos={totalAlumnos} title="Aciertos por reactivo" />
                   </section>
-                  <section className={`card-ios flex flex-col rounded-2xl border border-border bg-card p-3 ${isLgUp ? "min-h-0 flex-1" : ""}`}>
+                  <section className={`chart-card flex flex-col p-3 ${isLgUp ? "min-h-0 flex-1" : ""}`}>
                     <ChartPastelNiveles fillHeight={isLgUp} requiereApoyo={totalReq} enDesarrollo={totalDes} esperado={totalEsp} title="Por nivel" />
                   </section>
                 </>

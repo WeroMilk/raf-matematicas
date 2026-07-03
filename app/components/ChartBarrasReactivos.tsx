@@ -97,9 +97,9 @@ export default function ChartBarrasReactivos({ porcentajes, title, totalAlumnos,
       }
       tabIndex={-1}
     >
-      {title && <h3 className="mb-1 text-xs font-semibold">{title}</h3>}
-      <p className="mb-1 text-[11px] text-[var(--foreground)]/60">Toca un reactivo para ver su información</p>
-      <div className={`${chartContainerClass} cursor-pointer`} tabIndex={-1}>
+      {title && <h3 className="chart-title">{title}</h3>}
+      <p className="chart-hint">Toca un reactivo para ver su información</p>
+      <div className={`chart-card__plot ${chartContainerClass} cursor-pointer`} tabIndex={-1}>
         {!mounted ? (
           <div className="h-full w-full animate-pulse rounded-lg bg-[var(--fill-tertiary)]" aria-hidden />
         ) : (

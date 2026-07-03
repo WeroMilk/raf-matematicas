@@ -184,7 +184,12 @@ export default function TablaAlumnos({ alumnos, cct, comparativa, fillHeight = f
   });
 
   return (
-    <div className="min-h-0 min-w-0 max-w-full overflow-auto rounded-2xl border border-border bg-card max-h-[200px] shadow-sm" style={{ WebkitOverflowScrolling: "touch" }}>
+    <div
+      className={`min-h-0 min-w-0 max-w-full overflow-auto rounded-2xl border border-border bg-card shadow-sm ${
+        fillHeight ? "flex min-h-0 flex-1 flex-col" : "max-h-[min(50dvh,360px)]"
+      }`}
+      style={{ WebkitOverflowScrolling: "touch" }}
+    >
       <div className="sticky top-0 border-b border-border bg-card p-2">
         <input
           type="search"

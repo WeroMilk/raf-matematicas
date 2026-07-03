@@ -46,9 +46,9 @@ export default function SelectorEvaluacion({ compact = false }: Props) {
             aria-selected={active}
             onClick={() => setMode(modo.id)}
             className={`rounded-lg px-2 py-1.5 font-semibold transition-all sm:px-3 ${
-              active ? "text-white shadow-sm" : "text-foreground/70 hover:text-foreground"
+              active ? "text-white shadow-md" : "text-foreground/70 hover:bg-white/60 hover:text-foreground"
             }`}
-            style={active ? { backgroundColor: modo.color } : undefined}
+            style={active ? { backgroundColor: modo.color, boxShadow: active && modo.id === "comparar" ? "0 2px 8px rgba(123,45,62,0.35)" : undefined } : undefined}
           >
             {compact && modo.id === "comparar" ? "vs" : modo.label}
           </button>

@@ -28,7 +28,7 @@ export default function LoginPage() {
 
   return (
     <div
-      className="flex min-h-dvh w-full max-w-full flex-col items-center justify-start px-6 py-8"
+      className="login-shell flex w-full max-w-full flex-1 flex-col items-center justify-start px-6 py-8"
       style={{
         paddingLeft: "max(1.5rem, env(safe-area-inset-left))",
         paddingRight: "max(1.5rem, env(safe-area-inset-right))",
@@ -94,7 +94,7 @@ export default function LoginPage() {
             autoFocus
             required
             readOnly={loading}
-            className="card-ios w-full rounded-xl border border-border bg-card px-4 py-3.5 text-foreground placeholder:text-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-60"
+            className="card-ios w-full rounded-xl border border-border bg-card px-4 py-3.5 text-foreground placeholder:text-foreground/50 focus:outline-none focus:ring-2 focus:ring-[var(--guinda)] focus:border-[var(--guinda)] disabled:opacity-60"
           />
           {error && <p className="text-center text-sm text-red-600">{error}</p>}
           <button
@@ -105,7 +105,7 @@ export default function LoginPage() {
             {loading ? "Entrando…" : "Entrar"}
           </button>
         </form>
-        <div className="mt-auto flex flex-col gap-2 pt-10 text-xs text-foreground/50">
+        <div className="login-credits mt-auto flex flex-col gap-2 pt-10 text-xs text-foreground/50">
           <p className="leading-tight">Base de Datos creada por:</p>
           <p className="leading-tight">Mtra. Martha Camargo y Luis Silvas.</p>
         </div>
