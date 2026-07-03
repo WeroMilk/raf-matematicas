@@ -28,15 +28,14 @@ export default function LoginPage() {
 
   return (
     <div
-      className="login-shell flex w-full max-w-full flex-1 flex-col items-center justify-start px-6 py-8"
+      className="login-shell flex min-h-0 w-full max-w-full flex-1 flex-col"
       style={{
         paddingLeft: "max(1.5rem, env(safe-area-inset-left))",
         paddingRight: "max(1.5rem, env(safe-area-inset-right))",
         paddingTop: "max(2.5rem, env(safe-area-inset-top))",
-        paddingBottom: "max(2rem, env(safe-area-inset-bottom))",
       }}
     >
-      <div className="mx-auto flex w-full max-w-sm flex-1 flex-col items-center gap-8 text-center">
+      <div className="login-body mx-auto flex w-full max-w-sm flex-1 flex-col items-center gap-8 overflow-y-auto text-center">
         <div className="flex justify-center pt-2 ml-6">
           <LogoSonoraSec maxWidth={420} priority />
         </div>
@@ -105,11 +104,15 @@ export default function LoginPage() {
             {loading ? "Entrando…" : "Entrar"}
           </button>
         </form>
-        <div className="login-credits mt-auto flex flex-col gap-2 pt-10 text-xs text-foreground/50">
-          <p className="leading-tight">Base de Datos creada por:</p>
-          <p className="leading-tight">Mtra. Martha Camargo y Luis Silvas.</p>
-        </div>
       </div>
+
+      <footer
+        className="login-footer login-credits shrink-0 px-6 text-center text-xs text-[#757575]"
+        style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
+      >
+        <p className="leading-tight">Base de Datos creada por:</p>
+        <p className="leading-tight">Mtra. Martha Camargo y Luis Silvas.</p>
+      </footer>
     </div>
   );
 }

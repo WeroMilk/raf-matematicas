@@ -166,6 +166,23 @@
   flex: 1;
 }
 
+.login-layout {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  width: 100%;
+}
+
+.login-body {
+  min-height: 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+.login-footer {
+  padding-top: 0.5rem;
+}
+
 .login-credits {
   letter-spacing: 0.04em;
   text-transform: none;
@@ -271,6 +288,10 @@ body {
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
+}
+
+.app-main--login {
+  overflow: hidden;
 }
 
 .lista-mini-por-nivel {
