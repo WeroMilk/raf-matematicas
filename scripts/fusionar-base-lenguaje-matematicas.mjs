@@ -18,6 +18,16 @@ import * as fs from "fs";
 import * as path from "path";
 import { fileURLToPath } from "url";
 import XLSX from "xlsx";
+import {
+  fixUtf8Mojibake,
+  normalizarGrupo,
+  obtenerNivel,
+  calcularPorcentaje,
+  respuesta,
+  esCctSEP,
+  obtenerGrupoRaw,
+} from "./excel-utils.mjs";
+import { RESPUESTAS_CORRECTAS } from "./calificar-respuestas.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
@@ -27,98 +37,6 @@ const BASE_LENGUAJE =
 const DATA_DIR = process.env.DATA_DIR || path.join(ROOT, "data", "excel");
 const OUT_DIR = path.join(ROOT, "public", "data");
 const OUT_FILE = path.join(OUT_DIR, "resultados.json");
-
-const LETRA_GRUPO = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
-/** Respuestas correctas de los 12 reactivos RAF Matemáticas (A, B, C o D) */
-const RESPUESTAS_CORRECTAS = ["C", "B", "A", "B", "A", "A", "A", "A", "C", "D", "C", "C"];
-
-function fixUtf8Mojibake(str) {
-  if (typeof str !== "string") return str;
-  if (!/Ã[\x80-\xBF]/.test(str)) return str;
-  try {
-    return Buffer.from(str, "latin1").toString("utf8");
-  } catch {
-    return str;
-  }
-}
-
-function esCctSEP(s) {
-  if (typeof s !== "string") return false;
-  const t = s.trim().toUpperCase();
-  return /^\d{2}[A-Z]{3}\d{4}[A-Z0-9]$/.test(t);
-}
-
-function obtenerGrupoRaw(row) {
-  const qc = row.QuizClass != null ? fixUtf8Mojibake(String(row.QuizClass)) : "";
-  if (esCctSEP(qc)) {
-    const custom = row.CustomID != null ? fixUtf8Mojibake(String(row.CustomID)) : "";
-    return custom.trim() || qc.trim();
-  }
-  return qc.trim();
-}
-
-function normalizarGrupo(grupo) {
-  if (grupo == null || grupo === "") return "S/G";
-  const s = String(grupo).toUpperCase().trim();
-  if (/^[1-3][A-Z][MV]$/.test(s)) return s;
-  const m = s.match(/M1([A-H])/);
-  if (m) return `1${m[1]}M`;
-  const v = s.match(/V1([A-H])/);
-  if (v) return `1${v[1]}V`;
-  const zNum = s.match(/^Z(\d)(\d)EST[\d]*(M|V)\d*$/);
-  if (zNum) {
-    const grado = zNum[1];
-    const numGrupo = parseInt(zNum[2], 10);
-    const turno = zNum[3];
-    const letra = LETRA_GRUPO[numGrupo - 1] || LETRA_GRUPO[0];
-    return `${grado}${letra}${turno}`;
-  }
-  const zLetra = s.match(/^Z\d+EST[\d]*(M|V)(\d)([A-Z])$/);
-  if (zLetra) {
-    const turno = zLetra[1];
-    const grado = zLetra[2];
-    const letra = zLetra[3];
-    return `${grado}${letra}${turno}`;
-  }
-  return s.slice(0, 10);
-}
-
-function obtenerNivel(porcentaje) {
-  if (porcentaje == null) return "REQUIERE APOYO";
-  if (porcentaje <= 50) return "REQUIERE APOYO";
-  if (porcentaje <= 80) return "EN DESARROLLO";
-  return "ESPERADO";
-}
-
-function calcularPorcentaje(row) {
-  let aciertos = 0,
-    total = 0;
-  for (let i = 1; i <= 12; i++) {
-    const p = row[`Points${i}`];
-    const m = row[`Mark${i}`];
-    if (p == null || m == null) continue;
-    const pv = Number(p);
-    const mv = String(m).trim();
-    if (Number.isNaN(pv)) continue;
-    if (pv > 0 && mv === "C") {
-      aciertos++;
-      total++;
-    } else if (pv === 0) total++;
-  }
-  return total > 0 ? Math.round((aciertos / total) * 1000) / 10 : 0;
-}
-
-/** Obtiene la respuesta del alumno. Stu = opción real (A/B/C/D); Mark = C/X legacy */
-function respuesta(row, i) {
-  const val = row[`Stu${i}`];
-  if (val != null && String(val).trim()) {
-    const s = String(val).trim().toUpperCase();
-    if (/^[ABCD]$/.test(s)) return s;
-  }
-  const m = row[`Mark${i}`];
-  return m != null && String(m).trim() ? String(m).trim() : "-";
-}
 
 /** Clave para buscar alumno: normaliza nombre para matching */
 function claveAlumno(cct, grupo, nombre, apellido) {

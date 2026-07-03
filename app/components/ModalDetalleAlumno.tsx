@@ -5,60 +5,20 @@ import { createPortal } from "react-dom";
 import type { AlumnoRAF } from "@/types/raf";
 import { NIVEL_COLOR } from "@/types/raf";
 import { getReactivoInfo } from "@/lib/reactivos-matematicas";
+import {
+  calificarAlumno,
+  esCorrectoPorMarca,
+  esRespuestaCorrecta,
+  NUM_REACTIVOS_MATEMATICAS,
+  respuestaParaMostrar,
+  usaFormatoCX,
+} from "@/lib/calificar-respuestas";
+import ModalCloseFooter from "./ModalCloseFooter";
 
 interface Props {
   alumno: AlumnoRAF | null;
   cct?: string;
   onClose: () => void;
-}
-
-const OPCIONES_VALIDAS = ["A", "B", "C", "D"] as const;
-
-/** Detecta si los datos usan formato C/X (C=correcto, X=incorrecto) en lugar de A/B/C/D */
-function usaFormatoCX(respuestas: string[]): boolean {
-  return respuestas.every((r) => {
-    const x = (r ?? "").toUpperCase().trim();
-    return x === "" || x === "-" || x === "C" || x === "X";
-  });
-}
-
-/** Respuesta para mostrar: A/B/C/D si la tenemos; sin responder→X?; legacy incorrecto→? */
-function respuestaParaMostrar(resp: string, correcta: string, esCorrecto: boolean, sinResponder: boolean): string {
-  if (sinResponder) return "X?";
-  const r = resp.toUpperCase().trim();
-  if (OPCIONES_VALIDAS.includes(r as (typeof OPCIONES_VALIDAS)[number])) return r;
-  if (esCorrecto) return correcta;
-  return "?";
-}
-
-function getAciertosErrores(respuestas: string[]) {
-  const aciertos: number[] = [];
-  const errores: { num: number; marcado: string; correcta: string; marcadoDisplay: string }[] = [];
-  const formatoCX = usaFormatoCX(respuestas);
-
-  for (let i = 0; i < 12; i++) {
-    const info = getReactivoInfo(i + 1);
-    const resp = (respuestas[i] ?? "-").toUpperCase().trim();
-    const sinResponder = resp === "-" || resp === "";
-    if (!info) continue;
-    if (sinResponder) {
-      errores.push({ num: i + 1, marcado: "-", correcta: info.respuestaCorrecta, marcadoDisplay: "X?" });
-      continue;
-    }
-    const correcta = info.respuestaCorrecta;
-    const esCorrecto = formatoCX ? resp === "C" : resp === correcta;
-    if (esCorrecto) {
-      aciertos.push(i + 1);
-    } else {
-      errores.push({
-        num: i + 1,
-        marcado: resp,
-        correcta,
-        marcadoDisplay: respuestaParaMostrar(resp, correcta, false, false),
-      });
-    }
-  }
-  return { aciertos, errores };
 }
 
 export default function ModalDetalleAlumno({ alumno, cct, onClose }: Props) {
@@ -79,13 +39,18 @@ export default function ModalDetalleAlumno({ alumno, cct, onClose }: Props) {
   if (!alumno) return null;
 
   const respuestas = alumno.respuestas ?? [];
-  const { aciertos, errores } = getAciertosErrores(respuestas);
-  const totalCorrectas = aciertos.length;
-  const totalConExamen = aciertos.length + errores.length;
-  const sinExamen = totalConExamen === 0;
-  const porcentajeCalculado = 12 > 0 ? Math.round((totalCorrectas / 12) * 1000) / 10 : 0;
-  const nivelCalculado =
-    sinExamen ? alumno.nivel : porcentajeCalculado <= 50 ? "REQUIERE APOYO" : porcentajeCalculado <= 80 ? "EN DESARROLLO" : "ESPERADO";
+  const marcas = alumno.marcas ?? [];
+  const {
+    errores,
+    totalCorrectas,
+    totalCalificados,
+    sinExamen,
+    porcentaje: porcentajeCalculado,
+    nivel: nivelCalculado,
+    usaMarcas,
+    usaPorcentajeOficial,
+  } = calificarAlumno(alumno);
+  const formatoCX = usaFormatoCX(respuestas);
 
   const modalContent = (
     <div
@@ -96,7 +61,7 @@ export default function ModalDetalleAlumno({ alumno, cct, onClose }: Props) {
       onClick={handleClose}
     >
       <div
-        className="relative w-full max-h-[90vh] max-w-lg overflow-hidden rounded-2xl bg-[var(--card)] shadow-2xl animate-scale-in"
+        className="relative flex w-full max-h-[90vh] max-w-lg flex-col overflow-hidden rounded-2xl bg-[var(--card)] shadow-2xl animate-scale-in"
         onClick={(e) => e.stopPropagation()}
       >
         <div
@@ -119,7 +84,6 @@ export default function ModalDetalleAlumno({ alumno, cct, onClose }: Props) {
         </div>
 
         <div className="max-h-[calc(90vh-4rem)] overflow-y-auto px-5 py-4">
-          {/* Resumen */}
           <div className="mb-4 flex flex-wrap gap-2">
             <span className="rounded-full bg-[var(--fill-tertiary)] px-3 py-1 text-sm font-medium">
               {alumno.grupo}
@@ -146,29 +110,43 @@ export default function ModalDetalleAlumno({ alumno, cct, onClose }: Props) {
             <p className="text-sm text-[var(--foreground)]/80 italic">Sin datos de examen aplicado.</p>
           ) : (
             <>
-              {/* Total aciertos */}
               <div className="mb-4 rounded-xl border border-[var(--esperado)]/40 bg-[var(--esperado)]/8 px-4 py-3">
                 <p className="text-sm font-semibold text-[var(--esperado)]">
-                  {totalCorrectas} de 12 correctas
+                  {totalCorrectas} de {totalCalificados} correctas
                 </p>
                 <p className="text-xs text-[var(--foreground)]/70 mt-0.5">
-                  {errores.length} incorrecta{errores.length !== 1 ? "s" : ""}
+                  {totalCalificados - totalCorrectas} incorrecta{totalCalificados - totalCorrectas !== 1 ? "s" : ""}
                 </p>
+                {!usaMarcas && usaPorcentajeOficial && (
+                  <p className="text-[10px] text-[var(--foreground)]/60 mt-1.5 italic">
+                    Porcentaje según calificación oficial del examen. Las ✓/✗ por reactivo muestran la opción marcada; para calificación exacta por ítem importa el Excel con columnas Mark.
+                  </p>
+                )}
               </div>
 
-              {/* Grid de 12 reactivos */}
               <p className="mb-2 text-xs font-semibold text-[var(--foreground)]/80">Reactivos</p>
               <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 mb-4">
-                {Array.from({ length: 12 }, (_, i) => {
+                {Array.from({ length: NUM_REACTIVOS_MATEMATICAS }, (_, i) => {
                   const num = i + 1;
                   const resp = (respuestas[i] ?? "-").toUpperCase().trim();
                   const info = getReactivoInfo(num);
                   const correcta = info?.respuestaCorrecta ?? "";
-                  const formatoCX = usaFormatoCX(respuestas);
-                  const esCorrecto = formatoCX ? resp === "C" : (resp !== "-" && resp !== "" && resp === correcta);
-                  const esError = resp !== "-" && resp !== "" && !esCorrecto;
                   const sinResponder = resp === "-" || resp === "";
-                  const letraMostrar = esCorrecto ? correcta : esError ? respuestaParaMostrar(resp, correcta, false, false) : sinResponder ? "X?" : null;
+                  const porMarca = esCorrectoPorMarca(marcas[i]);
+                  const esCorrecto =
+                    porMarca != null
+                      ? porMarca
+                      : esRespuestaCorrecta(resp, correcta, formatoCX, sinResponder);
+                  const esError = !esCorrecto && (porMarca != null || resp !== "-" && resp !== "");
+                  const letraMostrar = esCorrecto
+                    ? porMarca != null && /^[ABCD]$/.test(resp)
+                      ? resp
+                      : correcta
+                    : esError
+                      ? respuestaParaMostrar(resp, correcta, false, false)
+                      : sinResponder
+                        ? "X?"
+                        : null;
 
                   return (
                     <div
@@ -180,17 +158,20 @@ export default function ModalDetalleAlumno({ alumno, cct, onClose }: Props) {
                             ? "border-[var(--requiere-apoyo)] bg-[var(--requiere-apoyo)]/10"
                             : "border-[var(--border)] bg-[var(--fill-tertiary)]/50"
                       }`}
-                      title={info ? `R${num}: ${info.evalua} - ${esCorrecto ? `Correcto (${correcta})` : sinResponder ? "Sin responder" : `Marcó ${letraMostrar}, correcta ${correcta}`}` : ""}
+                      title={
+                        info
+                          ? `R${num}: ${info.evalua} - ${esCorrecto ? `Correcto${porMarca != null && /^[ABCD]$/.test(resp) ? ` (${resp})` : ` (${correcta})`}` : sinResponder ? "Sin responder" : `Marcó ${letraMostrar}${!usaMarcas ? `, correcta ${correcta}` : ""}`}`
+                          : ""
+                      }
                     >
                       <span className="text-[10px] font-medium text-[var(--foreground)]/70">R{num}</span>
-                      {esCorrecto && <span className="text-sm font-bold text-[var(--esperado)]">✓ {correcta}</span>}
+                      {esCorrecto && <span className="text-sm font-bold text-[var(--esperado)]">✓ {letraMostrar}</span>}
                       {(esError || sinResponder) && <span className="text-sm font-bold text-[var(--requiere-apoyo)]">✗ {letraMostrar}</span>}
                     </div>
                   );
                 })}
               </div>
 
-              {/* Detalle de errores */}
               {errores.length > 0 && (
                 <div className="rounded-xl border border-[var(--border)] bg-[var(--fill-tertiary)]/30 px-4 py-3">
                   <p className="text-xs font-semibold text-[var(--foreground)]/80 mb-2">Errores (Reactivo · marcó · correcta)</p>
@@ -208,8 +189,12 @@ export default function ModalDetalleAlumno({ alumno, cct, onClose }: Props) {
                           <span className="text-[var(--requiere-apoyo)]" title={e.marcadoDisplay === "?" ? "La fuente de datos no registra la opción seleccionada" : undefined}>
                             {e.marcadoDisplay}
                           </span>
-                          <span>→</span>
-                          <span className="text-[var(--esperado)] font-medium">{e.correcta}</span>
+                          {!usaMarcas && (
+                            <>
+                              <span>→</span>
+                              <span className="text-[var(--esperado)] font-medium">{e.correcta}</span>
+                            </>
+                          )}
                           {info && (
                             <span className="text-[var(--foreground)]/60">({info.evalua})</span>
                           )}
@@ -222,6 +207,7 @@ export default function ModalDetalleAlumno({ alumno, cct, onClose }: Props) {
             </>
           )}
         </div>
+        <ModalCloseFooter onClose={handleClose} />
       </div>
     </div>
   );

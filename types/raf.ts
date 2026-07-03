@@ -36,6 +36,8 @@ export interface AlumnoRAF {
   porcentaje: number | null;
   nivel: NivelRAF;
   respuestas: string[];
+  /** Marcas C/X del export QuizClass (calificación oficial por reactivo). */
+  marcas?: string[];
 }
 
 export interface GrupoResumen {

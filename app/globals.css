@@ -58,6 +58,22 @@
   line-height: 1.4;
 }
 
+@media (max-width: 400px) {
+  .page-header-text--compact .page-title {
+    font-size: 0.8125rem;
+    line-height: 1.15;
+  }
+
+  .page-header-text--compact .page-subtitle {
+    font-size: 0.625rem;
+    line-height: 1.2;
+  }
+
+  .page-header-mobile__logo {
+    max-width: 6.25rem !important;
+  }
+}
+
 .chart-card {
   background: var(--card);
   border-radius: 1rem;
@@ -69,6 +85,11 @@
   border-radius: 0.75rem;
   background: color-mix(in srgb, var(--fill-tertiary) 45%, transparent);
   padding: 0.25rem;
+  overflow: hidden;
+}
+
+.chart-pastel-legend {
+  border-top: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
 }
 
 .chart-title {
@@ -330,6 +351,12 @@ body {
   .lista-expandida-por-nivel {
     min-height: 0;
   }
+}
+
+.por-nivel-filtros {
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
 }
 
 .por-nivel-cards-stack {

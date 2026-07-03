@@ -22,7 +22,7 @@ export function appendEvalParam(href: string, evalMode: ModoVista): string {
 
 export function appendNavParams(
   href: string,
-  opts: { evalMode?: ModoVista; zona?: number | null }
+  opts: { evalMode?: ModoVista; zona?: number | null; from?: string | null }
 ): string {
   let out = href;
   if (opts.zona != null) {
@@ -31,5 +31,23 @@ export function appendNavParams(
   if (opts.evalMode && opts.evalMode !== "despegue-2025") {
     out = appendQueryParams(out, { eval: opts.evalMode });
   }
+  if (opts.from) {
+    out = appendQueryParams(out, { from: opts.from });
+  }
   return out;
+}
+
+export function withReturnTo(href: string, returnTo: string): string {
+  return appendQueryParams(href, { from: returnTo });
+}
+
+export function backLabelFromReturnTo(from: string | null | undefined): string {
+  if (!from) return "Regresar";
+  const path = from.split("?")[0];
+  if (path === "/") return "Inicio";
+  if (path === "/escuelas") return "Escuelas";
+  if (path.includes("/grupo/")) return "Grupo";
+  if (path.startsWith("/escuela/")) return "Escuela";
+  if (path === "/por-nivel") return "Por nivel";
+  return "Regresar";
 }

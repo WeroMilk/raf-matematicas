@@ -40,10 +40,10 @@ export default async function EscuelasPage({
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-1 overflow-hidden p-2">
       <PageHeader
+        leadingOnMobile={<BackButton href={backHref} label="Inicio" />}
         belowLogoOnMobile={<SelectorEvaluacion compact />}
         centerContent={isSuper && zonaForced == null ? <FiltroZona isSuper={isSuper} /> : undefined}
       >
-        <BackButton href={backHref} label="Inicio" />
         <h1 className="mt-0.5 text-base font-bold">Por escuela</h1>
         <p className="text-xs text-foreground/80">Selecciona una escuela.</p>
       </PageHeader>

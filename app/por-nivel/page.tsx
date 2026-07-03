@@ -9,6 +9,7 @@ import { getZonaFromCct, ZONAS_DISPONIBLES } from "@/lib/zonas";
 import type { NivelRAF } from "@/types/raf";
 import { NIVELES_CON_EXAMEN } from "@/types/raf";
 import { EVALUACION_ATERRIZAJE_2026, EVALUACION_DESPEGUE_2025, parseModoVista } from "@/lib/evaluaciones";
+import { backLabelFromReturnTo } from "@/lib/evaluacion-url";
 
 const PARAM_TO_NIVEL: Record<string, NivelRAF> = {
   REQUIERE_APOYO: "REQUIERE APOYO",
@@ -19,7 +20,7 @@ const PARAM_TO_NIVEL: Record<string, NivelRAF> = {
 export default async function PorNivelPage({
   searchParams,
 }: {
-  searchParams: Promise<{ nivel?: string; grupo?: string; zona?: string; eval?: string }>;
+  searchParams: Promise<{ nivel?: string; grupo?: string; zona?: string; eval?: string; from?: string }>;
 }) {
   const params = await searchParams;
   const evalMode = parseModoVista(params.eval ?? null);
@@ -28,6 +29,7 @@ export default async function PorNivelPage({
   const nivelFiltro: NivelRAF | null = PARAM_TO_NIVEL[nivelParam] ?? null;
   const grupoParam = params.grupo ?? "";
   const zonaParam = params.zona;
+  const returnTo = params.from ? decodeURIComponent(params.from) : null;
 
   const cookieStore = await cookies();
   const session = await getSession(cookieStore.get("raf_session")?.value ?? null);
@@ -96,12 +98,17 @@ export default async function PorNivelPage({
     evalMode !== "despegue-2025" ? `eval=${evalMode}` : "",
   ].filter(Boolean);
   const qs = qsParts.length ? `?${qsParts.join("&")}` : "";
-  const backHref = nivelFiltro ? `/por-nivel${qs}` : `/${qs}`;
+  const backHref = returnTo ?? (nivelFiltro ? `/por-nivel${qs}` : `/${qs}`);
+  const backLabel = returnTo
+    ? backLabelFromReturnTo(returnTo)
+    : nivelFiltro
+      ? "Por nivel"
+      : "Inicio";
 
   return (
     <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-1 overflow-hidden p-2">
       <PageHeader belowLogoOnMobile={<SelectorEvaluacion compact />}>
-        <BackButton href={backHref} label={nivelFiltro ? "Por nivel" : "Inicio"} />
+        <BackButton href={backHref} label={backLabel} />
         <h1 className="mt-0.5 text-base font-bold">
           {nivelFiltro
             ? `Por nivel: ${nivelFiltro === "REQUIERE APOYO" ? "Requieren apoyo" : nivelFiltro === "EN DESARROLLO" ? "En desarrollo" : "Esperado"}`

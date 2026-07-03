@@ -80,11 +80,13 @@ export default function PorNivelContent({
   const evalModeFromUrl = parseModoVista(searchParams.get("eval"));
   const zonaParam = searchParams.get("zona");
   const zonaNum = zonaParam ? parseInt(zonaParam, 10) : null;
+  const returnTo = searchParams.get("from");
 
   const irANivel = (nivel: NivelesConExamen) => {
     const href = appendNavParams(`/por-nivel?nivel=${NIVEL_TO_PARAM[nivel]}`, {
       evalMode: evalModeFromUrl,
       zona: Number.isFinite(zonaNum) ? zonaNum : null,
+      from: returnTo,
     });
     setExpandedNivel(nivel);
     router.push(href);
@@ -198,18 +200,18 @@ export default function PorNivelContent({
 
   return (
     <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-2 pb-2 animate-fade-in overflow-hidden">
-      <section className="card-ios shrink-0 space-y-2 rounded-2xl border border-border bg-card p-2.5 max-lg:p-2.5 lg:space-y-2.5 lg:p-3">
-        <div className="flex flex-col gap-2 lg:flex-row lg:flex-wrap lg:items-center">
+      <section className="card-ios shrink-0 rounded-2xl border border-border bg-card p-2.5 lg:p-3">
+        <div className="por-nivel-filtros flex min-w-0 flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2">
           {!soloCct && (
             <>
-              <div className="flex min-w-0 flex-row items-stretch gap-2 max-lg:w-full">
-                {isSuper && zonaForced == null && (
-                  <div className="min-w-0 flex-1">
-                    <FiltroZona isSuper={isSuper} className="max-w-none" />
-                  </div>
-                )}
-                <div className={`min-w-0 ${isSuper && zonaForced == null ? "flex-1" : "w-full lg:w-auto"}`}>
-                  <span className="mb-1 hidden text-xs font-semibold lg:block">Organizar por:</span>
+              {isSuper && zonaForced == null && (
+                <div className="w-full min-w-0 sm:w-[160px] sm:shrink-0">
+                  <FiltroZona isSuper={isSuper} className="max-w-none" />
+                </div>
+              )}
+              <div className="flex w-full min-w-0 flex-col gap-1 sm:w-auto sm:shrink-0 sm:flex-row sm:items-center sm:gap-2">
+                <span className="text-xs font-semibold sm:whitespace-nowrap">Organizar por:</span>
+                <div className="w-full min-w-0 sm:w-[160px] sm:shrink-0">
                   <DropdownIos
                     options={[...VIEW_MODE_OPTIONS]}
                     value={viewMode}
@@ -220,52 +222,54 @@ export default function PorNivelContent({
                     }}
                     title="Organizar por"
                     ariaLabel="Organizar por"
-                    className="w-full lg:w-auto lg:min-w-[160px]"
                   />
                 </div>
               </div>
 
               {viewMode === "escuela" && (
-                <DropdownIos
-                  options={escuelaOptions}
-                  value={selectedCct}
-                  onChange={setSelectedCct}
-                  placeholder="Selecciona escuela"
-                  title="Seleccionar escuela"
-                  ariaLabel="Seleccionar escuela"
-                  className="w-full lg:w-auto lg:min-w-[160px]"
-                  minPanelWidth={240}
-                />
+                <div className="w-full min-w-0 sm:w-[160px] sm:shrink-0">
+                  <DropdownIos
+                    options={escuelaOptions}
+                    value={selectedCct}
+                    onChange={setSelectedCct}
+                    placeholder="Selecciona escuela"
+                    title="Seleccionar escuela"
+                    ariaLabel="Seleccionar escuela"
+                    minPanelWidth={240}
+                  />
+                </div>
               )}
 
               {viewMode === "grupo" && (
-                <DropdownIos
-                  options={grupoOptionsList}
-                  value={selectedGrupo}
-                  onChange={setSelectedGrupo}
-                  placeholder="Selecciona grupo"
-                  title="Seleccionar grupo"
-                  ariaLabel="Seleccionar grupo"
-                  className="w-full lg:w-auto lg:min-w-[180px]"
-                  minPanelWidth={280}
-                />
+                <div className="w-full min-w-0 sm:w-[180px] sm:shrink-0">
+                  <DropdownIos
+                    options={grupoOptionsList}
+                    value={selectedGrupo}
+                    onChange={setSelectedGrupo}
+                    placeholder="Selecciona grupo"
+                    title="Seleccionar grupo"
+                    ariaLabel="Seleccionar grupo"
+                    minPanelWidth={280}
+                  />
+                </div>
               )}
             </>
           )}
-          {soloCct && <span className="text-xs text-foreground/70">Solo tu escuela: {soloCct}</span>}
-        </div>
+          {soloCct && <span className="shrink-0 text-xs text-foreground/70 sm:whitespace-nowrap">Solo tu escuela: {soloCct}</span>}
 
-        <div className="flex flex-col gap-2 lg:flex-row lg:flex-wrap lg:items-center">
-          <label className="text-xs font-semibold lg:shrink-0">Ordenar %:</label>
-          <DropdownIos
-            options={[...SORT_OPTIONS]}
-            value={sortOrder}
-            onChange={(next) => setSortOrder(next as SortOrder)}
-            title="Ordenar porcentaje"
-            ariaLabel="Ordenar porcentaje"
-            className="lg:w-auto lg:min-w-[220px]"
-            minPanelWidth={260}
-          />
+          <div className="flex w-full min-w-0 flex-col gap-1 sm:w-auto sm:shrink-0 sm:flex-row sm:items-center sm:gap-2">
+            <label className="text-xs font-semibold sm:whitespace-nowrap">Ordenar %:</label>
+            <div className="w-full min-w-0 sm:w-[220px] sm:shrink-0">
+              <DropdownIos
+                options={[...SORT_OPTIONS]}
+                value={sortOrder}
+                onChange={(next) => setSortOrder(next as SortOrder)}
+                title="Ordenar porcentaje"
+                ariaLabel="Ordenar porcentaje"
+                minPanelWidth={260}
+              />
+            </div>
+          </div>
         </div>
       </section>
 

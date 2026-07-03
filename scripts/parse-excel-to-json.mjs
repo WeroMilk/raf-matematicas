@@ -2,108 +2,22 @@ import * as fs from "fs";
 import * as path from "path";
 import { fileURLToPath } from "url";
 import XLSX from "xlsx";
+import {
+  fixUtf8Mojibake,
+  normalizarGrupo,
+  obtenerNivel,
+  calcularPorcentaje,
+  respuesta,
+  extraerMarcas,
+  esCctSEP,
+  obtenerGrupoRaw,
+} from "./excel-utils.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
 const DATA_DIR = process.env.DATA_DIR || path.join(ROOT, "data", "excel");
 const OUT_DIR = path.join(ROOT, "public", "data");
 const OUT_FILE = path.join(OUT_DIR, "resultados.json");
-
-/** Corrige texto UTF-8 leído como Latin-1 (ej. PEÃA → PEÑA). */
-function fixUtf8Mojibake(str) {
-  if (typeof str !== "string") return str;
-  if (!/Ã[\x80-\xBF]/.test(str)) return str;
-  try {
-    return Buffer.from(str, "latin1").toString("utf8");
-  } catch {
-    return str;
-  }
-}
-
-const LETRA_GRUPO = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
-/** CCT SEP típico (ej. 26DST0058Q): en algunos exportes QuizClass trae el CCT y el grupo va en CustomID. */
-function esCctSEP(s) {
-  if (typeof s !== "string") return false;
-  const t = s.trim().toUpperCase();
-  return /^\d{2}[A-Z]{3}\d{4}[A-Z0-9]$/.test(t);
-}
-
-/** Texto de grupo: QuizClass salvo si es CCT, entonces CustomID (1AM, 1BM, …). */
-function obtenerGrupoRaw(row) {
-  const qc = row.QuizClass != null ? fixUtf8Mojibake(String(row.QuizClass)) : "";
-  if (esCctSEP(qc)) {
-    const custom = row.CustomID != null ? fixUtf8Mojibake(String(row.CustomID)) : "";
-    return custom.trim() || qc.trim();
-  }
-  return qc.trim();
-}
-
-function normalizarGrupo(grupo) {
-  if (grupo == null || grupo === "") return "S/G";
-  const s = String(grupo).toUpperCase().trim();
-  // Ya en formato 1AM, 2BV, etc.
-  if (/^[1-3][A-Z][MV]$/.test(s)) return s;
-  // M1A, M1B, ... / V1A, V1B, ...
-  const m = s.match(/M1([A-H])/);
-  if (m) return `1${m[1]}M`;
-  const v = s.match(/V1([A-H])/);
-  if (v) return `1${v[1]}V`;
-  // Z11EST56V1, Z14EST76V1 → grado 1º dígito, grupo 2º dígito (1→A, 2→B...), M|V al final
-  const zNum = s.match(/^Z(\d)(\d)EST[\d]*(M|V)\d*$/);
-  if (zNum) {
-    const grado = zNum[1];
-    const numGrupo = parseInt(zNum[2], 10);
-    const turno = zNum[3];
-    const letra = LETRA_GRUPO[numGrupo - 1] || LETRA_GRUPO[0];
-    return `${grado}${letra}${turno}`;
-  }
-  // Z4EST71V1I, Z4EST71V1J, ... → (M|V)(grado)(letra) al final
-  const zLetra = s.match(/^Z\d+EST[\d]*(M|V)(\d)([A-Z])$/);
-  if (zLetra) {
-    const turno = zLetra[1];
-    const grado = zLetra[2];
-    const letra = zLetra[3];
-    return `${grado}${letra}${turno}`;
-  }
-  return s.slice(0, 10);
-}
-
-function obtenerNivel(porcentaje) {
-  if (porcentaje == null) return "REQUIERE APOYO";
-  if (porcentaje <= 50) return "REQUIERE APOYO";
-  if (porcentaje <= 80) return "EN DESARROLLO";
-  return "ESPERADO";
-}
-
-function calcularPorcentaje(row) {
-  let aciertos = 0,
-    total = 0;
-  for (let i = 1; i <= 12; i++) {
-    const p = row[`Points${i}`];
-    const m = row[`Mark${i}`];
-    if (p == null || m == null) continue;
-    const pv = Number(p);
-    const mv = String(m).trim();
-    if (Number.isNaN(pv)) continue;
-    if (pv > 0 && mv === "C") {
-      aciertos++;
-      total++;
-    } else if (pv === 0) total++;
-  }
-  return total > 0 ? Math.round((aciertos / total) * 1000) / 10 : 0;
-}
-
-/** Obtiene la respuesta del alumno. Stu = opción real (A/B/C/D); Mark = C/X legacy */
-function respuesta(row, i) {
-  const val = row[`Stu${i}`];
-  if (val != null && String(val).trim()) {
-    const s = String(val).trim().toUpperCase();
-    if (/^[ABCD]$/.test(s)) return s;
-  }
-  const m = row[`Mark${i}`];
-  return m != null && String(m).trim() ? String(m).trim() : "-";
-}
 
 function procesarEscuela(filePath) {
   const wb = XLSX.readFile(filePath, { type: "file" });
@@ -128,6 +42,7 @@ function procesarEscuela(filePath) {
       _porcentaje: porcentaje,
       _nivel: nivel,
       _respuestas: Array.from({ length: 12 }, (_, i) => respuesta(row, i + 1)),
+      _marcas: extraerMarcas(row),
     };
   });
 
@@ -192,6 +107,7 @@ function procesarEscuela(filePath) {
         porcentaje: r._porcentaje,
         nivel: r._nivel,
         respuestas: r._respuestas,
+        marcas: r._marcas,
       })),
       porcentajesReactivos: porcentajesG,
       requiereApoyo: reqG,

@@ -3,6 +3,7 @@
 import { useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import type { ReactivoInfo } from "@/lib/reactivos-matematicas";
+import ModalCloseFooter from "./ModalCloseFooter";
 
 interface Props {
   reactivo: ReactivoInfo | null;
@@ -40,7 +41,7 @@ export default function ModalReactivo({ reactivo, onClose }: Props) {
     >
       {/* Panel - stopPropagation para que clic en el panel no cierre */}
       <div
-        className="relative w-full max-h-[90vh] max-w-lg overflow-hidden rounded-2xl bg-[var(--card)] shadow-2xl animate-scale-in"
+        className="relative flex w-full max-h-[90vh] max-w-lg flex-col overflow-hidden rounded-2xl bg-[var(--card)] shadow-2xl animate-scale-in"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header con gradiente guinda */}
@@ -121,6 +122,7 @@ export default function ModalReactivo({ reactivo, onClose }: Props) {
             </p>
           </div>
         </div>
+        <ModalCloseFooter onClose={handleClose} />
       </div>
     </div>
   );

@@ -14,6 +14,7 @@ import {
   obtenerNivel,
   calcularPorcentaje,
   respuesta,
+  extraerMarcas,
   extraerNumeroEscuela,
   resolverCct,
   construirEscuelaResumen,
@@ -77,6 +78,7 @@ function procesarExcelCombinado(filePath, cctsConocidos) {
       _porcentaje: porcentaje,
       _nivel: nivel,
       _respuestas: Array.from({ length: 12 }, (_, i) => respuesta(row, i + 1)),
+      _marcas: extraerMarcas(row),
     };
 
     if (!porCct.has(cct)) porCct.set(cct, []);

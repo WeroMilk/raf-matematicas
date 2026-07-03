@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { COLORS } from "@/types/raf";
 import { getReactivoInfo } from "@/lib/reactivos-matematicas";
 import ModalReactivo from "./ModalReactivo";
+import { useChartPlotSize } from "./useChartPlotSize";
+import { usePrefersTouch } from "./usePrefersTouch";
 
 const NIVEL_COLORS = [COLORS.requiereApoyo, COLORS.enDesarrollo, COLORS.esperado];
 
@@ -39,9 +41,9 @@ function TooltipAciertos(props: { active?: boolean; payload?: { payload: { react
 }
 
 export default function ChartBarrasReactivos({ porcentajes, title, totalAlumnos, fillHeight = false }: Props) {
-  const [mounted, setMounted] = useState(false);
+  const { ref, ready, width, height } = useChartPlotSize();
+  const isTouch = usePrefersTouch();
   const [reactivoSeleccionado, setReactivoSeleccionado] = useState<number | null>(null);
-  useEffect(() => setMounted(true), []);
 
   const data = porcentajes.map((p, i) => ({
     reactivo: `${i + 1}`,
@@ -99,12 +101,12 @@ export default function ChartBarrasReactivos({ porcentajes, title, totalAlumnos,
     >
       {title && <h3 className="chart-title">{title}</h3>}
       <p className="chart-hint">Toca un reactivo para ver su información</p>
-      <div className={`chart-card__plot ${chartContainerClass} cursor-pointer`} tabIndex={-1}>
-        {!mounted ? (
+      <div ref={ref} className={`chart-card__plot overflow-hidden ${chartContainerClass} cursor-pointer`} tabIndex={-1}>
+        {!ready ? (
           <div className="h-full w-full animate-pulse rounded-lg bg-[var(--fill-tertiary)]" aria-hidden />
         ) : (
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+        <ResponsiveContainer width={width} height={height} minWidth={0}>
+          <BarChart data={data} margin={{ top: 14, right: 4, left: 0, bottom: 0 }}>
             <XAxis dataKey="reactivo" tick={{ fontSize: 8 }} />
             <YAxis
               domain={[0, 100]}
@@ -112,10 +114,12 @@ export default function ChartBarrasReactivos({ porcentajes, title, totalAlumnos,
               tickFormatter={(v) => `${v}%`}
               width={28}
             />
+            {!isTouch && (
             <Tooltip
               content={<TooltipAciertos />}
               cursor={{ fill: "rgba(0, 0, 0, 0.06)", pointerEvents: "none" }}
             />
+            )}
             <Bar
               dataKey="porcentaje"
               radius={[2, 2, 0, 0]}

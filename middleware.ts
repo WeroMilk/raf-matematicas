@@ -70,5 +70,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon|manifest|api|Logtipo_EscudoColor|data/).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon|icon|apple-icon|manifest|api|Logtipo_EscudoColor|data/).*)"],
 };

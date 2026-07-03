@@ -32,7 +32,9 @@ export default function SelectorEvaluacion({ compact = false }: Props) {
 
   return (
     <div
-      className={`flex rounded-xl border border-border bg-[var(--fill-tertiary)] p-0.5 ${compact ? "text-[10px]" : "text-xs"}`}
+      className={`flex rounded-xl border border-border bg-[var(--fill-tertiary)] p-0.5 ${
+        compact ? "text-[10px] max-[400px]:text-[9px]" : "text-xs"
+      }`}
       role="tablist"
       aria-label="Evaluación RAF"
     >
@@ -45,7 +47,9 @@ export default function SelectorEvaluacion({ compact = false }: Props) {
             role="tab"
             aria-selected={active}
             onClick={() => setMode(modo.id)}
-            className={`rounded-lg px-2 py-1.5 font-semibold transition-all sm:px-3 ${
+            className={`rounded-lg font-semibold transition-all ${
+              compact ? "px-1.5 py-1 max-[400px]:px-1 max-[400px]:py-0.5" : "px-2 py-1.5 sm:px-3"
+            } ${
               active ? "text-white shadow-md" : "text-foreground/70 hover:bg-white/60 hover:text-foreground"
             }`}
             style={active ? { backgroundColor: modo.color, boxShadow: active && modo.id === "comparar" ? "0 2px 8px rgba(123,45,62,0.35)" : undefined } : undefined}

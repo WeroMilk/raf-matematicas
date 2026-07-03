@@ -8,12 +8,17 @@ import { ZONAS_DISPONIBLES } from "@/lib/zonas";
 interface Props {
   isSuper: boolean;
   className?: string;
+  compact?: boolean;
 }
 
 const OPTIONS: { value: number | null; label: string }[] = [
   { value: null, label: "Todas las zonas" },
   ...ZONAS_DISPONIBLES.map((z) => ({ value: z, label: `Zona ${z}` })),
 ];
+
+function triggerLabelFor(zona: number | null): string {
+  return zona == null ? "Zonas" : `Zona ${zona}`;
+}
 
 function ChevronIcon({ open }: { open: boolean }) {
   return (
@@ -42,7 +47,7 @@ function CheckIcon() {
   );
 }
 
-export default function FiltroZona({ isSuper, className = "" }: Props) {
+export default function FiltroZona({ isSuper, className = "", compact = false }: Props) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
@@ -56,7 +61,7 @@ export default function FiltroZona({ isSuper, className = "" }: Props) {
   const value = zonaParam ? parseInt(zonaParam, 10) : null;
   const isValid = value != null && ZONAS_DISPONIBLES.includes(value);
   const selectedValue = isValid ? value : null;
-  const selectedLabel = OPTIONS.find((o) => o.value === selectedValue)?.label ?? "Todas las zonas";
+  const triggerLabel = triggerLabelFor(selectedValue);
 
   const handleChange = useCallback(
     (zona: number | null) => {
@@ -198,17 +203,20 @@ export default function FiltroZona({ isSuper, className = "" }: Props) {
     );
 
   return (
-    <div className={`relative w-full min-w-0 max-w-[200px] sm:max-w-[220px] ${className}`}>
+    <div className={`relative w-full min-w-[5.75rem] max-w-full sm:max-w-[220px] ${className}`}>
       <button
         ref={triggerRef}
         type="button"
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={listId}
+        aria-label={`Zona seleccionada: ${triggerLabel}`}
         onClick={() => setOpen((v) => !v)}
-        className="dropdown-ios__trigger select-ios flex w-full min-h-[40px] items-center justify-between gap-2 rounded-xl border border-border bg-card px-3.5 py-2.5 text-sm font-medium text-foreground shadow-sm transition-[box-shadow,transform,border-color] hover:border-[#7b2d3e]/30 hover:shadow-md active:scale-[0.98]"
+        className={`dropdown-ios__trigger select-ios flex w-full items-center justify-between rounded-xl border border-border bg-card font-medium text-foreground shadow-sm transition-[box-shadow,transform,border-color] hover:border-[#7b2d3e]/30 hover:shadow-md active:scale-[0.98] ${
+          compact ? "min-h-[36px] gap-1 px-2 py-1.5 text-xs" : "min-h-[40px] gap-2 px-3.5 py-2.5 text-sm"
+        }`}
       >
-        <span className="truncate">{selectedLabel}</span>
+        <span className="min-w-0 flex-1 truncate text-left">{triggerLabel}</span>
         <ChevronIcon open={open} />
       </button>
       {menu}

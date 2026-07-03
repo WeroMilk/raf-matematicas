@@ -61,6 +61,7 @@ export function obtenerNivel(porcentaje) {
   return "ESPERADO";
 }
 
+/** Porcentaje según Mark/Points del export QuizClass (calificación oficial). */
 export function calcularPorcentaje(row) {
   let aciertos = 0,
     total = 0;
@@ -77,6 +78,20 @@ export function calcularPorcentaje(row) {
     } else if (pv === 0) total++;
   }
   return total > 0 ? Math.round((aciertos / total) * 1000) / 10 : 0;
+}
+
+/** Marcas C/X por reactivo según el export QuizClass. */
+export function extraerMarcas(row) {
+  return Array.from({ length: 12 }, (_, i) => {
+    const idx = i + 1;
+    const p = row[`Points${idx}`];
+    const m = row[`Mark${idx}`];
+    if (p == null || m == null) return "-";
+    const pv = Number(p);
+    if (Number.isNaN(pv)) return "-";
+    const mv = String(m).trim().toUpperCase();
+    return mv === "C" || mv === "X" ? mv : "-";
+  });
 }
 
 export function respuesta(row, i) {
@@ -171,6 +186,7 @@ export function construirEscuelaResumen(cct, rows) {
         porcentaje: r._porcentaje,
         nivel: r._nivel,
         respuestas: r._respuestas,
+        marcas: r._marcas,
       })),
       porcentajesReactivos: porcentajesG,
       requiereApoyo: reqG,

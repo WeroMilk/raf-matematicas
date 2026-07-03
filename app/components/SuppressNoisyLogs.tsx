@@ -7,6 +7,7 @@ export default function SuppressNoisyLogs() {
     if (process.env.NODE_ENV !== "development") return;
     const origLog = console.log;
     const origWarn = console.warn;
+    const origInfo = console.info;
     const skip = (args: unknown[]): boolean => {
       const msg = typeof args[0] === "string" ? args[0] : String(args[0] ?? "");
       return (
@@ -25,9 +26,14 @@ export default function SuppressNoisyLogs() {
       if (skip(args)) return;
       origWarn.apply(console, args);
     };
+    console.info = (...args: unknown[]) => {
+      if (skip(args)) return;
+      origInfo.apply(console, args);
+    };
     return () => {
       console.log = origLog;
       console.warn = origWarn;
+      console.info = origInfo;
     };
   }, []);
   return null;

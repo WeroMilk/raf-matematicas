@@ -21,7 +21,8 @@
     "lint": "eslint",
     "build:data:fusion": "node scripts/fusionar-base-lenguaje-matematicas.mjs",
     "build:data:2026": "node scripts/build-data-2026.mjs",
-    "build:data:solo-matematicas": "node scripts/parse-excel-to-json.mjs"
+    "build:data:solo-matematicas": "node scripts/parse-excel-to-json.mjs",
+    "fusionar-marcas-2026": "node scripts/fusionar-marcas-2026.mjs"
   },
   "dependencies": {
     "@tanstack/react-table": "^8.21.3",

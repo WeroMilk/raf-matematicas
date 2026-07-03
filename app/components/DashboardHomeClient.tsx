@@ -8,7 +8,7 @@ import { getZonaFromCct, ZONAS_DISPONIBLES } from "@/lib/zonas";
 import { EVALUACION_ATERRIZAJE_2026, EVALUACION_DESPEGUE_2025, EVALUACIONES_META, parseModoVista } from "@/lib/evaluaciones";
 import { getEscuelasForEval } from "@/lib/resultados-utils";
 import { agregarGlobal, porcentajesReactivosGlobales } from "@/lib/comparativa";
-import { appendNavParams } from "@/lib/evaluacion-url";
+import { appendNavParams, withReturnTo } from "@/lib/evaluacion-url";
 import PageHeader from "@/app/components/PageHeader";
 import ScrollOnlyWhenNeeded from "@/app/components/ScrollOnlyWhenNeeded";
 import ChartPastelNiveles from "@/app/components/ChartPastelNiveles";
@@ -20,21 +20,21 @@ import KpiNivelCard from "@/app/components/KpiNivelCard";
 import EmptyState from "@/app/components/EmptyState";
 import ComparativaLegend from "@/app/components/ComparativaLegend";
 import BannerCobertura2026 from "@/app/components/BannerCobertura2026";
-import KPIComparativa, { KPIComparativaResumen } from "@/app/components/KPIComparativa";
+import KPIComparativa, { KPIComparativaResumen, nivelComparativaHref } from "@/app/components/KPIComparativa";
 import { COLORS } from "@/types/raf";
 
 const NUM_REACTIVOS = 12;
 
-function useIsLgUp() {
-  const [isLgUp, setIsLgUp] = useState(false);
+function useIsMdUp() {
+  const [isMdUp, setIsMdUp] = useState(false);
   useEffect(() => {
-    const mq = window.matchMedia("(min-width: 1024px)");
-    const update = () => setIsLgUp(mq.matches);
+    const mq = window.matchMedia("(min-width: 768px)");
+    const update = () => setIsMdUp(mq.matches);
     update();
     mq.addEventListener("change", update);
     return () => mq.removeEventListener("change", update);
   }, []);
-  return isLgUp;
+  return isMdUp;
 }
 
 interface Props {
@@ -50,7 +50,7 @@ function filtrarZona(escuelas: EscuelaResumen[], zona: number | null) {
 }
 
 export default function DashboardHomeClient({ data, cobertura, isSuper, zonaForced }: Props) {
-  const isLgUp = useIsLgUp();
+  const isMdUp = useIsMdUp();
   const searchParams = useSearchParams();
   const evalMode = parseModoVista(searchParams.get("eval"));
   const zonaParam = searchParams.get("zona");
@@ -64,6 +64,7 @@ export default function DashboardHomeClient({ data, cobertura, isSuper, zonaForc
   const evalNombre = evalMode === "aterrizaje-2026" ? EVALUACIONES_META[EVALUACION_ATERRIZAJE_2026].nombre : EVALUACIONES_META[EVALUACION_DESPEGUE_2025].nombre;
 
   const navHref = (path: string) => appendNavParams(path, { evalMode, zona: zonaSeleccionada });
+  const inicioHref = navHref("/");
 
   const totalAlumnos = escuelas.reduce((s, e) => s + e.totalEstudiantes, 0);
   const totalReq = escuelas.reduce((s, e) => s + e.requiereApoyo, 0);
@@ -86,14 +87,16 @@ export default function DashboardHomeClient({ data, cobertura, isSuper, zonaForc
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden gap-1 animate-fade-in p-2 lg:gap-4 lg:p-0">
       <PageHeader
         belowLogoOnMobile={<SelectorEvaluacion compact />}
-        centerContent={isSuper && zonaForced == null ? <FiltroZona isSuper={isSuper} /> : undefined}
+        centerContent={isSuper && zonaForced == null ? <FiltroZona isSuper={isSuper} compact /> : undefined}
       >
-        <h1 className="page-title text-base lg:text-xl">RAF Matemáticas</h1>
-        <p className="page-subtitle text-xs lg:text-sm">Secundarias Técnicas · SEC Sonora</p>
-        <p className="page-subtitle text-xs lg:text-sm">Mtra. Martha Camargo</p>
+        <div className="page-header-text page-header-text--compact">
+          <h1 className="page-title text-base lg:text-xl">RAF Matemáticas</h1>
+          <p className="page-subtitle text-xs lg:text-sm">Secundarias Técnicas</p>
+          <p className="page-subtitle text-xs lg:text-sm">Mtra. Martha Camargo</p>
+        </div>
       </PageHeader>
 
-      <ScrollOnlyWhenNeeded className="flex min-h-0 flex-1 flex-col overflow-x-hidden">
+      <ScrollOnlyWhenNeeded className="flex min-h-0 flex-1 flex-col overflow-x-hidden pb-3">
         {evalMode === "aterrizaje-2026" && (
           <div className="mb-2 shrink-0">
             <BannerCobertura2026
@@ -126,7 +129,10 @@ export default function DashboardHomeClient({ data, cobertura, isSuper, zonaForc
                 <section className="shrink-0 space-y-2">
                   <KPIComparativaResumen comparativa={comparativa} />
                   <ComparativaLegend />
-                  <KPIComparativa comparativa={comparativa} />
+                  <KPIComparativa
+                    comparativa={comparativa}
+                    getNivelHref={(key) => withReturnTo(nivelComparativaHref(navHref, key), inicioHref)}
+                  />
                 </section>
                 <section className="card-ios my-2 rounded-2xl border border-border bg-card p-3 text-sm text-foreground/75">
                   Comparativa entre escuelas con datos en ambas evaluaciones
@@ -137,7 +143,7 @@ export default function DashboardHomeClient({ data, cobertura, isSuper, zonaForc
               <div className="shrink-0">
                 <section className="grid min-w-0 grid-cols-3 gap-2 lg:gap-4">
                   <KpiNivelCard
-                    href={navHref("/por-nivel?nivel=REQUIERE_APOYO")}
+                    href={withReturnTo(navHref("/por-nivel?nivel=REQUIERE_APOYO"), inicioHref)}
                     count={totalReq}
                     label="Requieren apoyo"
                     pct={pctReq}
@@ -145,7 +151,7 @@ export default function DashboardHomeClient({ data, cobertura, isSuper, zonaForc
                     variant="apoyo"
                   />
                   <KpiNivelCard
-                    href={navHref("/por-nivel?nivel=EN_DESARROLLO")}
+                    href={withReturnTo(navHref("/por-nivel?nivel=EN_DESARROLLO"), inicioHref)}
                     count={totalDes}
                     label="En desarrollo"
                     pct={pctDes}
@@ -153,7 +159,7 @@ export default function DashboardHomeClient({ data, cobertura, isSuper, zonaForc
                     variant="desarrollo"
                   />
                   <KpiNivelCard
-                    href={navHref("/por-nivel?nivel=ESPERADO")}
+                    href={withReturnTo(navHref("/por-nivel?nivel=ESPERADO"), inicioHref)}
                     count={totalEsp}
                     label="Esperado"
                     pct={pctEsp}
@@ -186,12 +192,12 @@ export default function DashboardHomeClient({ data, cobertura, isSuper, zonaForc
               </Link>
             </section>
 
-            <section className={isLgUp ? "grid min-h-0 flex-1 shrink-0 grid-cols-2 gap-4 pt-3" : "flex shrink-0 flex-col gap-3 pt-2"}>
+            <section className="grid shrink-0 grid-cols-1 gap-3 pt-2 md:min-h-0 md:flex-1 md:grid-cols-2 md:gap-4 md:pt-3">
               {evalMode === "comparar" ? (
                 <>
-                  <section className="chart-card flex min-h-[200px] flex-col p-3">
+                  <section className="chart-card flex shrink-0 flex-col p-3 md:min-h-0 md:shrink md:flex-1">
                     <ChartComparativaNiveles
-                      fillHeight={isLgUp}
+                      fillHeight={isMdUp}
                       requiereApoyo2025={comparativa.despegue2025.requiereApoyo}
                       enDesarrollo2025={comparativa.despegue2025.enDesarrollo}
                       esperado2025={comparativa.despegue2025.esperado}
@@ -201,9 +207,9 @@ export default function DashboardHomeClient({ data, cobertura, isSuper, zonaForc
                       title="Niveles: Despegue vs Aterrizaje"
                     />
                   </section>
-                  <section className="chart-card flex min-h-[200px] flex-col p-3">
+                  <section className="chart-card flex shrink-0 flex-col p-3 md:min-h-0 md:shrink md:flex-1">
                     <ChartBarrasReactivosComparativa
-                      fillHeight={isLgUp}
+                      fillHeight={isMdUp}
                       porcentajes2025={porcentajes2025}
                       porcentajes2026={porcentajes2026}
                       title="Aciertos por reactivo"
@@ -212,17 +218,17 @@ export default function DashboardHomeClient({ data, cobertura, isSuper, zonaForc
                 </>
               ) : (
                 <>
-                  <section className={`chart-card flex flex-col p-3 ${isLgUp ? "min-h-0 flex-1" : ""}`}>
-                    <ChartBarrasReactivos fillHeight={isLgUp} porcentajes={porcentajesGlobales} totalAlumnos={totalAlumnos} title="Aciertos por reactivo" />
+                  <section className="chart-card flex shrink-0 flex-col p-3 md:min-h-0 md:shrink md:flex-1">
+                    <ChartBarrasReactivos fillHeight={isMdUp} porcentajes={porcentajesGlobales} totalAlumnos={totalAlumnos} title="Aciertos por reactivo" />
                   </section>
-                  <section className={`chart-card flex flex-col p-3 ${isLgUp ? "min-h-0 flex-1" : ""}`}>
-                    <ChartPastelNiveles fillHeight={isLgUp} requiereApoyo={totalReq} enDesarrollo={totalDes} esperado={totalEsp} title="Por nivel" />
+                  <section className="chart-card flex shrink-0 flex-col p-3 md:min-h-0 md:shrink md:flex-1">
+                    <ChartPastelNiveles fillHeight={isMdUp} requiereApoyo={totalReq} enDesarrollo={totalDes} esperado={totalEsp} title="Por nivel" />
                   </section>
                 </>
               )}
             </section>
 
-            <p className="mt-1 shrink-0 text-[10px] text-foreground/50">
+            <p className="mt-3 shrink-0 px-1 pb-1 text-center text-[10px] text-foreground/50 md:mt-1 md:text-left">
               Última actualización:{" "}
               {new Date(data.generado).toLocaleString("es-MX", {
                 day: "2-digit",
