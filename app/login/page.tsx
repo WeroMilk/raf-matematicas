@@ -106,12 +106,9 @@ export default function LoginPage() {
         </form>
       </div>
 
-      <footer
-        className="login-footer login-credits shrink-0 px-6 text-center text-xs text-[#757575]"
-        style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
-      >
-        <p className="leading-tight">Base de Datos creada por:</p>
-        <p className="leading-tight">Mtra. Martha Camargo y Luis Silvas.</p>
+      <footer className="login-footer login-credits shrink-0 px-6 text-center text-xs text-[#757575]">
+        <p>Base de Datos creada por:</p>
+        <p>Mtra. Martha Camargo y Luis Silvas.</p>
       </footer>
     </div>
   );
