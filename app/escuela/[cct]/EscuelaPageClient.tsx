@@ -127,7 +127,7 @@ export default function EscuelaPageClient({ cct, data, backHref, showBack, cober
             </section>
             <section className="flex shrink-0 flex-col gap-3 md:min-h-0 md:flex-1 md:flex-row">
               <section className="card-ios flex shrink-0 flex-col rounded-2xl border p-3 md:min-h-0 md:min-w-0 md:flex-1">
-                <ChartBarrasReactivos fillHeight={isMdUp} porcentajes={escuela.porcentajesReactivos} totalAlumnos={escuela.totalEstudiantes} title="Aciertos por reactivo" />
+                <ChartBarrasReactivos fillHeight={isMdUp} porcentajes={escuela.porcentajesReactivos} title="Aciertos por reactivo" />
               </section>
               <section className="card-ios flex shrink-0 flex-col rounded-2xl border p-3 md:min-h-0 md:min-w-0 md:flex-1">
                 <ChartPastelNiveles fillHeight={isMdUp} requiereApoyo={escuela.requiereApoyo} enDesarrollo={escuela.enDesarrollo} esperado={escuela.esperado} title="Por nivel" />

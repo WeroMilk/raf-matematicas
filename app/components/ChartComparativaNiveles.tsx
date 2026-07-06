@@ -36,6 +36,32 @@ type ComparativaRow = {
   "2026": number;
 };
 
+function pctDelTotal(valor: number, total: number): number {
+  return total > 0 ? Math.round((valor / total) * 1000) / 10 : 0;
+}
+
+function TooltipPorcentaje({
+  active,
+  payload,
+  label,
+}: {
+  active?: boolean;
+  payload?: { name?: string; value?: number; color?: string }[];
+  label?: string;
+}) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="rounded border border-border bg-card px-2 py-1.5 text-xs shadow">
+      {label && <div className="mb-1 font-semibold">{label}</div>}
+      {payload.map((entry) => (
+        <div key={String(entry.name)} style={{ color: entry.color }}>
+          {entry.name}: {entry.value}%
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function ChartComparativaNiveles({
   requiereApoyo2025,
   enDesarrollo2025,
@@ -58,10 +84,12 @@ export default function ChartComparativaNiveles({
   const { ref, ready, width, height } = useChartPlotSize();
   const isTouch = usePrefersTouch();
   const [tip, setTip] = useState<ComparativaRow | null>(null);
+  const total2025 = requiereApoyo2025 + enDesarrollo2025 + esperado2025;
+  const total2026 = requiereApoyo2026 + enDesarrollo2026 + esperado2026;
   const data = [
-    { label: "Apoyo", "2025": requiereApoyo2025, "2026": requiereApoyo2026 },
-    { label: "Desarrollo", "2025": enDesarrollo2025, "2026": enDesarrollo2026 },
-    { label: "Esperado", "2025": esperado2025, "2026": esperado2026 },
+    { label: "Apoyo", "2025": pctDelTotal(requiereApoyo2025, total2025), "2026": pctDelTotal(requiereApoyo2026, total2026) },
+    { label: "Desarrollo", "2025": pctDelTotal(enDesarrollo2025, total2025), "2026": pctDelTotal(enDesarrollo2026, total2026) },
+    { label: "Esperado", "2025": pctDelTotal(esperado2025, total2025), "2026": pctDelTotal(esperado2026, total2026) },
   ];
 
   const handleBarClick = (row: unknown) => {
@@ -80,8 +108,8 @@ export default function ChartComparativaNiveles({
           <ResponsiveContainer width={width} height={height} minWidth={0}>
             <BarChart data={data} margin={{ top: 4, right: 4, left: 0, bottom: 4 }}>
               <XAxis dataKey="label" tick={{ fontSize: 10 }} />
-              <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
-              {!isTouch && <Tooltip />}
+              <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} tickFormatter={(v) => `${v}%`} width={32} />
+              {!isTouch && <Tooltip content={<TooltipPorcentaje />} />}
               <Bar
                 dataKey="2025"
                 name={EVALUACIONES_META["despegue-2025"].nombreCorto}
@@ -107,12 +135,12 @@ export default function ChartComparativaNiveles({
             rows={[
               {
                 label: EVALUACIONES_META["despegue-2025"].nombreCorto,
-                value: tip["2025"],
+                value: `${tip["2025"]}%`,
                 color: EVALUACIONES_META["despegue-2025"].color,
               },
               {
                 label: EVALUACIONES_META["aterrizaje-2026"].nombreCorto,
-                value: tip["2026"],
+                value: `${tip["2026"]}%`,
                 color: EVALUACIONES_META["aterrizaje-2026"].color,
               },
             ]}
@@ -163,8 +191,8 @@ export function ChartBarrasReactivosComparativa({
           <ResponsiveContainer width={width} height={height} minWidth={0}>
             <BarChart data={data} margin={{ top: 4, right: 4, left: 0, bottom: 4 }}>
               <XAxis dataKey="label" tick={{ fontSize: 9 }} />
-              <YAxis domain={[0, 100]} tick={{ fontSize: 9 }} />
-              {!isTouch && <Tooltip />}
+              <YAxis domain={[0, 100]} tick={{ fontSize: 9 }} tickFormatter={(v) => `${v}%`} width={28} />
+              {!isTouch && <Tooltip content={<TooltipPorcentaje />} />}
               <Bar
                 dataKey="2025"
                 name={EVALUACIONES_META["despegue-2025"].nombreCorto}
@@ -190,12 +218,12 @@ export function ChartBarrasReactivosComparativa({
             rows={[
               {
                 label: EVALUACIONES_META["despegue-2025"].nombreCorto,
-                value: tip["2025"],
+                value: `${tip["2025"]}%`,
                 color: EVALUACIONES_META["despegue-2025"].color,
               },
               {
                 label: EVALUACIONES_META["aterrizaje-2026"].nombreCorto,
-                value: tip["2026"],
+                value: `${tip["2026"]}%`,
                 color: EVALUACIONES_META["aterrizaje-2026"].color,
               },
             ]}

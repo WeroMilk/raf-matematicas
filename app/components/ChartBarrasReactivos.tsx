@@ -19,28 +19,22 @@ function getColor(value: number) {
 interface Props {
   porcentajes: number[];
   title?: string;
-  totalAlumnos?: number;
   fillHeight?: boolean;
 }
 
-function TooltipAciertos(props: { active?: boolean; payload?: { payload: { reactivo: string; porcentaje: number; aciertos?: number } }[] }) {
+function TooltipAciertos(props: { active?: boolean; payload?: { payload: { reactivo: string; porcentaje: number } }[] }) {
   const { active, payload } = props;
   if (!active || !payload?.length) return null;
   const row = payload[0].payload;
-  const aciertos = row.aciertos ?? null;
   return (
     <div className="rounded border border-border bg-card px-2 py-1.5 text-xs shadow">
-      <div className="font-semibold">
-        {aciertos != null
-          ? `${aciertos} ${aciertos === 1 ? "persona contestó bien" : "personas contestaron bien"}`
-          : `Reactivo ${row.reactivo}`}
-      </div>
+      <div className="font-semibold">Reactivo {row.reactivo}</div>
       <div className="text-foreground/80">{row.porcentaje}%</div>
     </div>
   );
 }
 
-export default function ChartBarrasReactivos({ porcentajes, title, totalAlumnos, fillHeight = false }: Props) {
+export default function ChartBarrasReactivos({ porcentajes, title, fillHeight = false }: Props) {
   const { ref, ready, width, height } = useChartPlotSize();
   const isTouch = usePrefersTouch();
   const [reactivoSeleccionado, setReactivoSeleccionado] = useState<number | null>(null);
@@ -50,7 +44,6 @@ export default function ChartBarrasReactivos({ porcentajes, title, totalAlumnos,
     numero: i + 1,
     porcentaje: p,
     fill: getColor(p),
-    aciertos: totalAlumnos != null ? Math.round((p / 100) * totalAlumnos) : undefined,
   }));
 
   const chartContainerClass = fillHeight

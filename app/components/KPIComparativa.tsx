@@ -11,16 +11,25 @@ const NIVEL_QUERY: Record<KPIComparativaNivelKey, string> = {
   esperado: "ESPERADO",
 };
 
+function pctDelTotal(valor: number, total: number): number {
+  return total > 0 ? Math.round((valor / total) * 1000) / 10 : 0;
+}
+
+function formatPct(n: number): string {
+  return Number.isInteger(n) ? `${n}%` : `${n.toFixed(1)}%`;
+}
+
 function DeltaBadge({ value, invert }: { value: number; invert?: boolean }) {
   if (value === 0) return <span className="text-[10px] text-foreground/50">=</span>;
   const positive = invert ? value < 0 : value > 0;
   const sign = value > 0 ? "+" : "";
+  const formatted = Number.isInteger(value) ? `${value}` : value.toFixed(1);
   return (
     <span
       className={`text-[10px] font-bold ${positive ? "text-[#2E7D32]" : "text-[#D32F2F]"}`}
     >
       {sign}
-      {value}
+      {formatted} pp
     </span>
   );
 }
@@ -36,7 +45,7 @@ export function nivelComparativaHref(getHref: (path: string) => string, key: KPI
 }
 
 export default function KPIComparativa({ comparativa, compact = false, getNivelHref }: Props) {
-  const { despegue2025, aterrizaje2026, delta } = comparativa;
+  const { despegue2025, aterrizaje2026 } = comparativa;
   const items = [
     { key: "requiereApoyo", label: "Apoyo", color: COLORS.requiereApoyo, invert: true },
     { key: "enDesarrollo", label: "Desarrollo", color: COLORS.enDesarrollo, invert: false },
@@ -51,6 +60,9 @@ export default function KPIComparativa({ comparativa, compact = false, getNivelH
   return (
     <div className={`grid grid-cols-3 gap-2.5 sm:gap-2 ${compact ? "" : "lg:gap-4"}`}>
       {items.map(({ key, label, color, invert }) => {
+        const pct2025 = pctDelTotal(despegue2025[key], despegue2025.total);
+        const pct2026 = pctDelTotal(aterrizaje2026[key], aterrizaje2026.total);
+        const deltaPct = Math.round((pct2026 - pct2025) * 10) / 10;
         const href = getNivelHref?.(key);
         const cardContent = (
           <>
@@ -63,13 +75,13 @@ export default function KPIComparativa({ comparativa, compact = false, getNivelH
               <div className="flex items-baseline justify-between gap-1 px-0.5">
                 <span className="shrink-0 text-[9px] uppercase text-foreground/50">2025</span>
                 <span className="min-w-0 truncate font-bold tabular-nums text-sm leading-none">
-                  {despegue2025[key].toLocaleString("es-MX")}
+                  {formatPct(pct2025)}
                 </span>
               </div>
               <div className="flex items-baseline justify-between gap-1 px-0.5">
                 <span className="shrink-0 text-[9px] uppercase text-foreground/50">2026</span>
                 <span className="min-w-0 truncate font-bold tabular-nums text-sm leading-none">
-                  {aterrizaje2026[key].toLocaleString("es-MX")}
+                  {formatPct(pct2026)}
                 </span>
               </div>
             </div>
@@ -79,20 +91,20 @@ export default function KPIComparativa({ comparativa, compact = false, getNivelH
               <div className="min-w-0">
                 <div className="text-[9px] uppercase text-foreground/50">2025</div>
                 <div className={`font-bold tabular-nums ${compact ? "text-sm" : "text-lg"}`}>
-                  {despegue2025[key].toLocaleString("es-MX")}
+                  {formatPct(pct2025)}
                 </div>
               </div>
               <div className="shrink-0 text-foreground/30">→</div>
               <div className="min-w-0">
                 <div className="text-[9px] uppercase text-foreground/50">2026</div>
                 <div className={`font-bold tabular-nums ${compact ? "text-sm" : "text-lg"}`}>
-                  {aterrizaje2026[key].toLocaleString("es-MX")}
+                  {formatPct(pct2026)}
                 </div>
               </div>
             </div>
 
             <div className="mt-1.5 sm:mt-1">
-              <DeltaBadge value={delta[key]} invert={invert} />
+              <DeltaBadge value={deltaPct} invert={invert} />
             </div>
           </>
         );
@@ -119,11 +131,16 @@ export function KPIComparativaResumen({ comparativa }: Props) {
       <span style={{ color: EVALUACIONES_META["despegue-2025"].color }} className="font-semibold">
         Despegue 2025:
       </span>{" "}
-      {d.total} alumnos ·{" "}
+      {formatPct(pctDelTotal(d.requiereApoyo, d.total))} apoyo ·{" "}
+      {formatPct(pctDelTotal(d.enDesarrollo, d.total))} desarrollo ·{" "}
+      {formatPct(pctDelTotal(d.esperado, d.total))} esperado
+      {" · "}
       <span style={{ color: EVALUACIONES_META["aterrizaje-2026"].color }} className="font-semibold">
         Aterrizaje 2026:
       </span>{" "}
-      {a.total} alumnos
+      {formatPct(pctDelTotal(a.requiereApoyo, a.total))} apoyo ·{" "}
+      {formatPct(pctDelTotal(a.enDesarrollo, a.total))} desarrollo ·{" "}
+      {formatPct(pctDelTotal(a.esperado, a.total))} esperado
     </p>
   );
 }

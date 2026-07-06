@@ -219,7 +219,7 @@ export default function DashboardHomeClient({ data, cobertura, isSuper, zonaForc
               ) : (
                 <>
                   <section className="chart-card flex shrink-0 flex-col p-3 md:min-h-0 md:shrink md:flex-1">
-                    <ChartBarrasReactivos fillHeight={isMdUp} porcentajes={porcentajesGlobales} totalAlumnos={totalAlumnos} title="Aciertos por reactivo" />
+                    <ChartBarrasReactivos fillHeight={isMdUp} porcentajes={porcentajesGlobales} title="Aciertos por reactivo" />
                   </section>
                   <section className="chart-card flex shrink-0 flex-col p-3 md:min-h-0 md:shrink md:flex-1">
                     <ChartPastelNiveles fillHeight={isMdUp} requiereApoyo={totalReq} enDesarrollo={totalDes} esperado={totalEsp} title="Por nivel" />

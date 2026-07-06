@@ -81,7 +81,7 @@ export default function GrupoPageClient({ cct, grupo, data }: { cct: string; gru
               ))}
             </section>
             <section className="card-ios shrink-0 rounded-2xl border p-3">
-              <ChartBarrasReactivos porcentajes={grupoData.porcentajesReactivos} totalAlumnos={grupoData.total} title="Aciertos por reactivo" />
+              <ChartBarrasReactivos porcentajes={grupoData.porcentajesReactivos} title="Aciertos por reactivo" />
             </section>
             <section className="hidden min-h-0 min-w-0 flex-1 flex-col md:flex">
               <TablaAlumnos alumnos={grupoData.alumnos} cct={cct} fillHeight />
