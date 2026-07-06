@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { COLORS } from "@/types/raf";
+import type { EvaluacionId } from "@/types/raf";
+import { EVALUACION_DESPEGUE_2025 } from "@/lib/evaluaciones";
 import { getReactivoInfo } from "@/lib/reactivos-matematicas";
 import ModalReactivo from "./ModalReactivo";
 import { useChartPlotSize } from "./useChartPlotSize";
@@ -19,6 +21,7 @@ function getColor(value: number) {
 interface Props {
   porcentajes: number[];
   title?: string;
+  evalId?: EvaluacionId;
   fillHeight?: boolean;
 }
 
@@ -34,7 +37,12 @@ function TooltipAciertos(props: { active?: boolean; payload?: { payload: { react
   );
 }
 
-export default function ChartBarrasReactivos({ porcentajes, title, fillHeight = false }: Props) {
+export default function ChartBarrasReactivos({
+  porcentajes,
+  title,
+  evalId = EVALUACION_DESPEGUE_2025,
+  fillHeight = false,
+}: Props) {
   const { ref, ready, width, height } = useChartPlotSize();
   const isTouch = usePrefersTouch();
   const [reactivoSeleccionado, setReactivoSeleccionado] = useState<number | null>(null);
@@ -81,7 +89,7 @@ export default function ChartBarrasReactivos({ porcentajes, title, fillHeight = 
     );
   };
 
-  const info = reactivoSeleccionado ? getReactivoInfo(reactivoSeleccionado) ?? null : null;
+  const info = reactivoSeleccionado ? getReactivoInfo(reactivoSeleccionado, evalId) ?? null : null;
 
   return (
     <div

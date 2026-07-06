@@ -10,8 +10,9 @@ import {
   type SortingState,
 } from "@tanstack/react-table";
 import { useState, useMemo } from "react";
-import type { AlumnoRAF, AlumnoComparativa } from "@/types/raf";
+import type { AlumnoRAF, AlumnoComparativa, EvaluacionId } from "@/types/raf";
 import { NIVEL_COLOR } from "@/types/raf";
+import { EVALUACION_ATERRIZAJE_2026, EVALUACION_DESPEGUE_2025 } from "@/lib/evaluaciones";
 import ModalDetalleAlumno from "@/app/components/ModalDetalleAlumno";
 
 const columnHelper = createColumnHelper<AlumnoRAF>();
@@ -20,6 +21,7 @@ interface Props {
   alumnos: AlumnoRAF[];
   cct?: string;
   comparativa?: AlumnoComparativa[];
+  evalId?: EvaluacionId;
   fillHeight?: boolean;
 }
 
@@ -48,7 +50,7 @@ function NivelBadge({ nivel }: { nivel: string }) {
 }
 
 function TablaComparativa({ alumnos, cct, fillHeight = false }: { alumnos: AlumnoComparativa[]; cct?: string; fillHeight?: boolean }) {
-  const [activo, setActivo] = useState<AlumnoRAF | null>(null);
+  const [activo, setActivo] = useState<{ alumno: AlumnoRAF; evalId: EvaluacionId } | null>(null);
   const sorted = useMemo(
     () => [...alumnos].sort((a, b) => `${a.apellido} ${a.nombre}`.localeCompare(`${b.apellido} ${b.nombre}`, "es")),
     [alumnos]
@@ -81,11 +83,11 @@ function TablaComparativa({ alumnos, cct, fillHeight = false }: { alumnos: Alumn
                     <div className="font-medium">{r.nombre} {r.apellido}</div>
                     <div className="text-[10px] opacity-60">{r.grupo}</div>
                   </td>
-                  <td className="p-2 text-center cursor-pointer" onClick={() => r.alumno2025 && setActivo(r.alumno2025)}>
+                  <td className="p-2 text-center cursor-pointer" onClick={() => r.alumno2025 && setActivo({ alumno: r.alumno2025, evalId: EVALUACION_DESPEGUE_2025 })}>
                     {r.alumno2025?.porcentaje != null ? `${r.alumno2025.porcentaje}%` : "—"}
                   </td>
                   <td className="p-2 text-center">{r.alumno2025 ? <NivelBadge nivel={r.alumno2025.nivel} /> : "—"}</td>
-                  <td className="p-2 text-center cursor-pointer" onClick={() => r.alumno2026 && setActivo(r.alumno2026)}>
+                  <td className="p-2 text-center cursor-pointer" onClick={() => r.alumno2026 && setActivo({ alumno: r.alumno2026, evalId: EVALUACION_ATERRIZAJE_2026 })}>
                     {r.alumno2026?.porcentaje != null ? `${r.alumno2026.porcentaje}%` : "—"}
                   </td>
                   <td className="p-2 text-center">{r.alumno2026 ? <NivelBadge nivel={r.alumno2026.nivel} /> : "—"}</td>
@@ -101,12 +103,17 @@ function TablaComparativa({ alumnos, cct, fillHeight = false }: { alumnos: Alumn
           </tbody>
         </table>
       </div>
-      <ModalDetalleAlumno alumno={activo} cct={cct} onClose={() => setActivo(null)} />
+      <ModalDetalleAlumno
+        alumno={activo?.alumno ?? null}
+        evalId={activo?.evalId}
+        cct={cct}
+        onClose={() => setActivo(null)}
+      />
     </div>
   );
 }
 
-export default function TablaAlumnos({ alumnos, cct, comparativa, fillHeight = false }: Props) {
+export default function TablaAlumnos({ alumnos, cct, comparativa, evalId = EVALUACION_DESPEGUE_2025, fillHeight = false }: Props) {
   if (comparativa) return <TablaComparativa alumnos={comparativa} cct={cct} fillHeight={fillHeight} />;
 
   const [sorting, setSorting] = useState<SortingState>([{ id: "porcentaje", desc: true }]);
@@ -228,7 +235,12 @@ export default function TablaAlumnos({ alumnos, cct, comparativa, fillHeight = f
           ))}
         </tbody>
       </table>
-      <ModalDetalleAlumno alumno={alumnoSeleccionado} cct={cct} onClose={() => setAlumnoSeleccionado(null)} />
+      <ModalDetalleAlumno
+        alumno={alumnoSeleccionado}
+        evalId={evalId}
+        cct={cct}
+        onClose={() => setAlumnoSeleccionado(null)}
+      />
     </div>
   );
 }

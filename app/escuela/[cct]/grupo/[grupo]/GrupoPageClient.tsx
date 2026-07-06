@@ -25,6 +25,7 @@ export default function GrupoPageClient({ cct, grupo, data }: { cct: string; gru
   const escuela2025 = getEscuelaFromEval(data, cct, EVALUACION_DESPEGUE_2025);
   const escuela2026 = getEscuelaFromEval(data, cct, EVALUACION_ATERRIZAJE_2026);
   const escuela = evalMode === "aterrizaje-2026" ? escuela2026 : escuela2025;
+  const evalId = evalMode === "aterrizaje-2026" ? EVALUACION_ATERRIZAJE_2026 : EVALUACION_DESPEGUE_2025;
   const grupoData = escuela?.grupos.find((g) => g.nombre === grupo);
   const comparativa = compararGrupo(data, cct, grupo);
 
@@ -81,10 +82,10 @@ export default function GrupoPageClient({ cct, grupo, data }: { cct: string; gru
               ))}
             </section>
             <section className="card-ios shrink-0 rounded-2xl border p-3">
-              <ChartBarrasReactivos porcentajes={grupoData.porcentajesReactivos} title="Aciertos por reactivo" />
+              <ChartBarrasReactivos porcentajes={grupoData.porcentajesReactivos} evalId={evalId} title="Aciertos por reactivo" />
             </section>
             <section className="hidden min-h-0 min-w-0 flex-1 flex-col md:flex">
-              <TablaAlumnos alumnos={grupoData.alumnos} cct={cct} fillHeight />
+              <TablaAlumnos alumnos={grupoData.alumnos} cct={cct} evalId={evalId} fillHeight />
             </section>
             <Link href={withReturnTo(alumnosHref, grupoHref)} className="nav-link-card link-ios shrink-0 md:hidden">
               Ver lista de alumnos ({total})

@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { NivelRAF } from "@/types/raf";
 import { NIVELES_CON_EXAMEN, NIVEL_COLOR } from "@/types/raf";
-import { parseModoVista } from "@/lib/evaluaciones";
+import { EVALUACION_ATERRIZAJE_2026, EVALUACION_DESPEGUE_2025, parseModoVista } from "@/lib/evaluaciones";
 import { appendNavParams } from "@/lib/evaluacion-url";
 import TablaAlumnosNivel from "@/app/components/TablaAlumnosNivel";
 import DropdownIos from "@/app/components/DropdownIos";
@@ -78,6 +78,8 @@ export default function PorNivelContent({
   const router = useRouter();
   const searchParams = useSearchParams();
   const evalModeFromUrl = parseModoVista(searchParams.get("eval"));
+  const evalIdLista =
+    evalModeFromUrl === "aterrizaje-2026" ? EVALUACION_ATERRIZAJE_2026 : EVALUACION_DESPEGUE_2025;
   const zonaParam = searchParams.get("zona");
   const zonaNum = zonaParam ? parseInt(zonaParam, 10) : null;
   const returnTo = searchParams.get("from");
@@ -189,6 +191,7 @@ export default function PorNivelContent({
             <TablaAlumnosNivel
               alumnosConCct={alumnos}
               comparativa={evalMode === "comparar"}
+              evalId={evalIdLista}
               layout={expandedNivel ? "grid" : "column"}
               fillHeight={fillHeight}
               enlargedMobile={!!expandedNivel}

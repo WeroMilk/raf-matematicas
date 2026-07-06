@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import type { NivelRAF } from "@/types/raf";
+import type { NivelRAF, EvaluacionId } from "@/types/raf";
 import type { AlumnoRAF } from "@/types/raf";
+import { EVALUACION_ATERRIZAJE_2026, EVALUACION_DESPEGUE_2025 } from "@/lib/evaluaciones";
 import ModalDetalleAlumno from "@/app/components/ModalDetalleAlumno";
 import { inicialesAlumno, colorNivel } from "@/lib/avatar";
 
@@ -26,6 +27,7 @@ type Row = {
 interface Props {
   alumnosConCct: Row[];
   comparativa?: boolean;
+  evalId?: EvaluacionId;
   layout?: "column" | "grid";
   fillHeight?: boolean;
   enlargedMobile?: boolean;
@@ -72,12 +74,14 @@ function textoCambio(r: Row): { text: string; color: string } {
 export default function TablaAlumnosNivel({
   alumnosConCct,
   comparativa = false,
+  evalId = EVALUACION_DESPEGUE_2025,
   layout = "column",
   fillHeight = false,
   enlargedMobile = false,
 }: Props) {
   const [filtro, setFiltro] = useState("");
   const [alumnoSeleccionado, setAlumnoSeleccionado] = useState<AlumnoRAF | null>(null);
+  const [evalIdSeleccionado, setEvalIdSeleccionado] = useState<EvaluacionId>(evalId);
   const [cctSeleccionado, setCctSeleccionado] = useState<string | undefined>(undefined);
 
   const filtrados = useMemo(
@@ -94,9 +98,14 @@ export default function TablaAlumnosNivel({
 
   const total = filtrados.length;
 
-  const abrirAlumno = (alumno: AlumnoRAF | null | undefined, cct: string) => {
+  const abrirAlumno = (
+    alumno: AlumnoRAF | null | undefined,
+    cct: string,
+    evalAlumno: EvaluacionId = evalId
+  ) => {
     if (!alumno) return;
     setAlumnoSeleccionado(alumno);
+    setEvalIdSeleccionado(evalAlumno);
     setCctSeleccionado(cct);
   };
 
@@ -179,7 +188,11 @@ export default function TablaAlumnosNivel({
                       <button
                         type="button"
                         onClick={() =>
-                          abrirAlumno(r.alumno.alumno2025 ?? r.alumno.alumno2026 ?? alumnoFallback(r), r.cct)
+                          abrirAlumno(
+                            r.alumno.alumno2025 ?? r.alumno.alumno2026 ?? alumnoFallback(r),
+                            r.cct,
+                            r.alumno.alumno2025 ? EVALUACION_DESPEGUE_2025 : EVALUACION_ATERRIZAJE_2026
+                          )
                         }
                         className="text-left font-medium leading-snug hover:underline"
                       >
@@ -192,7 +205,7 @@ export default function TablaAlumnosNivel({
                         <td className="px-2 py-1.5 text-center">
                           <button
                             type="button"
-                            onClick={() => abrirAlumno(r.alumno.alumno2025, r.cct)}
+                            onClick={() => abrirAlumno(r.alumno.alumno2025, r.cct, EVALUACION_DESPEGUE_2025)}
                             className="font-semibold text-[#4472C4] hover:underline"
                           >
                             {fmtPct(r.alumno.porcentaje2025)}
@@ -201,7 +214,7 @@ export default function TablaAlumnosNivel({
                         <td className="px-2 py-1.5 text-center">
                           <button
                             type="button"
-                            onClick={() => abrirAlumno(r.alumno.alumno2026, r.cct)}
+                            onClick={() => abrirAlumno(r.alumno.alumno2026, r.cct, EVALUACION_ATERRIZAJE_2026)}
                             className="font-semibold text-[#2E7D32] hover:underline"
                           >
                             {fmtPct(r.alumno.porcentaje2026)}
@@ -242,7 +255,13 @@ export default function TablaAlumnosNivel({
               >
                 <button
                   type="button"
-                  onClick={() => abrirAlumno(r.alumno.alumno2025 ?? r.alumno.alumno2026 ?? alumnoFallback(r), r.cct)}
+                  onClick={() =>
+                    abrirAlumno(
+                      r.alumno.alumno2025 ?? r.alumno.alumno2026 ?? alumnoFallback(r),
+                      r.cct,
+                      r.alumno.alumno2025 ? EVALUACION_DESPEGUE_2025 : EVALUACION_ATERRIZAJE_2026
+                    )
+                  }
                   className="flex w-full items-center gap-3 text-left"
                 >
                   <span
@@ -273,7 +292,7 @@ export default function TablaAlumnosNivel({
                   >
                     <button
                       type="button"
-                      onClick={() => abrirAlumno(r.alumno.alumno2025, r.cct)}
+                      onClick={() => abrirAlumno(r.alumno.alumno2025, r.cct, EVALUACION_DESPEGUE_2025)}
                       className={`rounded-lg bg-[#4472C4]/8 text-center ${enlargedMobile ? "px-2 py-2.5" : "px-1.5 py-1.5"}`}
                     >
                       <div className={`font-medium uppercase tracking-wide text-[#4472C4] ${enlargedMobile ? "text-[10px]" : "text-[9px]"}`}>2025</div>
@@ -281,7 +300,7 @@ export default function TablaAlumnosNivel({
                     </button>
                     <button
                       type="button"
-                      onClick={() => abrirAlumno(r.alumno.alumno2026, r.cct)}
+                      onClick={() => abrirAlumno(r.alumno.alumno2026, r.cct, EVALUACION_ATERRIZAJE_2026)}
                       className={`rounded-lg bg-[#2E7D32]/8 text-center ${enlargedMobile ? "px-2 py-2.5" : "px-1.5 py-1.5"}`}
                     >
                       <div className={`font-medium uppercase tracking-wide text-[#2E7D32] ${enlargedMobile ? "text-[10px]" : "text-[9px]"}`}>2026</div>
@@ -314,6 +333,7 @@ export default function TablaAlumnosNivel({
 
       <ModalDetalleAlumno
         alumno={alumnoSeleccionado}
+        evalId={evalIdSeleccionado}
         cct={cctSeleccionado}
         onClose={() => {
           setAlumnoSeleccionado(null);

@@ -61,6 +61,7 @@ export default function DashboardHomeClient({ data, cobertura, isSuper, zonaForc
   const escuelas2026 = useMemo(() => filtrarZona(getEscuelasForEval(data, EVALUACION_ATERRIZAJE_2026), zonaSeleccionada), [data, zonaSeleccionada]);
 
   const escuelas = evalMode === "aterrizaje-2026" ? escuelas2026 : escuelas2025;
+  const evalId = evalMode === "aterrizaje-2026" ? EVALUACION_ATERRIZAJE_2026 : EVALUACION_DESPEGUE_2025;
   const evalNombre = evalMode === "aterrizaje-2026" ? EVALUACIONES_META[EVALUACION_ATERRIZAJE_2026].nombre : EVALUACIONES_META[EVALUACION_DESPEGUE_2025].nombre;
 
   const navHref = (path: string) => appendNavParams(path, { evalMode, zona: zonaSeleccionada });
@@ -219,7 +220,7 @@ export default function DashboardHomeClient({ data, cobertura, isSuper, zonaForc
               ) : (
                 <>
                   <section className="chart-card flex shrink-0 flex-col p-3 md:min-h-0 md:shrink md:flex-1">
-                    <ChartBarrasReactivos fillHeight={isMdUp} porcentajes={porcentajesGlobales} title="Aciertos por reactivo" />
+                    <ChartBarrasReactivos fillHeight={isMdUp} porcentajes={porcentajesGlobales} evalId={evalId} title="Aciertos por reactivo" />
                   </section>
                   <section className="chart-card flex shrink-0 flex-col p-3 md:min-h-0 md:shrink md:flex-1">
                     <ChartPastelNiveles fillHeight={isMdUp} requiereApoyo={totalReq} enDesarrollo={totalDes} esperado={totalEsp} title="Por nivel" />

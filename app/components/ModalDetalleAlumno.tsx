@@ -2,8 +2,9 @@
 
 import { useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
-import type { AlumnoRAF } from "@/types/raf";
+import type { AlumnoRAF, EvaluacionId } from "@/types/raf";
 import { NIVEL_COLOR } from "@/types/raf";
+import { EVALUACION_DESPEGUE_2025, EVALUACIONES_META } from "@/lib/evaluaciones";
 import { getReactivoInfo } from "@/lib/reactivos-matematicas";
 import {
   calificarAlumno,
@@ -18,10 +19,16 @@ import ModalCloseFooter from "./ModalCloseFooter";
 interface Props {
   alumno: AlumnoRAF | null;
   cct?: string;
+  evalId?: EvaluacionId;
   onClose: () => void;
 }
 
-export default function ModalDetalleAlumno({ alumno, cct, onClose }: Props) {
+export default function ModalDetalleAlumno({
+  alumno,
+  cct,
+  evalId = EVALUACION_DESPEGUE_2025,
+  onClose,
+}: Props) {
   const handleClose = useCallback(() => onClose(), [onClose]);
 
   useEffect(() => {
@@ -49,8 +56,9 @@ export default function ModalDetalleAlumno({ alumno, cct, onClose }: Props) {
     nivel: nivelCalculado,
     usaMarcas,
     usaPorcentajeOficial,
-  } = calificarAlumno(alumno);
+  } = calificarAlumno(alumno, evalId);
   const formatoCX = usaFormatoCX(respuestas);
+  const evalLabel = EVALUACIONES_META[evalId].nombreCorto;
 
   const modalContent = (
     <div
@@ -70,6 +78,7 @@ export default function ModalDetalleAlumno({ alumno, cct, onClose }: Props) {
         >
           <h2 id="modal-alumno-titulo" className="text-lg font-semibold">
             {alumno.nombre} {alumno.apellido}
+            <span className="mt-0.5 block text-xs font-medium text-white/85">{evalLabel}</span>
           </h2>
           <button
             type="button"
@@ -129,7 +138,7 @@ export default function ModalDetalleAlumno({ alumno, cct, onClose }: Props) {
                 {Array.from({ length: NUM_REACTIVOS_MATEMATICAS }, (_, i) => {
                   const num = i + 1;
                   const resp = (respuestas[i] ?? "-").toUpperCase().trim();
-                  const info = getReactivoInfo(num);
+                  const info = getReactivoInfo(num, evalId);
                   const correcta = info?.respuestaCorrecta ?? "";
                   const sinResponder = resp === "-" || resp === "";
                   const porMarca = esCorrectoPorMarca(marcas[i]);
@@ -182,7 +191,7 @@ export default function ModalDetalleAlumno({ alumno, cct, onClose }: Props) {
                   )}
                   <div className="space-y-1">
                     {errores.map((e) => {
-                      const info = getReactivoInfo(e.num);
+                      const info = getReactivoInfo(e.num, evalId);
                       return (
                         <div key={e.num} className="flex items-center gap-2 text-xs">
                           <span className="font-medium">R{e.num}:</span>

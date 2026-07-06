@@ -5,8 +5,23 @@
 
 export const NUM_REACTIVOS_MATEMATICAS = 12;
 
-/** Respuestas correctas RAF Matemáticas (R1–R12) — referencia para mostrar clave en UI */
-export const RESPUESTAS_CORRECTAS = ["C", "B", "A", "B", "A", "A", "A", "A", "C", "D", "C", "C"];
+export const EVALUACION_DESPEGUE_2025 = "despegue-2025";
+export const EVALUACION_ATERRIZAJE_2026 = "aterrizaje-2026";
+
+/** Respuestas correctas RAF Despegue 2025 (R1–R12) */
+export const RESPUESTAS_CORRECTAS_DESPEGUE = ["C", "B", "A", "B", "A", "A", "A", "A", "C", "D", "C", "C"];
+
+/** Respuestas correctas RAF Aterrizaje 2026 (R1–R12) */
+export const RESPUESTAS_CORRECTAS_ATERRIZAJE = ["B", "A", "A", "C", "C", "C", "A", "C", "D", "C", "A", "C"];
+
+/** @deprecated Usar getRespuestasCorrectas(evalId) */
+export const RESPUESTAS_CORRECTAS = RESPUESTAS_CORRECTAS_DESPEGUE;
+
+export function getRespuestasCorrectas(evalId = EVALUACION_DESPEGUE_2025) {
+  return evalId === EVALUACION_ATERRIZAJE_2026
+    ? RESPUESTAS_CORRECTAS_ATERRIZAJE
+    : RESPUESTAS_CORRECTAS_DESPEGUE;
+}
 
 const OPCIONES_VALIDAS = new Set(["A", "B", "C", "D"]);
 
@@ -62,7 +77,14 @@ export function calcularPorcentajeDesdeMarcas(marcas, points) {
 }
 
 /** Califica con marcas C/X del export (prioridad sobre clave estática). */
-export function calificarDesdeMarcas(respuestas, marcas, porcentajeGuardado = null, numReactivos = NUM_REACTIVOS_MATEMATICAS) {
+export function calificarDesdeMarcas(
+  respuestas,
+  marcas,
+  porcentajeGuardado = null,
+  evalId = EVALUACION_DESPEGUE_2025,
+  numReactivos = NUM_REACTIVOS_MATEMATICAS
+) {
+  const clave = getRespuestasCorrectas(evalId);
   const aciertos = [];
   let totalCalificados = 0;
   let totalCorrectas = 0;
@@ -87,16 +109,21 @@ export function calificarDesdeMarcas(respuestas, marcas, porcentajeGuardado = nu
   const nivel = sinExamen ? "REQUIERE APOYO" : obtenerNivelDesdePorcentaje(porcentaje);
   const denominador = totalCalificados > 0 ? totalCalificados : numReactivos;
 
-  return { aciertos, totalCorrectas, totalCalificados: denominador, sinExamen, porcentaje, nivel };
+  return { aciertos, totalCorrectas, totalCalificados: denominador, sinExamen, porcentaje, nivel, clave };
 }
 
-/** Califica respuestas contra la clave RAF Matemáticas (siempre /12). */
-export function calificarRespuestas(respuestas, numReactivos = NUM_REACTIVOS_MATEMATICAS) {
+/** Califica respuestas contra la clave del examen indicado (siempre /12). */
+export function calificarRespuestas(
+  respuestas,
+  evalId = EVALUACION_DESPEGUE_2025,
+  numReactivos = NUM_REACTIVOS_MATEMATICAS
+) {
+  const clave = getRespuestasCorrectas(evalId);
   const aciertos = [];
   const formatoCX = usaFormatoCX(respuestas);
 
   for (let i = 0; i < numReactivos; i++) {
-    const correcta = RESPUESTAS_CORRECTAS[i];
+    const correcta = clave[i];
     if (!correcta) continue;
     const resp = (respuestas[i] ?? "-").toUpperCase().trim();
     const sinResponder = resp === "-" || resp === "";
@@ -125,15 +152,15 @@ export function calificarRespuestas(respuestas, numReactivos = NUM_REACTIVOS_MAT
   };
 }
 
-export function calificarAlumno(alumno) {
+export function calificarAlumno(alumno, evalId = EVALUACION_DESPEGUE_2025) {
   const respuestas = alumno.respuestas ?? [];
   const marcas = alumno.marcas ?? [];
 
   if (tieneMarcasCalificadas(marcas)) {
-    return calificarDesdeMarcas(respuestas, marcas, alumno.porcentaje);
+    return calificarDesdeMarcas(respuestas, marcas, alumno.porcentaje, evalId);
   }
 
-  const desdeStu = calificarRespuestas(respuestas);
+  const desdeStu = calificarRespuestas(respuestas, evalId);
   if (alumno.porcentaje != null && !desdeStu.sinExamen) {
     return {
       ...desdeStu,

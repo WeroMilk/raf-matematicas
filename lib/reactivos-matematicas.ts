@@ -1,3 +1,5 @@
+import type { EvaluacionId } from "@/types/raf";
+
 /** Metadata de cada reactivo del diagnóstico RAF Matemáticas */
 
 export interface ReactivoInfo {
@@ -9,7 +11,8 @@ export interface ReactivoInfo {
   argumentacion: string;
 }
 
-export const REACTIVOS_MATEMATICAS: ReactivoInfo[] = [
+/** RAF Despegue 2025 — banco original (no modificar). */
+export const REACTIVOS_DESPEGUE_2025: ReactivoInfo[] = [
   {
     numero: 1,
     pregunta: "Un grupo de niños recolectó 126 manzanas en un árbol y 97 manzanas en otro árbol. ¿Cuántas manzanas recolectaron en total?",
@@ -168,6 +171,197 @@ export const REACTIVOS_MATEMATICAS: ReactivoInfo[] = [
   },
 ];
 
-export function getReactivoInfo(numero: number): ReactivoInfo | undefined {
-  return REACTIVOS_MATEMATICAS.find((r) => r.numero === numero);
+/** RAF Aterrizaje 2026 — Examen Final RAF Matemáticas. */
+export const REACTIVOS_ATERRIZAJE_2026: ReactivoInfo[] = [
+  {
+    numero: 1,
+    pregunta:
+      "En una granja hay 148 gallinas y 92 patos. ¿Cuántas aves hay en total?",
+    opciones: [
+      { letra: "a", texto: "230" },
+      { letra: "b", texto: "240" },
+      { letra: "c", texto: "250" },
+      { letra: "d", texto: "210" },
+    ],
+    respuestaCorrecta: "B",
+    evalua: "Suma de números naturales",
+    argumentacion: "Para responder acertadamente, el alumno efectúa la suma de números naturales.",
+  },
+  {
+    numero: 2,
+    pregunta:
+      "En una tienda había 350 dulces y se vendieron 128. ¿Cuántos dulces quedaron?",
+    opciones: [
+      { letra: "a", texto: "222" },
+      { letra: "b", texto: "232" },
+      { letra: "c", texto: "228" },
+      { letra: "d", texto: "200" },
+    ],
+    respuestaCorrecta: "A",
+    evalua: "Resta de números naturales",
+    argumentacion: "Para responder acertadamente, el alumno efectúa la resta de números naturales.",
+  },
+  {
+    numero: 3,
+    pregunta:
+      "Una caja contiene 24 paquetes de jugo y cada paquete tiene 10 jugos. ¿Cuántos jugos hay en total?",
+    opciones: [
+      { letra: "a", texto: "240" },
+      { letra: "b", texto: "220" },
+      { letra: "c", texto: "200" },
+      { letra: "d", texto: "250" },
+    ],
+    respuestaCorrecta: "A",
+    evalua: "Multiplicación de números naturales",
+    argumentacion: "Para responder acertadamente, el alumno efectúa la multiplicación de números naturales.",
+  },
+  {
+    numero: 4,
+    pregunta:
+      "Si tienes 72 pelotas de ping pong y quieres repartirlas equitativamente entre 6 amigos, ¿cuántas pelotas le tocan a cada amigo?",
+    opciones: [
+      { letra: "a", texto: "10" },
+      { letra: "b", texto: "11" },
+      { letra: "c", texto: "12" },
+      { letra: "d", texto: "14" },
+    ],
+    respuestaCorrecta: "C",
+    evalua: "División (cociente entero)",
+    argumentacion: "Para responder acertadamente, el alumno efectúa la división de números naturales.",
+  },
+  {
+    numero: 5,
+    pregunta:
+      "En un evento se colocará una garrafa de agua de 4.25 litros en cada una de las 12 mesas. ¿Cuántos litros de agua se necesitan?",
+    opciones: [
+      { letra: "a", texto: "50.00 litros" },
+      { letra: "b", texto: "50.90 litros" },
+      { letra: "c", texto: "51.00 litros" },
+      { letra: "d", texto: "510.0 litros" },
+    ],
+    respuestaCorrecta: "C",
+    evalua: "Multiplicación con números decimales",
+    argumentacion: "Para responder acertadamente, el alumno efectúa la multiplicación de números decimales.",
+  },
+  {
+    numero: 6,
+    pregunta:
+      "Martha compró 3.25 kg de azúcar y 2.75 kg de harina. ¿Cuántos kilogramos compró en total?",
+    opciones: [
+      { letra: "a", texto: "5.00 kg" },
+      { letra: "b", texto: "5.25 kg" },
+      { letra: "c", texto: "6.00 kg" },
+      { letra: "d", texto: "6.25 kg" },
+    ],
+    respuestaCorrecta: "C",
+    evalua: "Suma de números decimales",
+    argumentacion: "Para responder acertadamente, el alumno efectúa la suma de números decimales.",
+  },
+  {
+    numero: 7,
+    pregunta: "Una maestra dictó la operación 5.2 – 0.04. ¿Cuál es el resultado?",
+    opciones: [
+      { letra: "a", texto: "5.16" },
+      { letra: "b", texto: "5.18" },
+      { letra: "c", texto: "4.98" },
+      { letra: "d", texto: "5.02" },
+    ],
+    respuestaCorrecta: "A",
+    evalua: "Resta de números decimales",
+    argumentacion: "Para responder acertadamente, el alumno efectúa la resta de números decimales.",
+  },
+  {
+    numero: 8,
+    pregunta:
+      "Laura tiene 9.6 metros de tela y quiere hacer cortinas usando 1.2 m por cortina. ¿Cuántas cortinas puede hacer?",
+    opciones: [
+      { letra: "a", texto: "6" },
+      { letra: "b", texto: "7" },
+      { letra: "c", texto: "8" },
+      { letra: "d", texto: "9" },
+    ],
+    respuestaCorrecta: "C",
+    evalua: "División con números decimales",
+    argumentacion: "Para responder acertadamente, el alumno efectúa la división de números decimales.",
+  },
+  {
+    numero: 9,
+    pregunta:
+      "Juan corrió 84 km por la mañana y 34 km por la noche. ¿Cuánto corrió en total?",
+    opciones: [
+      { letra: "a", texto: "812 km" },
+      { letra: "b", texto: "832 km" },
+      { letra: "c", texto: "114 km" },
+      { letra: "d", texto: "118 km" },
+    ],
+    respuestaCorrecta: "D",
+    evalua: "Suma de números naturales",
+    argumentacion: "Para responder acertadamente, el alumno efectúa la suma de números naturales.",
+  },
+  {
+    numero: 10,
+    pregunta:
+      "La mamá de Kike compró un queso de 3 kg. Para preparar caldo de queso utilizó 3/4 kg. ¿Cuántos kilogramos le quedaron después de hacer el caldo?",
+    opciones: [
+      { letra: "a", texto: "1/4 kg" },
+      { letra: "b", texto: "5/4 kg" },
+      { letra: "c", texto: "9/4 kg" },
+      { letra: "d", texto: "13/4 kg" },
+    ],
+    respuestaCorrecta: "C",
+    evalua: "Resta de fracciones",
+    argumentacion:
+      "Para responder acertadamente, el alumno convierte un número entero en fracción y efectúa la resta de números fraccionarios.",
+  },
+  {
+    numero: 11,
+    pregunta:
+      "El área de un rectángulo se calcula multiplicando la base por la altura. Si un rectángulo tiene una base de 17 m y una altura de 20 m, ¿cuál es su área?",
+    opciones: [
+      { letra: "a", texto: "340 m²" },
+      { letra: "b", texto: "403 m²" },
+      { letra: "c", texto: "245 m²" },
+      { letra: "d", texto: "524 m²" },
+    ],
+    respuestaCorrecta: "A",
+    evalua: "Multiplicación de números naturales",
+    argumentacion: "Para responder acertadamente, el alumno efectúa la multiplicación para obtener el área del rectángulo.",
+  },
+  {
+    numero: 12,
+    pregunta:
+      "En una fiesta prepararon 36 litros de jugo para servir en vasos que tienen capacidad de 2 litros. ¿Cuántos vasos se pueden llenar completamente con el jugo disponible?",
+    opciones: [
+      { letra: "a", texto: "6" },
+      { letra: "b", texto: "12" },
+      { letra: "c", texto: "18" },
+      { letra: "d", texto: "24" },
+    ],
+    respuestaCorrecta: "C",
+    evalua: "División de números naturales",
+    argumentacion: "Para responder acertadamente, el alumno efectúa la división de números naturales.",
+  },
+];
+
+/** @deprecated Usar REACTIVOS_DESPEGUE_2025 o getReactivosPorEvaluacion */
+export const REACTIVOS_MATEMATICAS = REACTIVOS_DESPEGUE_2025;
+
+const REACTIVOS_POR_EVAL = {
+  "despegue-2025": REACTIVOS_DESPEGUE_2025,
+  "aterrizaje-2026": REACTIVOS_ATERRIZAJE_2026,
+} satisfies Record<EvaluacionId, ReactivoInfo[]>;
+
+export function getReactivosPorEvaluacion(evalId: EvaluacionId): ReactivoInfo[] {
+  return REACTIVOS_POR_EVAL[evalId];
+}
+
+export function getClaveRespuestas(evalId: EvaluacionId): string[] {
+  return getReactivosPorEvaluacion(evalId).map((r) => r.respuestaCorrecta);
+}
+
+export function getReactivoInfo(
+  numero: number,
+  evalId: EvaluacionId = "despegue-2025"
+): ReactivoInfo | undefined {
+  return getReactivosPorEvaluacion(evalId).find((r) => r.numero === numero);
 }

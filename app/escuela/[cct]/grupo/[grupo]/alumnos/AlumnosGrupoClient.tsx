@@ -26,6 +26,7 @@ export default function AlumnosGrupoClient({ cct, grupo, data }: Props) {
   const escuela2025 = getEscuelaFromEval(data, cct, EVALUACION_DESPEGUE_2025);
   const escuela2026 = getEscuelaFromEval(data, cct, EVALUACION_ATERRIZAJE_2026);
   const escuela = evalMode === "aterrizaje-2026" ? escuela2026 : escuela2025;
+  const evalId = evalMode === "aterrizaje-2026" ? EVALUACION_ATERRIZAJE_2026 : EVALUACION_DESPEGUE_2025;
   const grupoData = escuela?.grupos.find((g) => g.nombre === grupo);
   const comparativa = compararGrupo(data, cct, grupo);
 
@@ -66,7 +67,7 @@ export default function AlumnosGrupoClient({ cct, grupo, data }: Props) {
         </p>
       </PageHeader>
       <section className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <TablaAlumnos alumnos={grupoData.alumnos} cct={cct} fillHeight />
+        <TablaAlumnos alumnos={grupoData.alumnos} cct={cct} evalId={evalId} fillHeight />
       </section>
     </div>
   );

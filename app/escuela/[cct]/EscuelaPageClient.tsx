@@ -48,6 +48,7 @@ export default function EscuelaPageClient({ cct, data, backHref, showBack, cober
   const escuela2025 = getEscuelaFromEval(data, cct, EVALUACION_DESPEGUE_2025);
   const escuela2026 = getEscuelaFromEval(data, cct, EVALUACION_ATERRIZAJE_2026);
   const escuela = evalMode === "aterrizaje-2026" ? escuela2026 : escuela2025;
+  const evalId = evalMode === "aterrizaje-2026" ? EVALUACION_ATERRIZAJE_2026 : EVALUACION_DESPEGUE_2025;
   const ref = escuela ?? escuela2025 ?? escuela2026!;
   const cmp = compararEscuela(data, cct);
   const tend = tendenciaEscuela(data, cct);
@@ -127,7 +128,7 @@ export default function EscuelaPageClient({ cct, data, backHref, showBack, cober
             </section>
             <section className="flex shrink-0 flex-col gap-3 md:min-h-0 md:flex-1 md:flex-row">
               <section className="card-ios flex shrink-0 flex-col rounded-2xl border p-3 md:min-h-0 md:min-w-0 md:flex-1">
-                <ChartBarrasReactivos fillHeight={isMdUp} porcentajes={escuela.porcentajesReactivos} title="Aciertos por reactivo" />
+                <ChartBarrasReactivos fillHeight={isMdUp} porcentajes={escuela.porcentajesReactivos} evalId={evalId} title="Aciertos por reactivo" />
               </section>
               <section className="card-ios flex shrink-0 flex-col rounded-2xl border p-3 md:min-h-0 md:min-w-0 md:flex-1">
                 <ChartPastelNiveles fillHeight={isMdUp} requiereApoyo={escuela.requiereApoyo} enDesarrollo={escuela.enDesarrollo} esperado={escuela.esperado} title="Por nivel" />
