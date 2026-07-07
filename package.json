@@ -22,7 +22,8 @@
     "build:data:fusion": "node scripts/fusionar-base-lenguaje-matematicas.mjs",
     "build:data:2026": "node scripts/build-data-2026.mjs",
     "build:data:solo-matematicas": "node scripts/parse-excel-to-json.mjs",
-    "fusionar-marcas-2026": "node scripts/fusionar-marcas-2026.mjs"
+    "fusionar-marcas-2026": "node scripts/fusionar-marcas-2026.mjs",
+    "generate-pdf-comparativa": "node scripts/generar-pdf-comparativa.mjs"
   },
   "dependencies": {
     "@tanstack/react-table": "^8.21.3",
@@ -39,6 +40,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
+    "pdfkit": "^0.19.1",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
