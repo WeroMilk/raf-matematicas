@@ -11,6 +11,10 @@ export const metadata: Metadata = {
   title: "RAF Matemáticas | E.S.T.",
   description: "Resultados del examen diagnóstico RAF Matemáticas para maestros de Secundarias Técnicas, Hermosillo, Sonora.",
   applicationName: "RAF Matemáticas | E.S.T.",
+  icons: {
+    icon: [{ url: "/favicon.png", type: "image/png", sizes: "192x192" }],
+    apple: [{ url: "/apple-icon.png", type: "image/png", sizes: "180x180" }],
+  },
 };
 
 export const viewport: Viewport = {
@@ -33,6 +37,8 @@ export default async function RootLayout({
   return (
     <html lang="es">
       <head>
+        <link rel="icon" href="/favicon.png" type="image/png" sizes="192x192" />
+        <link rel="apple-touch-icon" href="/apple-icon.png" sizes="180x180" />
         <link rel="manifest" href="/manifest.json" />
         <link rel="preload" href="/Logtipo_EscudoColor.png" as="image" />
         <meta name="mobile-web-app-capable" content="yes" />
