@@ -19,14 +19,13 @@ function formatPct(n: number): string {
   return Number.isInteger(n) ? `${n}%` : `${n.toFixed(1)}%`;
 }
 
-function DeltaBadge({ value, invert }: { value: number; invert?: boolean }) {
+function DeltaBadge({ value }: { value: number }) {
   if (value === 0) return <span className="text-[10px] text-foreground/50">=</span>;
-  const positive = invert ? value < 0 : value > 0;
   const sign = value > 0 ? "+" : "";
   const formatted = Number.isInteger(value) ? `${value}` : value.toFixed(1);
   return (
     <span
-      className={`text-[10px] font-bold ${positive ? "text-[#2E7D32]" : "text-[#D32F2F]"}`}
+      className={`text-[10px] font-bold ${value > 0 ? "text-[#2E7D32]" : "text-[#D32F2F]"}`}
     >
       {sign}
       {formatted} pp
@@ -47,9 +46,9 @@ export function nivelComparativaHref(getHref: (path: string) => string, key: KPI
 export default function KPIComparativa({ comparativa, compact = false, getNivelHref }: Props) {
   const { despegue2025, aterrizaje2026 } = comparativa;
   const items = [
-    { key: "requiereApoyo", label: "Apoyo", color: COLORS.requiereApoyo, invert: true },
-    { key: "enDesarrollo", label: "Desarrollo", color: COLORS.enDesarrollo, invert: false },
-    { key: "esperado", label: "Esperado", color: COLORS.esperado, invert: false },
+    { key: "requiereApoyo", label: "Apoyo", color: COLORS.requiereApoyo },
+    { key: "enDesarrollo", label: "Desarrollo", color: COLORS.enDesarrollo },
+    { key: "esperado", label: "Esperado", color: COLORS.esperado },
   ] as const;
 
   const cardPad = compact ? "p-3 sm:p-2" : "p-3.5 sm:p-3 lg:p-4";
@@ -59,7 +58,7 @@ export default function KPIComparativa({ comparativa, compact = false, getNivelH
 
   return (
     <div className={`grid grid-cols-3 gap-2.5 sm:gap-2 ${compact ? "" : "lg:gap-4"}`}>
-      {items.map(({ key, label, color, invert }) => {
+      {items.map(({ key, label, color }) => {
         const pct2025 = pctDelTotal(despegue2025[key], despegue2025.total);
         const pct2026 = pctDelTotal(aterrizaje2026[key], aterrizaje2026.total);
         const deltaPct = Math.round((pct2026 - pct2025) * 10) / 10;
@@ -104,7 +103,7 @@ export default function KPIComparativa({ comparativa, compact = false, getNivelH
             </div>
 
             <div className="mt-1.5 sm:mt-1">
-              <DeltaBadge value={deltaPct} invert={invert} />
+              <DeltaBadge value={deltaPct} />
             </div>
           </>
         );

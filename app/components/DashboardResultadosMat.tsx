@@ -19,7 +19,6 @@ const NIVELES = [
     label: "Apoyo",
     desc: "Requiere apoyo",
     color: COLORS.requiereApoyo,
-    invert: true,
   },
   {
     key: "enDesarrollo" as const,
@@ -27,7 +26,6 @@ const NIVELES = [
     label: "Desarrollo",
     desc: "En desarrollo",
     color: COLORS.enDesarrollo,
-    invert: false,
   },
   {
     key: "esperado" as const,
@@ -35,14 +33,13 @@ const NIVELES = [
     label: "Esperado",
     desc: "Nivel esperado",
     color: COLORS.esperado,
-    invert: false,
   },
 ];
 
 export default function DashboardResultadosMat({ comparativa, getNivelHref }: Props) {
   const { despegue2025, aterrizaje2026 } = comparativa;
 
-  const filas = NIVELES.map(({ key, nivel, label, desc, color, invert }) => {
+  const filas = NIVELES.map(({ key, nivel, label, desc, color }) => {
     const pct2025 = pctDelTotal(despegue2025[key], despegue2025.total);
     const pct2026 = pctDelTotal(aterrizaje2026[key], aterrizaje2026.total);
     return {
@@ -53,7 +50,6 @@ export default function DashboardResultadosMat({ comparativa, getNivelHref }: Pr
       pct2025,
       pct2026,
       deltaPct: Math.round((pct2026 - pct2025) * 10) / 10,
-      invert,
       href: getNivelHref(key),
     };
   });

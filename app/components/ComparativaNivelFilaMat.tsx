@@ -1,6 +1,4 @@
 import Link from "next/link";
-import { COLORS } from "@/types/raf";
-import type { KPIComparativaNivelKey } from "@/app/components/KPIComparativa";
 
 interface Props {
   nivel: number;
@@ -10,14 +8,12 @@ interface Props {
   pct2025: number;
   pct2026: number;
   deltaPct: number;
-  invert: boolean;
   href: string;
 }
 
-function deltaClassPct(delta: number, invert: boolean): string {
+function deltaClassPct(delta: number): string {
   if (delta === 0) return "delta-neutral";
-  const positive = invert ? delta < 0 : delta > 0;
-  return positive ? "delta-up" : "delta-down";
+  return delta > 0 ? "delta-up" : "delta-down";
 }
 
 function formatDeltaPct(delta: number): string {
@@ -31,10 +27,9 @@ function formatPct(n: number): string {
   return Number.isInteger(rounded) ? `${rounded}%` : `${rounded.toFixed(1)}%`;
 }
 
-function deltaHint(invert: boolean, delta: number): string {
+function deltaHint(delta: number): string {
   if (delta === 0) return "Sin cambio";
-  const positive = invert ? delta < 0 : delta > 0;
-  return positive ? "Mejoró respecto a 2025" : "Empeoró respecto a 2025";
+  return delta > 0 ? "Aumentó el porcentaje" : "Disminuyó el porcentaje";
 }
 
 export default function ComparativaNivelFilaMat({
@@ -45,10 +40,9 @@ export default function ComparativaNivelFilaMat({
   pct2025,
   pct2026,
   deltaPct,
-  invert,
   href,
 }: Props) {
-  const deltaCls = deltaClassPct(deltaPct, invert);
+  const deltaCls = deltaClassPct(deltaPct);
 
   return (
     <Link href={href} className="comparativa-nivel-fila link-ios group" title={`Ver lista · ${label}`}>
@@ -59,7 +53,7 @@ export default function ComparativaNivelFilaMat({
             <p className="comparativa-nivel-fila__title">Nivel {nivel}: {label}</p>
             <p className="comparativa-nivel-fila__desc">{desc}</p>
           </div>
-          <div className={`comparativa-nivel-fila__delta ${deltaCls}`} title={deltaHint(invert, deltaPct)}>
+          <div className={`comparativa-nivel-fila__delta ${deltaCls}`} title={deltaHint(deltaPct)}>
             <span className="comparativa-nivel-fila__delta-value tabular-nums">{formatDeltaPct(deltaPct)}</span>
           </div>
         </div>
