@@ -25,10 +25,11 @@ export const MODOS_VISTA: { id: ModoVista; label: string; color: string }[] = [
   { id: "despegue-2025", label: "Despegue 2025", color: "#4472C4" },
   { id: "aterrizaje-2026", label: "Aterrizaje 2026", color: "#2E7D32" },
   { id: "comparar", label: "Comparar", color: "#7B2D3E" },
+  { id: "resultados", label: "Resultados", color: "#5C4A72" },
 ];
 
 export function parseModoVista(param: string | null): ModoVista {
-  if (param === "aterrizaje-2026" || param === "comparar") return param;
+  if (param === "aterrizaje-2026" || param === "comparar" || param === "resultados") return param;
   return "despegue-2025";
 }
 

@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import type { NivelRAF } from "@/types/raf";
+import type { NivelRAF, ModoVista } from "@/types/raf";
 import { NIVELES_CON_EXAMEN, NIVEL_COLOR } from "@/types/raf";
 import { EVALUACION_ATERRIZAJE_2026, EVALUACION_DESPEGUE_2025, parseModoVista } from "@/lib/evaluaciones";
 import { appendNavParams } from "@/lib/evaluacion-url";
@@ -30,7 +30,7 @@ interface Props {
   nivelFiltro?: NivelRAF | null;
   soloCct?: string;
   initialGrupo?: string;
-  evalMode?: "despegue-2025" | "aterrizaje-2026" | "comparar";
+  evalMode?: ModoVista;
   isSuper?: boolean;
   zonaForced?: number;
 }
@@ -78,8 +78,11 @@ export default function PorNivelContent({
   const router = useRouter();
   const searchParams = useSearchParams();
   const evalModeFromUrl = parseModoVista(searchParams.get("eval"));
+  const evalModeLista =
+    evalModeFromUrl === "resultados" ? "despegue-2025" : evalModeFromUrl;
+  const esComparativa = evalModeFromUrl === "comparar";
   const evalIdLista =
-    evalModeFromUrl === "aterrizaje-2026" ? EVALUACION_ATERRIZAJE_2026 : EVALUACION_DESPEGUE_2025;
+    evalModeLista === "aterrizaje-2026" ? EVALUACION_ATERRIZAJE_2026 : EVALUACION_DESPEGUE_2025;
   const zonaParam = searchParams.get("zona");
   const zonaNum = zonaParam ? parseInt(zonaParam, 10) : null;
   const returnTo = searchParams.get("from");
@@ -166,7 +169,7 @@ export default function PorNivelContent({
             : "Esperado";
       const conteos = conteosPorNivel[nivel];
       const tituloConteo =
-        evalMode === "comparar" && alumnosPorNivel2026
+        esComparativa && alumnosPorNivel2026
           ? `${label} · 2025: ${conteos.n2025} · 2026: ${conteos.n2026}`
           : `${label} (${alumnos.length})`;
 
@@ -190,7 +193,7 @@ export default function PorNivelContent({
           >
             <TablaAlumnosNivel
               alumnosConCct={alumnos}
-              comparativa={evalMode === "comparar"}
+              comparativa={esComparativa}
               evalId={evalIdLista}
               layout={expandedNivel ? "grid" : "column"}
               fillHeight={fillHeight}
@@ -304,7 +307,7 @@ export default function PorNivelContent({
                   <div className="flex min-w-0 flex-1 items-center gap-3 px-4 py-4">
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-semibold text-foreground">{label}</p>
-                      {evalMode === "comparar" && alumnosPorNivel2026 ? (
+                      {esComparativa && alumnosPorNivel2026 ? (
                         <div className="mt-2 flex flex-wrap gap-2">
                           <span className="rounded-full bg-[#4472C4]/12 px-2.5 py-1 text-[11px] font-medium text-[#4472C4]">
                             2025: {conteos.n2025.toLocaleString("es-MX")}

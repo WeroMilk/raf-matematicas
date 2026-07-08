@@ -77,7 +77,7 @@ export interface EscuelaResumen {
 
 export type EvaluacionId = "despegue-2025" | "aterrizaje-2026";
 
-export type ModoVista = EvaluacionId | "comparar";
+export type ModoVista = EvaluacionId | "comparar" | "resultados";
 
 export interface EvaluacionRAF {
   id: EvaluacionId;

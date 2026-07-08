@@ -54,7 +54,11 @@ export default function SelectorEvaluacion({ compact = false }: Props) {
             }`}
             style={active ? { backgroundColor: modo.color, boxShadow: active && modo.id === "comparar" ? "0 2px 8px rgba(123,45,62,0.35)" : undefined } : undefined}
           >
-            {compact && modo.id === "comparar" ? "vs" : modo.label}
+            {compact && modo.id === "comparar"
+              ? "vs"
+              : compact && modo.id === "resultados"
+                ? "Res."
+                : modo.label}
           </button>
         );
       })}
