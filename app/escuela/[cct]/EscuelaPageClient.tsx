@@ -81,7 +81,6 @@ export default function EscuelaPageClient({ cct, data, backHref, showBack, cober
           {evalMode === "comparar"
             ? `Comparativa · ${cmp.despegue2025.total} vs ${cmp.aterrizaje2026.total} alumnos`
             : `${total} alumnos · ${escuela?.grupos.length ?? 0} grupos · ${evalMode === "aterrizaje-2026" ? EVALUACIONES_META[EVALUACION_ATERRIZAJE_2026].nombreCorto : EVALUACIONES_META[EVALUACION_DESPEGUE_2025].nombreCorto}`}
-          {cobertura?.cobertura === "parcial" && evalMode === "aterrizaje-2026" && ` · Parcial (${cobertura.alumnos2026}/${cobertura.alumnos2025})`}
         </p>
       </PageHeader>
 
