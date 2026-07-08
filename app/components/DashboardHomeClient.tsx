@@ -22,6 +22,7 @@ import ComparativaLegend from "@/app/components/ComparativaLegend";
 import KPIComparativa, { KPIComparativaResumen, nivelComparativaHref } from "@/app/components/KPIComparativa";
 import DashboardResultadosMat from "@/app/components/DashboardResultadosMat";
 import { COLORS } from "@/types/raf";
+import { RAF_CONFIG } from "@/lib/raf-config";
 
 const NUM_REACTIVOS = 12;
 
@@ -94,7 +95,7 @@ export default function DashboardHomeClient({ data, cobertura, isSuper, zonaForc
       >
         <div className="page-header-text page-header-text--compact">
           <h1 className="page-title text-base lg:text-xl">RAF Matemáticas</h1>
-          <p className="page-subtitle text-xs lg:text-sm">Secundarias Técnicas</p>
+          <p className="page-subtitle text-xs lg:text-sm">{RAF_CONFIG.nombrePlural}</p>
         </div>
       </PageHeader>
 

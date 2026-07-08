@@ -6,11 +6,12 @@ import PageTransition from "./components/PageTransition";
 import MainWithAuth from "./components/MainWithAuth";
 import SuppressNoisyLogs from "./components/SuppressNoisyLogs";
 import { getSession } from "@/lib/auth";
+import { getTituloApp, getDescripcionApp } from "@/lib/raf-config";
 
 export const metadata: Metadata = {
-  title: "RAF Matemáticas | E.S.T.",
-  description: "Resultados del examen diagnóstico RAF Matemáticas para maestros de Secundarias Técnicas, Hermosillo, Sonora.",
-  applicationName: "RAF Matemáticas | E.S.T.",
+  title: getTituloApp(),
+  description: getDescripcionApp(),
+  applicationName: getTituloApp(),
   icons: {
     icon: [{ url: "/favicon.png", type: "image/png", sizes: "192x192" }],
     apple: [{ url: "/apple-icon.png", type: "image/png", sizes: "180x180" }],
