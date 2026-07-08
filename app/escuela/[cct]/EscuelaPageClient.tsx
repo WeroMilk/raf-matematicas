@@ -11,7 +11,7 @@ import { compararEscuela, tendenciaEscuela } from "@/lib/comparativa";
 import { appendNavParams, withReturnTo } from "@/lib/evaluacion-url";
 import ChartBarrasReactivos from "@/app/components/ChartBarrasReactivos";
 import ChartPastelNiveles from "@/app/components/ChartPastelNiveles";
-import ChartComparativaNiveles from "@/app/components/ChartComparativaNiveles";
+import ChartComparativaNiveles, { ChartBarrasReactivosComparativa } from "@/app/components/ChartComparativaNiveles";
 import KPIComparativa, { nivelComparativaHref } from "@/app/components/KPIComparativa";
 import SelectorEvaluacion from "@/app/components/SelectorEvaluacion";
 import BackButton from "@/app/components/BackButton";
@@ -98,17 +98,29 @@ export default function EscuelaPageClient({ cct, data, backHref, showBack, cober
                 />
               </div>
             )}
-            <section className="card-ios flex shrink-0 flex-col rounded-2xl border p-3 md:min-h-0 md:flex-1">
-              <ChartComparativaNiveles
-                fillHeight={isMdUp}
-                requiereApoyo2025={cmp.despegue2025.requiereApoyo}
-                enDesarrollo2025={cmp.despegue2025.enDesarrollo}
-                esperado2025={cmp.despegue2025.esperado}
-                requiereApoyo2026={cmp.aterrizaje2026.requiereApoyo}
-                enDesarrollo2026={cmp.aterrizaje2026.enDesarrollo}
-                esperado2026={cmp.aterrizaje2026.esperado}
-                title="Por nivel"
-              />
+            <section className="flex shrink-0 flex-col gap-3 md:min-h-0 md:flex-1 md:flex-row">
+              <section className="card-ios flex shrink-0 flex-col rounded-2xl border p-3 md:min-h-0 md:min-w-0 md:flex-1">
+                <ChartComparativaNiveles
+                  fillHeight={isMdUp}
+                  requiereApoyo2025={cmp.despegue2025.requiereApoyo}
+                  enDesarrollo2025={cmp.despegue2025.enDesarrollo}
+                  esperado2025={cmp.despegue2025.esperado}
+                  requiereApoyo2026={cmp.aterrizaje2026.requiereApoyo}
+                  enDesarrollo2026={cmp.aterrizaje2026.enDesarrollo}
+                  esperado2026={cmp.aterrizaje2026.esperado}
+                  title="Por nivel"
+                />
+              </section>
+              {cmp.aterrizaje2026.total > 0 && (
+                <section className="card-ios flex shrink-0 flex-col rounded-2xl border p-3 md:min-h-0 md:min-w-0 md:flex-1">
+                  <ChartBarrasReactivosComparativa
+                    fillHeight={isMdUp}
+                    porcentajes2025={escuela2025?.porcentajesReactivos ?? []}
+                    porcentajes2026={escuela2026?.porcentajesReactivos ?? []}
+                    title="Aciertos por reactivo"
+                  />
+                </section>
+              )}
             </section>
           </>
         ) : escuela ? (
