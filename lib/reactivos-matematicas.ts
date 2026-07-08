@@ -287,16 +287,16 @@ export const REACTIVOS_ATERRIZAJE_2026: ReactivoInfo[] = [
   {
     numero: 9,
     pregunta:
-      "Juan corrió 84 km por la mañana y 34 km por la noche. ¿Cuánto corrió en total?",
+      "Juan corrió 5/8 km por la mañana y 3/4 km por la noche. ¿Cuánto corrió en total?",
     opciones: [
-      { letra: "a", texto: "812 km" },
-      { letra: "b", texto: "832 km" },
-      { letra: "c", texto: "114 km" },
-      { letra: "d", texto: "118 km" },
+      { letra: "a", texto: "8/12 km" },
+      { letra: "b", texto: "8/32 km" },
+      { letra: "c", texto: "11/4 km" },
+      { letra: "d", texto: "11/8 km" },
     ],
     respuestaCorrecta: "D",
-    evalua: "Suma de números naturales",
-    argumentacion: "Para responder acertadamente, el alumno efectúa la suma de números naturales.",
+    evalua: "Suma de fracciones",
+    argumentacion: "Para responder acertadamente, el alumno efectúa la suma de números fraccionarios.",
   },
   {
     numero: 10,
@@ -316,21 +316,22 @@ export const REACTIVOS_ATERRIZAJE_2026: ReactivoInfo[] = [
   {
     numero: 11,
     pregunta:
-      "El área de un rectángulo se calcula multiplicando la base por la altura. Si un rectángulo tiene una base de 17 m y una altura de 20 m, ¿cuál es su área?",
+      "El área de un rectángulo se calcula multiplicando la base por la altura. Si un rectángulo tiene una base de 1/8 m y una altura de 3/5 m, ¿cuál es su área?",
     opciones: [
-      { letra: "a", texto: "340 m²" },
-      { letra: "b", texto: "403 m²" },
-      { letra: "c", texto: "245 m²" },
-      { letra: "d", texto: "524 m²" },
+      { letra: "a", texto: "3/40 m²" },
+      { letra: "b", texto: "40/3 m²" },
+      { letra: "c", texto: "24/5 m²" },
+      { letra: "d", texto: "5/24 m²" },
     ],
     respuestaCorrecta: "A",
-    evalua: "Multiplicación de números naturales",
-    argumentacion: "Para responder acertadamente, el alumno efectúa la multiplicación para obtener el área del rectángulo.",
+    evalua: "Multiplicación de fracciones",
+    argumentacion:
+      "Para responder acertadamente, el alumno efectúa la multiplicación de números fraccionarios y simplifica la fracción resultante.",
   },
   {
     numero: 12,
     pregunta:
-      "En una fiesta prepararon 36 litros de jugo para servir en vasos que tienen capacidad de 2 litros. ¿Cuántos vasos se pueden llenar completamente con el jugo disponible?",
+      "En una fiesta prepararon 36/8 de litros de jugo para servir en vasos que tienen capacidad de 2/8 de litro. ¿Cuántos vasos se pueden llenar completamente con el jugo disponible?",
     opciones: [
       { letra: "a", texto: "6" },
       { letra: "b", texto: "12" },
@@ -338,8 +339,8 @@ export const REACTIVOS_ATERRIZAJE_2026: ReactivoInfo[] = [
       { letra: "d", texto: "24" },
     ],
     respuestaCorrecta: "C",
-    evalua: "División de números naturales",
-    argumentacion: "Para responder acertadamente, el alumno efectúa la división de números naturales.",
+    evalua: "División de fracciones",
+    argumentacion: "Para responder acertadamente, el alumno efectúa la división de números fraccionarios.",
   },
 ];
 

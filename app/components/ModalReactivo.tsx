@@ -4,6 +4,7 @@ import { useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import type { ReactivoInfo } from "@/lib/reactivos-matematicas";
 import ModalCloseFooter from "./ModalCloseFooter";
+import TextoMatematico from "./TextoMatematico";
 
 interface Props {
   reactivo: ReactivoInfo | null;
@@ -73,7 +74,7 @@ export default function ModalReactivo({ reactivo, onClose }: Props) {
 
           {/* Pregunta */}
           <p className="mb-4 text-[15px] leading-relaxed text-[var(--foreground)]">
-            {reactivo.pregunta}
+            <TextoMatematico texto={reactivo.pregunta} />
           </p>
 
           {/* Opciones */}
@@ -97,7 +98,9 @@ export default function ModalReactivo({ reactivo, onClose }: Props) {
                   >
                     {op.letra.toUpperCase()}
                   </span>
-                  <span className="text-sm leading-relaxed">{op.texto}</span>
+                  <span className="text-sm leading-relaxed">
+                    <TextoMatematico texto={op.texto} />
+                  </span>
                   {esCorrecta && (
                     <span className="ml-auto shrink-0 text-xs font-medium text-[var(--esperado)]">✓ Correcta</span>
                   )}
@@ -110,7 +113,7 @@ export default function ModalReactivo({ reactivo, onClose }: Props) {
           <div className="mt-4 rounded-xl border border-[var(--esperado)]/40 bg-[var(--esperado)]/6 px-4 py-3">
             <p className="text-xs font-medium text-[var(--foreground)]/70">Respuesta correcta</p>
             <p className="mt-0.5 font-semibold text-[var(--esperado)]">
-              {reactivo.respuestaCorrecta}) {correcta?.texto}
+              {reactivo.respuestaCorrecta}) {correcta ? <TextoMatematico texto={correcta.texto} /> : null}
             </p>
           </div>
 

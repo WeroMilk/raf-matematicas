@@ -49,8 +49,10 @@ function NivelBadge({ nivel }: { nivel: string }) {
   );
 }
 
+type VistaModal = "comparar" | EvaluacionId;
+
 function TablaComparativa({ alumnos, cct, fillHeight = false }: { alumnos: AlumnoComparativa[]; cct?: string; fillHeight?: boolean }) {
-  const [activo, setActivo] = useState<{ alumno: AlumnoRAF; evalId: EvaluacionId } | null>(null);
+  const [activo, setActivo] = useState<{ row: AlumnoComparativa; vistaInicial: VistaModal } | null>(null);
   const sorted = useMemo(
     () => [...alumnos].sort((a, b) => `${a.apellido} ${a.nombre}`.localeCompare(`${b.apellido} ${b.nombre}`, "es")),
     [alumnos]
@@ -80,14 +82,26 @@ function TablaComparativa({ alumnos, cct, fillHeight = false }: { alumnos: Alumn
               return (
                 <tr key={`${r.nombre}-${r.apellido}`} className="border-b hover:bg-[var(--fill-tertiary)]">
                   <td className="p-2">
-                    <div className="font-medium">{r.nombre} {r.apellido}</div>
+                    <button
+                      type="button"
+                      onClick={() => setActivo({ row: r, vistaInicial: "comparar" })}
+                      className="text-left font-medium underline decoration-dotted hover:opacity-80 cursor-pointer"
+                    >
+                      {r.nombre} {r.apellido}
+                    </button>
                     <div className="text-[10px] opacity-60">{r.grupo}</div>
                   </td>
-                  <td className="p-2 text-center cursor-pointer" onClick={() => r.alumno2025 && setActivo({ alumno: r.alumno2025, evalId: EVALUACION_DESPEGUE_2025 })}>
+                  <td
+                    className="p-2 text-center cursor-pointer hover:underline"
+                    onClick={() => r.alumno2025 && setActivo({ row: r, vistaInicial: EVALUACION_DESPEGUE_2025 })}
+                  >
                     {r.alumno2025?.porcentaje != null ? `${r.alumno2025.porcentaje}%` : "—"}
                   </td>
                   <td className="p-2 text-center">{r.alumno2025 ? <NivelBadge nivel={r.alumno2025.nivel} /> : "—"}</td>
-                  <td className="p-2 text-center cursor-pointer" onClick={() => r.alumno2026 && setActivo({ alumno: r.alumno2026, evalId: EVALUACION_ATERRIZAJE_2026 })}>
+                  <td
+                    className="p-2 text-center cursor-pointer hover:underline"
+                    onClick={() => r.alumno2026 && setActivo({ row: r, vistaInicial: EVALUACION_ATERRIZAJE_2026 })}
+                  >
                     {r.alumno2026?.porcentaje != null ? `${r.alumno2026.porcentaje}%` : "—"}
                   </td>
                   <td className="p-2 text-center">{r.alumno2026 ? <NivelBadge nivel={r.alumno2026.nivel} /> : "—"}</td>
@@ -104,8 +118,8 @@ function TablaComparativa({ alumnos, cct, fillHeight = false }: { alumnos: Alumn
         </table>
       </div>
       <ModalDetalleAlumno
-        alumno={activo?.alumno ?? null}
-        evalId={activo?.evalId}
+        comparativa={activo?.row ?? null}
+        vistaInicial={activo?.vistaInicial}
         cct={cct}
         onClose={() => setActivo(null)}
       />

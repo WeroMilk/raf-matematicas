@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import type { NivelRAF, EvaluacionId } from "@/types/raf";
+import type { NivelRAF, EvaluacionId, AlumnoComparativa } from "@/types/raf";
 import type { AlumnoRAF } from "@/types/raf";
 import { EVALUACION_ATERRIZAJE_2026, EVALUACION_DESPEGUE_2025 } from "@/lib/evaluaciones";
 import ModalDetalleAlumno from "@/app/components/ModalDetalleAlumno";
@@ -81,7 +81,9 @@ export default function TablaAlumnosNivel({
 }: Props) {
   const [filtro, setFiltro] = useState("");
   const [alumnoSeleccionado, setAlumnoSeleccionado] = useState<AlumnoRAF | null>(null);
+  const [comparativaSeleccionada, setComparativaSeleccionada] = useState<AlumnoComparativa | null>(null);
   const [evalIdSeleccionado, setEvalIdSeleccionado] = useState<EvaluacionId>(evalId);
+  const [vistaInicial, setVistaInicial] = useState<"comparar" | EvaluacionId>("comparar");
   const [cctSeleccionado, setCctSeleccionado] = useState<string | undefined>(undefined);
 
   const filtrados = useMemo(
@@ -104,8 +106,36 @@ export default function TablaAlumnosNivel({
     evalAlumno: EvaluacionId = evalId
   ) => {
     if (!alumno) return;
+    setComparativaSeleccionada(null);
     setAlumnoSeleccionado(alumno);
     setEvalIdSeleccionado(evalAlumno);
+    setVistaInicial(evalAlumno);
+    setCctSeleccionado(cct);
+  };
+
+  const abrirComparativa = (r: Row, cct: string, vista: "comparar" | EvaluacionId = "comparar") => {
+    setAlumnoSeleccionado(null);
+    setComparativaSeleccionada({
+      nombre: r.alumno.nombre,
+      apellido: r.alumno.apellido,
+      grupo: r.alumno.grupo,
+      alumno2025: r.alumno.alumno2025 ?? null,
+      alumno2026: r.alumno.alumno2026 ?? null,
+      deltaPorcentaje: r.alumno.deltaPorcentaje ?? null,
+      tendencia:
+        !r.alumno.alumno2025 && r.alumno.alumno2026
+          ? "solo_2026"
+          : r.alumno.alumno2025 && !r.alumno.alumno2026
+            ? "solo_2025"
+            : r.alumno.deltaPorcentaje != null
+              ? r.alumno.deltaPorcentaje > 0
+                ? "mejoro"
+                : r.alumno.deltaPorcentaje < 0
+                  ? "bajo"
+                  : "igual"
+              : "igual",
+    });
+    setVistaInicial(vista);
     setCctSeleccionado(cct);
   };
 
@@ -188,13 +218,11 @@ export default function TablaAlumnosNivel({
                       <button
                         type="button"
                         onClick={() =>
-                          abrirAlumno(
-                            r.alumno.alumno2025 ?? r.alumno.alumno2026 ?? alumnoFallback(r),
-                            r.cct,
-                            r.alumno.alumno2025 ? EVALUACION_DESPEGUE_2025 : EVALUACION_ATERRIZAJE_2026
-                          )
+                          comparativa
+                            ? abrirComparativa(r, r.cct)
+                            : abrirAlumno(alumnoFallback(r), r.cct, evalId)
                         }
-                        className="text-left font-medium leading-snug hover:underline"
+                        className="text-left font-medium leading-snug underline decoration-dotted hover:opacity-80"
                       >
                         {nombre}
                       </button>
@@ -205,7 +233,7 @@ export default function TablaAlumnosNivel({
                         <td className="px-2 py-1.5 text-center">
                           <button
                             type="button"
-                            onClick={() => abrirAlumno(r.alumno.alumno2025, r.cct, EVALUACION_DESPEGUE_2025)}
+                            onClick={() => abrirComparativa(r, r.cct, EVALUACION_DESPEGUE_2025)}
                             className="font-semibold text-[#4472C4] hover:underline"
                           >
                             {fmtPct(r.alumno.porcentaje2025)}
@@ -214,7 +242,7 @@ export default function TablaAlumnosNivel({
                         <td className="px-2 py-1.5 text-center">
                           <button
                             type="button"
-                            onClick={() => abrirAlumno(r.alumno.alumno2026, r.cct, EVALUACION_ATERRIZAJE_2026)}
+                            onClick={() => abrirComparativa(r, r.cct, EVALUACION_ATERRIZAJE_2026)}
                             className="font-semibold text-[#2E7D32] hover:underline"
                           >
                             {fmtPct(r.alumno.porcentaje2026)}
@@ -256,11 +284,9 @@ export default function TablaAlumnosNivel({
                 <button
                   type="button"
                   onClick={() =>
-                    abrirAlumno(
-                      r.alumno.alumno2025 ?? r.alumno.alumno2026 ?? alumnoFallback(r),
-                      r.cct,
-                      r.alumno.alumno2025 ? EVALUACION_DESPEGUE_2025 : EVALUACION_ATERRIZAJE_2026
-                    )
+                    comparativa
+                      ? abrirComparativa(r, r.cct)
+                      : abrirAlumno(alumnoFallback(r), r.cct, evalId)
                   }
                   className="flex w-full items-center gap-3 text-left"
                 >
@@ -292,7 +318,7 @@ export default function TablaAlumnosNivel({
                   >
                     <button
                       type="button"
-                      onClick={() => abrirAlumno(r.alumno.alumno2025, r.cct, EVALUACION_DESPEGUE_2025)}
+                      onClick={() => abrirComparativa(r, r.cct, EVALUACION_DESPEGUE_2025)}
                       className={`rounded-lg bg-[#4472C4]/8 text-center ${enlargedMobile ? "px-2 py-2.5" : "px-1.5 py-1.5"}`}
                     >
                       <div className={`font-medium uppercase tracking-wide text-[#4472C4] ${enlargedMobile ? "text-[10px]" : "text-[9px]"}`}>2025</div>
@@ -300,7 +326,7 @@ export default function TablaAlumnosNivel({
                     </button>
                     <button
                       type="button"
-                      onClick={() => abrirAlumno(r.alumno.alumno2026, r.cct, EVALUACION_ATERRIZAJE_2026)}
+                      onClick={() => abrirComparativa(r, r.cct, EVALUACION_ATERRIZAJE_2026)}
                       className={`rounded-lg bg-[#2E7D32]/8 text-center ${enlargedMobile ? "px-2 py-2.5" : "px-1.5 py-1.5"}`}
                     >
                       <div className={`font-medium uppercase tracking-wide text-[#2E7D32] ${enlargedMobile ? "text-[10px]" : "text-[9px]"}`}>2026</div>
@@ -333,10 +359,13 @@ export default function TablaAlumnosNivel({
 
       <ModalDetalleAlumno
         alumno={alumnoSeleccionado}
+        comparativa={comparativaSeleccionada}
         evalId={evalIdSeleccionado}
+        vistaInicial={vistaInicial}
         cct={cctSeleccionado}
         onClose={() => {
           setAlumnoSeleccionado(null);
+          setComparativaSeleccionada(null);
           setCctSeleccionado(undefined);
         }}
       />
