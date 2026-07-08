@@ -189,6 +189,7 @@ export default function DashboardHomeClient({ data, cobertura, isSuper, zonaForc
               </div>
             )}
 
+            {evalMode !== "resultados" && (
             <section className="grid shrink-0 gap-2 lg:grid-cols-2 lg:gap-4">
               <Link href={navHref("/escuelas")} className="nav-link-card link-ios">
                 Ver por escuela
@@ -203,6 +204,7 @@ export default function DashboardHomeClient({ data, cobertura, isSuper, zonaForc
                 </span>
               </Link>
             </section>
+            )}
 
             <section className="grid shrink-0 grid-cols-1 gap-3 pt-2 md:min-h-0 md:flex-1 md:grid-cols-2 md:gap-4 md:pt-3">
               {evalMode === "resultados" ? null : evalMode === "comparar" ? (
