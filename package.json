@@ -7,7 +7,9 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "npm run build:data:2026 && next build",
+    "build": "next build",
+    "build:data": "node scripts/build-zipgrade-2026.mjs",
+    "build:data:legacy": "npm run build:data:2026",
     "build:data": "node scripts/build-data.mjs",
     "merge-buscador": "node scripts/merge-buscador-escuelas.mjs",
     "generate-auth": "node scripts/generate-auth.mjs",
