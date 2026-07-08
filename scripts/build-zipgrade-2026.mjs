@@ -16,6 +16,7 @@ const XLSX = require("xlsx");
 const EXCEL_2026 = path.join(ROOT, "data", "excel", "2026");
 const GRUPO_REVISAR = "faltan por revisar";
 const CCT_SIN_ESCUELA = "26DST0000R";
+const EXCLUDED_SCHOOL_NUMS = new Set([19, 48, 56, 58, 60]);
 
 const FILES_MAT = [
   path.join(EXCEL_2026, "quiz-2RAF Matemticas-full (1).xlsx"),
@@ -662,6 +663,11 @@ function actualizarNombresEscuelas(nombresPath) {
   }
 }
 
+function schoolNumFromCct(cct) {
+  const m = String(cct || "").match(/^26DST(\d{4})[A-Z0-9]?$/i);
+  return m ? parseInt(m[1], 10) : null;
+}
+
 function main() {
   console.log("=== Build ZipGrade Aterrizaje 2026 — Técnicas Matemáticas ===\n");
 
@@ -676,7 +682,11 @@ function main() {
   const numToCct = buildNumEscuelaToCct(nombresFile);
 
   console.log("Procesando Matemáticas...");
-  const escuelasMat = procesarMateria(FILES_MAT, "mat", numToCct);
+  let escuelasMat = procesarMateria(FILES_MAT, "mat", numToCct);
+  escuelasMat = escuelasMat.filter((e) => {
+    const num = schoolNumFromCct(e.cct);
+    return num == null || !EXCLUDED_SCHOOL_NUMS.has(num);
+  });
 
   const despegueMat = JSON.parse(
     fs.readFileSync(path.join(ROOT, "public", "data", "resultados.json"), "utf8")
