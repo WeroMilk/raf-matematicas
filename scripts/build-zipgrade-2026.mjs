@@ -16,7 +16,7 @@ const XLSX = require("xlsx");
 const EXCEL_2026 = path.join(ROOT, "data", "excel", "2026");
 const GRUPO_REVISAR = "faltan por revisar";
 const CCT_SIN_ESCUELA = "26DST0000R";
-const EXCLUDED_SCHOOL_NUMS = new Set([19, 48, 56, 58, 60]);
+const EXCLUDED_SCHOOL_NUMS = new Set([19, 58, 60]);
 
 const FILES_MAT = [
   path.join(EXCEL_2026, "quiz-2RAF Matemticas-full (1).xlsx"),
@@ -719,7 +719,10 @@ function main() {
   };
 
   const matOut = path.join(ROOT, "public", "data", "resultados.json");
+  const matData = path.join(ROOT, "data", "resultados.json");
   fs.writeFileSync(matOut, JSON.stringify(outMat, null, 2), "utf8");
+  fs.mkdirSync(path.dirname(matData), { recursive: true });
+  fs.writeFileSync(matData, JSON.stringify(outMat, null, 2), "utf8");
 
   const total = escuelasMat.reduce((s, e) => s + e.totalEstudiantes, 0);
   console.log("\nOK:", total, "alumnos,", escuelasMat.length, "escuelas");
