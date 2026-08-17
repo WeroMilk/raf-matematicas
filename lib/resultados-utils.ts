@@ -14,11 +14,24 @@ import {
   EVALUACIONES_META,
 } from "@/lib/evaluaciones";
 
+/** Salón temporal de no asignados y Técnica #23: no se muestran ni entran en totales. */
+const CCTS_OCULTOS = new Set(["26DST0000R", "26DST0023A"]);
+
+function filtrarEscuelasVisibles(escuelas: EscuelaResumen[]): EscuelaResumen[] {
+  return escuelas.filter((e) => !CCTS_OCULTOS.has(e.cct));
+}
+
 export function normalizeResultados(raw: ResultadosRAF): ResultadosMultiRAF {
   if (raw.evaluaciones && raw.evaluaciones.length > 0) {
-    return { evaluaciones: raw.evaluaciones, generado: raw.generado };
+    return {
+      evaluaciones: raw.evaluaciones.map((ev) => ({
+        ...ev,
+        escuelas: filtrarEscuelasVisibles(ev.escuelas ?? []),
+      })),
+      generado: raw.generado,
+    };
   }
-  const escuelas = raw.escuelas ?? [];
+  const escuelas = filtrarEscuelasVisibles(raw.escuelas ?? []);
   return {
     evaluaciones: [
       {

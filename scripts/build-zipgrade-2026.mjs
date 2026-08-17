@@ -16,7 +16,7 @@ const XLSX = require("xlsx");
 const EXCEL_2026 = path.join(ROOT, "data", "excel", "2026");
 const GRUPO_REVISAR = "faltan por revisar";
 const CCT_SIN_ESCUELA = "26DST0000R";
-const EXCLUDED_SCHOOL_NUMS = new Set([19, 58, 60]);
+const EXCLUDED_SCHOOL_NUMS = new Set([19, 23, 58, 60]);
 
 const FILES_MAT = [
   path.join(EXCEL_2026, "quiz-2RAF Matemticas-full (1).xlsx"),
@@ -105,7 +105,6 @@ function buildNumEscuelaToCct(nombresPath) {
     const m = cct.match(/26DST(\d{4})/i);
     if (m) map.set(parseInt(m[1], 10), cct);
   }
-  map.set(0, CCT_SIN_ESCUELA);
   return map;
 }
 
@@ -625,6 +624,7 @@ function procesarMateria(paths, materia, numToCct) {
   const porEscuela = new Map();
   for (const a of alumnos) {
     const cct = a.cct;
+    if (!cctIncluido(cct)) continue;
     if (!porEscuela.has(cct)) porEscuela.set(cct, []);
     porEscuela.get(cct).push(a);
   }
@@ -653,19 +653,25 @@ function procesarMateria(paths, materia, numToCct) {
 }
 
 function actualizarNombresEscuelas(nombresPath) {
-  const nombres = fs.existsSync(nombresPath)
-    ? JSON.parse(fs.readFileSync(nombresPath, "utf8"))
-    : {};
-  if (!nombres[CCT_SIN_ESCUELA]) {
-    nombres[CCT_SIN_ESCUELA] = "EXÁMENES SIN ESCUELA ASIGNADA (POR REVISAR)";
+  if (!fs.existsSync(nombresPath)) return;
+  const nombres = JSON.parse(fs.readFileSync(nombresPath, "utf8"));
+  if (nombres[CCT_SIN_ESCUELA]) {
+    delete nombres[CCT_SIN_ESCUELA];
     fs.writeFileSync(nombresPath, JSON.stringify(nombres, null, 2), "utf8");
-    console.log("  + CCT revisión en nombres-escuelas.json");
+    console.log("  - CCT revisión removido de nombres-escuelas.json");
   }
 }
 
 function schoolNumFromCct(cct) {
   const m = String(cct || "").match(/^26DST(\d{4})[A-Z0-9]?$/i);
   return m ? parseInt(m[1], 10) : null;
+}
+
+function cctIncluido(cct) {
+  if (!cct || cct === CCT_SIN_ESCUELA) return false;
+  const num = schoolNumFromCct(cct);
+  if (num === 0) return false;
+  return !EXCLUDED_SCHOOL_NUMS.has(num);
 }
 
 function main() {
@@ -683,10 +689,7 @@ function main() {
 
   console.log("Procesando Matemáticas...");
   let escuelasMat = procesarMateria(FILES_MAT, "mat", numToCct);
-  escuelasMat = escuelasMat.filter((e) => {
-    const num = schoolNumFromCct(e.cct);
-    return num == null || !EXCLUDED_SCHOOL_NUMS.has(num);
-  });
+  escuelasMat = escuelasMat.filter((e) => cctIncluido(e.cct));
 
   const despegueMat = JSON.parse(
     fs.readFileSync(path.join(ROOT, "public", "data", "resultados.json"), "utf8")
