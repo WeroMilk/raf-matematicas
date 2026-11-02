@@ -24,6 +24,27 @@ import { RAF_CONFIG } from "@/lib/raf-config";
 
 const NUM_REACTIVOS = 20;
 
+function formatActualizacion(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Hermosillo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(d);
+  const pick = (type: Intl.DateTimeFormatPartTypes) => parts.find((p) => p.type === type)?.value ?? "";
+  let hour = Number(pick("hour"));
+  const suffix = hour >= 12 ? "p.m." : "a.m.";
+  hour = hour % 12;
+  if (hour === 0) hour = 12;
+  return `${pick("day")}/${pick("month")}/${pick("year")}, ${hour}:${pick("minute")}:${pick("second")} ${suffix}`;
+}
+
 function useIsMdUp() {
   const [isMdUp, setIsMdUp] = useState(false);
   useEffect(() => {
@@ -194,16 +215,7 @@ export default function DashboardHomeClient({ data, cobertura, isSuper, zonaForc
             </section>
 
             <p className="mt-3 shrink-0 px-1 pb-1 text-center text-[10px] text-foreground/50 md:mt-1 md:text-left">
-              Última actualización:{" "}
-              {new Date(data.generado).toLocaleString("es-MX", {
-                day: "2-digit",
-                month: "2-digit",
-                year: "numeric",
-                hour: "numeric",
-                minute: "2-digit",
-                second: "2-digit",
-                hour12: true,
-              })}
+              Última actualización: {formatActualizacion(data.generado)}
             </p>
           </>
         )}

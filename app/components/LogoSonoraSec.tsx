@@ -59,12 +59,16 @@ export default function LogoSonoraSec({
         alt="Sonora Tierra de Oportunidades · Secretaría de Educación y Cultura"
         width={Math.min(maxWidth, 480)}
         height={100}
+        style={{
+          maxWidth: "100%",
+          maxHeight: compact ? "40px" : "96px",
+          aspectRatio: "726 / 407",
+        }}
         className={
           imgLoaded && !imgError
             ? "w-full h-auto object-contain opacity-100 transition-opacity duration-200"
             : `absolute inset-0 m-auto w-auto max-w-full object-contain opacity-0 transition-opacity duration-200 ${compact ? "max-h-[40px]" : "max-h-[96px]"}`
         }
-        style={{ maxWidth: "100%", maxHeight: compact ? "40px" : "96px" }}
         priority={priority}
         onLoad={() => setImgLoaded(true)}
         onError={() => setImgError(true)}
