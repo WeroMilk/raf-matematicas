@@ -13,13 +13,11 @@ import PageHeader from "@/app/components/PageHeader";
 import ScrollOnlyWhenNeeded from "@/app/components/ScrollOnlyWhenNeeded";
 import ChartPastelNiveles from "@/app/components/ChartPastelNiveles";
 import ChartBarrasReactivos from "@/app/components/ChartBarrasReactivos";
-import ChartComparativaNiveles, { ChartBarrasReactivosComparativa } from "@/app/components/ChartComparativaNiveles";
 import FiltroZona from "@/app/components/FiltroZona";
 import SelectorEvaluacion from "@/app/components/SelectorEvaluacion";
 import KpiNivelCard from "@/app/components/KpiNivelCard";
 import EmptyState from "@/app/components/EmptyState";
-import ComparativaLegend from "@/app/components/ComparativaLegend";
-import KPIComparativa, { KPIComparativaResumen, nivelComparativaHref } from "@/app/components/KPIComparativa";
+import { nivelComparativaHref } from "@/app/components/KPIComparativa";
 import DashboardResultadosMat from "@/app/components/DashboardResultadosMat";
 import { COLORS } from "@/types/raf";
 import { RAF_CONFIG } from "@/lib/raf-config";
@@ -53,7 +51,10 @@ function filtrarZona(escuelas: EscuelaResumen[], zona: number | null) {
 export default function DashboardHomeClient({ data, cobertura, isSuper, zonaForced }: Props) {
   const isMdUp = useIsMdUp();
   const searchParams = useSearchParams();
-  const evalMode = parseModoVista(searchParams.get("eval"));
+  const evalMode = (() => {
+    const parsed = parseModoVista(searchParams.get("eval"));
+    return parsed === "comparar" ? "resultados" : parsed;
+  })();
   const zonaParam = searchParams.get("zona");
   const zonaFromUrl = zonaParam && ZONAS_DISPONIBLES.includes(parseInt(zonaParam, 10)) ? parseInt(zonaParam, 10) : null;
   const zonaSeleccionada = zonaForced ?? (isSuper ? zonaFromUrl : null);
@@ -79,8 +80,6 @@ export default function DashboardHomeClient({ data, cobertura, isSuper, zonaForc
   const pctEsp = totalAlumnos ? Math.round((totalEsp / totalAlumnos) * 100) : 0;
 
   const porcentajesGlobales = useMemo(() => porcentajesReactivosGlobales(escuelas, NUM_REACTIVOS), [escuelas]);
-  const porcentajes2025 = useMemo(() => porcentajesReactivosGlobales(escuelas2025, NUM_REACTIVOS), [escuelas2025]);
-  const porcentajes2026 = useMemo(() => porcentajesReactivosGlobales(escuelas2026, NUM_REACTIVOS), [escuelas2026]);
 
   const comparativa = useMemo(() => {
     const ccts = [...new Set([...escuelas2025.map((e) => e.cct), ...escuelas2026.map((e) => e.cct)])];
@@ -100,7 +99,7 @@ export default function DashboardHomeClient({ data, cobertura, isSuper, zonaForc
       </PageHeader>
 
       <ScrollOnlyWhenNeeded className="flex min-h-0 flex-1 flex-col overflow-x-hidden pb-3">
-        {escuelas.length === 0 && evalMode !== "comparar" && evalMode !== "resultados" ? (
+        {escuelas.length === 0 && evalMode !== "resultados" ? (
           <EmptyState
             title={
               evalMode === "aterrizaje-2026"
@@ -126,21 +125,6 @@ export default function DashboardHomeClient({ data, cobertura, isSuper, zonaForc
                   }
                 />
               </section>
-            ) : evalMode === "comparar" ? (
-              <>
-                <section className="shrink-0 space-y-2">
-                  <KPIComparativaResumen comparativa={comparativa} />
-                  <ComparativaLegend />
-                  <KPIComparativa
-                    comparativa={comparativa}
-                    getNivelHref={(key) => withReturnTo(nivelComparativaHref(navHref, key), inicioHref)}
-                  />
-                </section>
-                <section className="card-ios my-2 rounded-2xl border border-border bg-card p-3 text-sm text-foreground/75">
-                  Despegue 2026 comparado con Aterrizaje 2027. El aterrizaje sigue en 0 hasta que haya resultados.
-                  {zonaSeleccionada != null && ` · Zona ${zonaSeleccionada}`}
-                </section>
-              </>
             ) : (
               <div className="shrink-0">
                 <section className="grid min-w-0 grid-cols-3 gap-2 lg:gap-4">
@@ -197,30 +181,7 @@ export default function DashboardHomeClient({ data, cobertura, isSuper, zonaForc
             )}
 
             <section className="grid shrink-0 grid-cols-1 gap-3 pt-2 md:min-h-0 md:flex-1 md:grid-cols-2 md:gap-4 md:pt-3">
-              {evalMode === "resultados" ? null : evalMode === "comparar" ? (
-                <>
-                  <section className="chart-card flex shrink-0 flex-col p-3 md:min-h-0 md:shrink md:flex-1">
-                    <ChartComparativaNiveles
-                      fillHeight={isMdUp}
-                      requiereApoyo2025={comparativa.despegue2025.requiereApoyo}
-                      enDesarrollo2025={comparativa.despegue2025.enDesarrollo}
-                      esperado2025={comparativa.despegue2025.esperado}
-                      requiereApoyo2026={comparativa.aterrizaje2026.requiereApoyo}
-                      enDesarrollo2026={comparativa.aterrizaje2026.enDesarrollo}
-                      esperado2026={comparativa.aterrizaje2026.esperado}
-                      title="Niveles: Despegue vs Aterrizaje"
-                    />
-                  </section>
-                  <section className="chart-card flex shrink-0 flex-col p-3 md:min-h-0 md:shrink md:flex-1">
-                    <ChartBarrasReactivosComparativa
-                      fillHeight={isMdUp}
-                      porcentajes2025={porcentajes2025}
-                      porcentajes2026={porcentajes2026}
-                      title="Aciertos por reactivo"
-                    />
-                  </section>
-                </>
-              ) : (
+              {evalMode === "resultados" ? null : (
                 <>
                   <section className="chart-card flex shrink-0 flex-col p-3 md:min-h-0 md:shrink md:flex-1">
                     <ChartBarrasReactivos fillHeight={isMdUp} porcentajes={porcentajesGlobales} evalId={evalId} title="Aciertos por reactivo" />

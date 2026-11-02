@@ -39,7 +39,7 @@ export default function SelectorEvaluacion({ compact = false }: Props) {
       aria-label="Evaluación RAF"
     >
       {MODOS_VISTA.map((modo) => {
-        const active = current === modo.id;
+        const active = current === modo.id || (current === "comparar" && modo.id === "resultados");
         return (
           <button
             key={modo.id}
@@ -52,13 +52,9 @@ export default function SelectorEvaluacion({ compact = false }: Props) {
             } ${
               active ? "text-white shadow-md" : "text-foreground/70 hover:bg-white/60 hover:text-foreground"
             }`}
-            style={active ? { backgroundColor: modo.color, boxShadow: active && modo.id === "comparar" ? "0 2px 8px rgba(123,45,62,0.35)" : undefined } : undefined}
+            style={active ? { backgroundColor: modo.color } : undefined}
           >
-            {compact && modo.id === "comparar"
-              ? "vs"
-              : compact && modo.id === "resultados"
-                ? "Res."
-                : modo.label}
+            {modo.label}
           </button>
         );
       })}
