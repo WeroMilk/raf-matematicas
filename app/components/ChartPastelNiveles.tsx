@@ -116,7 +116,7 @@ export default function ChartPastelNiveles({ requiereApoyo, enDesarrollo, espera
           {!ready ? (
             <div className="h-full w-full animate-pulse rounded-lg bg-[var(--fill-tertiary)]" aria-hidden />
           ) : (
-            <ResponsiveContainer width={width} height={height} minWidth={0}>
+            <ResponsiveContainer width={Math.max(width, 1)} height={Math.max(height, 1)} minWidth={1} minHeight={1}>
               <PieChart margin={{ top: 4, right: 4, left: 4, bottom: 4 }}>
                 <Pie
                   data={data}

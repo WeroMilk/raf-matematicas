@@ -37,7 +37,7 @@ export default function LoginPage() {
     >
       <div className="login-body mx-auto flex w-full max-w-sm flex-1 flex-col items-center gap-8 overflow-y-auto text-center">
         <div className="flex justify-center pt-2 ml-6">
-          <LogoSonoraSec maxWidth={420} priority />
+          <LogoSonoraSec maxWidth={520} priority prominent />
         </div>
         <div className="mt-12 flex flex-col gap-2">
           <h1 className="text-xl font-bold tracking-tight text-foreground">RAF Matemáticas</h1>

@@ -3,7 +3,7 @@
 import LogoSonoraSec from "@/app/components/LogoSonoraSec";
 
 function MobileLogo({ narrow = false }: { narrow?: boolean }) {
-  return <LogoSonoraSec maxWidth={narrow ? 100 : 120} compact className="page-header-mobile__logo" />;
+  return <LogoSonoraSec maxWidth={narrow ? 128 : 150} compact className="page-header-mobile__logo" />;
 }
 
 function MobileControlsRow({
@@ -137,7 +137,7 @@ export default function PageHeader({
         )}
 
         <div className="shrink-0">
-          <LogoSonoraSec maxWidth={160} />
+          <LogoSonoraSec maxWidth={210} />
         </div>
       </div>
     </header>

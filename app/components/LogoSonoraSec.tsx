@@ -3,9 +3,6 @@
 import { useState } from "react";
 import Image from "next/image";
 
-const LOGO_WRAPPER_CLASS =
-  "rounded-xl p-2 flex items-center justify-center min-h-[96px] relative";
-
 function LogoTextFallback() {
   return (
     <div className="text-center w-full">
@@ -35,18 +32,24 @@ export default function LogoSonoraSec({
   maxWidth = 200,
   priority = false,
   compact = false,
+  prominent = false,
 }: {
   className?: string;
   maxWidth?: number;
   priority?: boolean;
   /** Para header: reduce altura y padding (móvil) */
   compact?: boolean;
+  /** Login: logo más grande */
+  prominent?: boolean;
 }) {
   const [imgLoaded, setImgLoaded] = useState(false);
   const [imgError, setImgError] = useState(false);
-  const wrapperClass = compact
-    ? "rounded-lg p-1 flex items-center justify-center min-h-[40px] relative"
-    : LOGO_WRAPPER_CLASS;
+  const maxH = prominent ? "200px" : compact ? "56px" : "118px";
+  const wrapperClass = prominent
+    ? "flex items-center justify-center relative w-full"
+    : compact
+      ? "rounded-lg p-1 flex items-center justify-center min-h-[56px] relative"
+      : "rounded-xl p-2 flex items-center justify-center min-h-[118px] relative";
 
   return (
     <div
@@ -61,13 +64,13 @@ export default function LogoSonoraSec({
         height={100}
         style={{
           maxWidth: "100%",
-          maxHeight: compact ? "40px" : "96px",
-          aspectRatio: "726 / 407",
+          maxHeight: maxH,
+          aspectRatio: "603 / 295",
         }}
         className={
           imgLoaded && !imgError
             ? "w-full h-auto object-contain opacity-100 transition-opacity duration-200"
-            : `absolute inset-0 m-auto w-auto max-w-full object-contain opacity-0 transition-opacity duration-200 ${compact ? "max-h-[40px]" : "max-h-[96px]"}`
+            : "absolute inset-0 m-auto w-auto max-w-full object-contain opacity-0 transition-opacity duration-200"
         }
         priority={priority}
         onLoad={() => setImgLoaded(true)}

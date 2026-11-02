@@ -105,7 +105,7 @@ export default function ChartComparativaNiveles({
         {!ready ? (
           <div className="h-full w-full animate-pulse rounded-lg bg-[var(--fill-tertiary)]" aria-hidden />
         ) : (
-          <ResponsiveContainer width={width} height={height} minWidth={0}>
+          <ResponsiveContainer width={Math.max(width, 1)} height={Math.max(height, 1)} minWidth={1} minHeight={1}>
             <BarChart data={data} margin={{ top: 4, right: 4, left: 0, bottom: 4 }}>
               <XAxis dataKey="label" tick={{ fontSize: 10 }} />
               <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} tickFormatter={(v) => `${v}%`} width={32} />
@@ -188,7 +188,7 @@ export function ChartBarrasReactivosComparativa({
         {!ready ? (
           <div className="h-full w-full animate-pulse rounded-lg bg-[var(--fill-tertiary)]" aria-hidden />
         ) : (
-          <ResponsiveContainer width={width} height={height} minWidth={0}>
+          <ResponsiveContainer width={Math.max(width, 1)} height={Math.max(height, 1)} minWidth={1} minHeight={1}>
             <BarChart data={data} margin={{ top: 4, right: 4, left: 0, bottom: 4 }}>
               <XAxis dataKey="label" tick={{ fontSize: 9 }} />
               <YAxis domain={[0, 100]} tick={{ fontSize: 9 }} tickFormatter={(v) => `${v}%`} width={28} />
