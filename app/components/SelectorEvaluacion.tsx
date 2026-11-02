@@ -32,7 +32,7 @@ export default function SelectorEvaluacion({ compact = false }: Props) {
 
   return (
     <div
-      className={`flex rounded-xl border border-border bg-[var(--fill-tertiary)] p-0.5 ${
+      className={`flex w-full min-w-0 rounded-xl border border-border bg-[var(--fill-tertiary)] p-0.5 ${
         compact ? "text-[10px] max-[400px]:text-[9px]" : "text-xs"
       }`}
       role="tablist"
@@ -47,8 +47,8 @@ export default function SelectorEvaluacion({ compact = false }: Props) {
             role="tab"
             aria-selected={active}
             onClick={() => setMode(modo.id)}
-            className={`rounded-lg font-semibold transition-all ${
-              compact ? "px-1.5 py-1 max-[400px]:px-1 max-[400px]:py-0.5" : "px-2 py-1.5 sm:px-3"
+            className={`min-w-0 flex-1 basis-0 whitespace-normal text-center leading-tight rounded-lg font-semibold transition-all ${
+              compact ? "px-1 py-1" : "px-1.5 py-1.5 sm:px-3"
             } ${
               active ? "text-white shadow-md" : "text-foreground/70 hover:bg-white/60 hover:text-foreground"
             }`}

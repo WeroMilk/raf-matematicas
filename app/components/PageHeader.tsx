@@ -9,28 +9,16 @@ function MobileLogo({ narrow = false }: { narrow?: boolean }) {
 function MobileControlsRow({
   centerContent,
   belowLogoOnMobile,
-  narrow = false,
 }: {
   centerContent?: React.ReactNode;
   belowLogoOnMobile?: React.ReactNode;
-  narrow?: boolean;
 }) {
   if (!centerContent && !belowLogoOnMobile) return null;
 
   return (
-    <div className={`page-header-mobile__controls flex items-center gap-1.5 ${narrow ? "w-full" : ""}`}>
-      {centerContent && <div className="page-header-mobile__zona min-w-[5.75rem] max-w-[8rem] shrink-0">{centerContent}</div>}
-      {belowLogoOnMobile && (
-        <div
-          className={
-            narrow
-              ? "shrink-0 w-[min(calc(100vw-6.5rem),12.5rem)]"
-              : "w-[min(calc(100vw-5.5rem),13.5rem)] shrink-0 justify-self-end"
-          }
-        >
-          {belowLogoOnMobile}
-        </div>
-      )}
+    <div className="page-header-mobile__controls flex w-full min-w-0 items-center gap-1.5">
+      {centerContent && <div className="page-header-mobile__zona w-[5.75rem] shrink-0">{centerContent}</div>}
+      {belowLogoOnMobile && <div className="min-w-0 flex-1">{belowLogoOnMobile}</div>}
     </div>
   );
 }
@@ -55,12 +43,10 @@ export default function PageHeader({
   className?: string;
 }) {
   const showControls = centerContent || belowLogoOnMobile;
-  const hasZona = !!centerContent;
 
   return (
     <header className={`shrink-0 min-h-0 ${className}`}>
-      {/* Móvil estrecho (≤400px): sin solapamientos */}
-      <div className="flex flex-col gap-1.5 md:hidden min-[401px]:hidden">
+      <div className="flex min-w-0 flex-col gap-1.5 md:hidden">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1 pr-1">
             {leadingOnMobile}
@@ -71,56 +57,8 @@ export default function PageHeader({
 
         {leadingOnMobile && <div className="min-w-0">{children}</div>}
 
-        <MobileControlsRow centerContent={centerContent} belowLogoOnMobile={belowLogoOnMobile} narrow />
+        <MobileControlsRow centerContent={centerContent} belowLogoOnMobile={belowLogoOnMobile} />
       </div>
-
-      {/* Móvil ancho (401px–767px) con zona */}
-      {hasZona && (
-        <div
-          className={`hidden min-[401px]:grid min-w-0 grid-rows-[auto_auto] items-start gap-x-1.5 gap-y-1.5 md:hidden ${
-            leadingOnMobile ? "grid-cols-[auto_1fr_auto]" : "grid-cols-[minmax(0,1fr)_auto_auto]"
-          }`}
-        >
-          {leadingOnMobile ? (
-            <div className="col-start-1 row-start-1 shrink-0 self-center">{leadingOnMobile}</div>
-          ) : (
-            <div className="col-start-1 row-start-1 min-w-0 pr-1">{children}</div>
-          )}
-
-          <div
-            className={`row-start-1 self-start ${
-              leadingOnMobile ? "col-start-2 min-w-[5.75rem] max-w-[8rem]" : "col-start-2 w-[6.25rem] shrink-0"
-            }`}
-          >
-            {centerContent}
-          </div>
-
-          <div className="col-start-3 row-start-1 flex shrink-0 flex-col items-end gap-1.5 self-start">
-            <MobileLogo />
-          </div>
-
-          {leadingOnMobile && <div className="col-span-2 col-start-1 row-start-2 min-w-0">{children}</div>}
-
-          {belowLogoOnMobile && (
-            <div className="col-start-3 row-start-2 w-[min(calc(100vw-5.5rem),13.5rem)] justify-self-end self-end">
-              {belowLogoOnMobile}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Móvil ancho sin zona */}
-      {!hasZona && (
-        <div className="hidden min-[401px]:grid min-w-0 grid-cols-[1fr_auto] items-start gap-x-2 gap-y-1.5 md:hidden">
-          <div className="col-start-1 row-start-1 min-w-0 pr-1">{children}</div>
-          <div className="col-start-2 row-start-1 flex shrink-0 flex-col items-end gap-1.5 self-start">
-            <MobileLogo />
-            {belowLogoOnMobile && (
-              <div className="w-[min(calc(100vw-5.5rem),13.5rem)]">{belowLogoOnMobile}</div>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* Desktop */}
       <div className="hidden min-w-0 items-start justify-between gap-3 md:flex">
@@ -130,9 +68,9 @@ export default function PageHeader({
         </div>
 
         {showControls && (
-          <div className="flex shrink-0 items-center gap-3 self-center">
-            {belowLogoOnMobile}
-            {centerContent}
+          <div className="flex min-w-0 max-w-[28rem] flex-1 items-center justify-end gap-3 self-center">
+            {centerContent && <div className="w-[6.5rem] shrink-0">{centerContent}</div>}
+            {belowLogoOnMobile && <div className="min-w-0 flex-1">{belowLogoOnMobile}</div>}
           </div>
         )}
 
