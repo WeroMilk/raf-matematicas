@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Alimenta Aterrizaje 2026 de Técnicas (Lenguaje + Matemáticas) desde exportes ZipGrade.
+ * Alimenta Aterrizaje 2027 de Técnicas (Lenguaje + Matemáticas) desde exportes ZipGrade.
  * Fusiona dos archivos por materia. Filas sin nombre y sin grupo → "faltan por revisar" + alumno N.
  */
 import { createRequire } from "module";
@@ -675,7 +675,7 @@ function cctIncluido(cct) {
 }
 
 function main() {
-  console.log("=== Build ZipGrade Aterrizaje 2026 — Técnicas Matemáticas ===\n");
+  console.log("=== Build ZipGrade Aterrizaje 2027 — Técnicas Matemáticas ===\n");
 
   for (const p of FILES_MAT) {
     if (!fs.existsSync(p)) throw new Error(`Falta archivo: ${p}`);
@@ -712,8 +712,8 @@ function main() {
       ...otrasMat.filter((e) => e.id !== "aterrizaje-2026"),
       {
         id: "aterrizaje-2026",
-        nombre: "RAF Aterrizaje 2026",
-        nombreCorto: "Aterrizaje 2026",
+        nombre: "RAF Aterrizaje 2027",
+        nombreCorto: "Aterrizaje 2027",
         escuelas: escuelasMat,
         parcial: escuelasMat.length < totalDespegueMat,
       },

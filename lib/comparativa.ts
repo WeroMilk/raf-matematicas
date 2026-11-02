@@ -216,7 +216,7 @@ export type RowNivelComparativa = {
   };
 };
 
-/** Alumnos por nivel (según Despegue 2025) con porcentajes de ambas evaluaciones. */
+/** Alumnos por nivel (según Despegue 2026) con porcentajes de ambas evaluaciones. */
 export function getAlumnosPorNivelComparativa(
   data: ResultadosMultiRAF,
   nivel: NivelRAF,

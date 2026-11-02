@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Pipeline datos 2026: migrar a multi-eval + importar Excel combinado Aterrizaje 2026.
+ * Pipeline datos 2026: migrar a multi-eval + importar Excel combinado Aterrizaje 2027.
  */
 import * as path from "path";
 import { fileURLToPath } from "url";

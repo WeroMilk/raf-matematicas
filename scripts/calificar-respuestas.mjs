@@ -8,10 +8,10 @@ export const NUM_REACTIVOS_MATEMATICAS = 12;
 export const EVALUACION_DESPEGUE_2025 = "despegue-2025";
 export const EVALUACION_ATERRIZAJE_2026 = "aterrizaje-2026";
 
-/** Respuestas correctas RAF Despegue 2025 (R1–R12) */
+/** Respuestas correctas RAF Despegue 2026 (R1–R12) */
 export const RESPUESTAS_CORRECTAS_DESPEGUE = ["C", "B", "A", "B", "A", "A", "A", "A", "C", "D", "C", "C"];
 
-/** Respuestas correctas RAF Aterrizaje 2026 (R1–R12) */
+/** Respuestas correctas RAF Aterrizaje 2027 (R1–R12) */
 export const RESPUESTAS_CORRECTAS_ATERRIZAJE = ["B", "A", "A", "C", "C", "C", "A", "C", "D", "C", "A", "C"];
 
 /** @deprecated Usar getRespuestasCorrectas(evalId) */

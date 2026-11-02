@@ -62,8 +62,8 @@ export default function EscuelaPageClient({ cct, data, backHref, showBack, cober
           <h1 className="mt-0.5 text-base font-bold">{nombre}</h1>
         </PageHeader>
         <div className="card-ios rounded-2xl border p-4 text-sm">
-          Esta escuela aún no tiene resultados de <strong>RAF Aterrizaje 2026</strong>.
-          {escuela2025 && <p className="mt-2 text-foreground/70">Datos disponibles solo para Despegue 2025 ({escuela2025.totalEstudiantes} alumnos).</p>}
+          Esta escuela aún no tiene resultados de <strong>RAF Aterrizaje 2027</strong>.
+          {escuela2025 && <p className="mt-2 text-foreground/70">Datos disponibles solo para Despegue 2026 ({escuela2025.totalEstudiantes} alumnos).</p>}
         </div>
       </div>
     );

@@ -44,7 +44,7 @@ export function getResultadosMultiSync(): ResultadosMultiRAF {
   return loadMulti();
 }
 
-/** Compatibilidad: devuelve escuelas de la evaluación indicada (default Despegue 2025) */
+/** Compatibilidad: devuelve escuelas de la evaluación indicada (default Despegue 2026) */
 export function getResultadosSync(evalId: EvaluacionId = EVALUACION_DESPEGUE_2025): ResultadosRAF {
   const multi = loadMulti();
   const escuelas = getEscuelasForEval(multi, evalId);

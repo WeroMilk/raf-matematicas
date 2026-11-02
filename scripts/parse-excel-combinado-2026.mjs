@@ -27,8 +27,8 @@ const OUT_FILE = path.join(ROOT, "public", "data", "resultados.json");
 
 const META_ATERRIZAJE = {
   id: "aterrizaje-2026",
-  nombre: "RAF Aterrizaje 2026",
-  nombreCorto: "Aterrizaje 2026",
+  nombre: "RAF Aterrizaje 2027",
+  nombreCorto: "Aterrizaje 2027",
 };
 
 function findExcelFile() {

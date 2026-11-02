@@ -24,7 +24,7 @@ import DashboardResultadosMat from "@/app/components/DashboardResultadosMat";
 import { COLORS } from "@/types/raf";
 import { RAF_CONFIG } from "@/lib/raf-config";
 
-const NUM_REACTIVOS = 12;
+const NUM_REACTIVOS = 20;
 
 function useIsMdUp() {
   const [isMdUp, setIsMdUp] = useState(false);
@@ -104,7 +104,7 @@ export default function DashboardHomeClient({ data, cobertura, isSuper, zonaForc
           <EmptyState
             title={
               evalMode === "aterrizaje-2026"
-                ? "Sin datos de Aterrizaje 2026"
+                ? "Sin datos de Aterrizaje 2027"
                 : zonaSeleccionada != null
                   ? `Sin escuelas en la Zona ${zonaSeleccionada}`
                   : "Sin datos cargados"

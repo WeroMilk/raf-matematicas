@@ -35,8 +35,8 @@ const TENDENCIA_LABEL: Record<TendenciaComparativa, { text: string; color: strin
   mejoro: { text: "Mejoró", color: "#2E7D32" },
   bajo: { text: "Bajó", color: "#D32F2F" },
   igual: { text: "Igual", color: "#757575" },
-  solo_2025: { text: "Solo Despegue 2025", color: "#4472C4" },
-  solo_2026: { text: "Solo Aterrizaje 2026", color: "#2E7D32" },
+  solo_2025: { text: "Solo Despegue 2026", color: "#4472C4" },
+  solo_2026: { text: "Solo Aterrizaje 2027", color: "#2E7D32" },
 };
 
 function nivelCorto(nivel: string): string {

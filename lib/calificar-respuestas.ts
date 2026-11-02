@@ -2,7 +2,7 @@ import type { EvaluacionId, NivelRAF } from "@/types/raf";
 import { EVALUACION_DESPEGUE_2025 } from "@/lib/evaluaciones";
 import { getClaveRespuestas, getReactivoInfo } from "@/lib/reactivos-matematicas";
 
-export const NUM_REACTIVOS_MATEMATICAS = 12;
+export const NUM_REACTIVOS_MATEMATICAS = 20;
 
 const OPCIONES_VALIDAS = ["A", "B", "C", "D"] as const;
 

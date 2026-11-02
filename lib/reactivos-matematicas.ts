@@ -11,7 +11,7 @@ export interface ReactivoInfo {
   argumentacion: string;
 }
 
-/** RAF Despegue 2025 — banco original (no modificar). */
+/** RAF Despegue 2026 — banco original (no modificar). */
 export const REACTIVOS_DESPEGUE_2025: ReactivoInfo[] = [
   {
     numero: 1,
@@ -171,7 +171,7 @@ export const REACTIVOS_DESPEGUE_2025: ReactivoInfo[] = [
   },
 ];
 
-/** RAF Aterrizaje 2026 — Examen Final RAF Matemáticas. */
+/** RAF Aterrizaje 2027 — Examen Final RAF Matemáticas. */
 export const REACTIVOS_ATERRIZAJE_2026: ReactivoInfo[] = [
   {
     numero: 1,

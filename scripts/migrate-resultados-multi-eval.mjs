@@ -12,14 +12,14 @@ const OUT_FILE = path.join(ROOT, "public", "data", "resultados.json");
 
 const META_DESPEGUE = {
   id: "despegue-2025",
-  nombre: "RAF Despegue 2025",
-  nombreCorto: "Despegue 2025",
+  nombre: "RAF Despegue 2026",
+  nombreCorto: "Despegue 2026",
 };
 
 const META_ATERRIZAJE = {
   id: "aterrizaje-2026",
-  nombre: "RAF Aterrizaje 2026",
-  nombreCorto: "Aterrizaje 2026",
+  nombre: "RAF Aterrizaje 2027",
+  nombreCorto: "Aterrizaje 2027",
 };
 
 export function readJsonFile(filePath) {

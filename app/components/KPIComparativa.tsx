@@ -128,14 +128,14 @@ export function KPIComparativaResumen({ comparativa }: Props) {
   return (
     <p className="rounded-xl border border-border bg-[var(--guinda-muted)] px-3 py-2 text-xs text-foreground/80">
       <span style={{ color: EVALUACIONES_META["despegue-2025"].color }} className="font-semibold">
-        Despegue 2025:
+        Despegue 2026:
       </span>{" "}
       {formatPct(pctDelTotal(d.requiereApoyo, d.total))} apoyo ·{" "}
       {formatPct(pctDelTotal(d.enDesarrollo, d.total))} desarrollo ·{" "}
       {formatPct(pctDelTotal(d.esperado, d.total))} esperado
       {" · "}
       <span style={{ color: EVALUACIONES_META["aterrizaje-2026"].color }} className="font-semibold">
-        Aterrizaje 2026:
+        Aterrizaje 2027:
       </span>{" "}
       {formatPct(pctDelTotal(a.requiereApoyo, a.total))} apoyo ·{" "}
       {formatPct(pctDelTotal(a.enDesarrollo, a.total))} desarrollo ·{" "}
