@@ -66,8 +66,8 @@ function textoCambio(r: Row): { text: string; color: string } {
       color: deltaColor(d),
     };
   }
-  if (r.alumno.porcentaje2026 == null) return { text: "Solo 2025", color: TENDENCIA_COLOR.solo_2025 };
-  if (r.alumno.porcentaje2025 == null) return { text: "Solo 2026", color: TENDENCIA_COLOR.solo_2026 };
+  if (r.alumno.porcentaje2026 == null) return { text: "Solo Despegue 2026", color: TENDENCIA_COLOR.solo_2025 };
+  if (r.alumno.porcentaje2025 == null) return { text: "Solo Aterrizaje 2027", color: TENDENCIA_COLOR.solo_2026 };
   return { text: "—", color: "#757575" };
 }
 
@@ -195,8 +195,8 @@ export default function TablaAlumnosNivel({
                 <th className="bg-white px-2 py-1.5 text-left font-semibold">Grupo</th>
                 {comparativa ? (
                   <>
-                    <th className="bg-white px-2 py-1.5 text-center font-semibold">% 2025</th>
                     <th className="bg-white px-2 py-1.5 text-center font-semibold">% 2026</th>
+                    <th className="bg-white px-2 py-1.5 text-center font-semibold">% 2027</th>
                     <th className="bg-white px-2 py-1.5 text-center font-semibold">Cambio</th>
                   </>
                 ) : (
@@ -321,7 +321,7 @@ export default function TablaAlumnosNivel({
                       onClick={() => abrirComparativa(r, r.cct, EVALUACION_DESPEGUE_2025)}
                       className={`rounded-lg bg-[#4472C4]/8 text-center ${enlargedMobile ? "px-2 py-2.5" : "px-1.5 py-1.5"}`}
                     >
-                      <div className={`font-medium uppercase tracking-wide text-[#4472C4] ${enlargedMobile ? "text-[10px]" : "text-[9px]"}`}>2025</div>
+                      <div className={`font-medium uppercase tracking-wide text-[#4472C4] ${enlargedMobile ? "text-[10px]" : "text-[9px]"}`}>2026</div>
                       <div className={`mt-0.5 font-bold text-foreground ${enlargedMobile ? "text-lg" : "text-sm"}`}>{fmtPct(r.alumno.porcentaje2025)}</div>
                     </button>
                     <button
@@ -329,7 +329,7 @@ export default function TablaAlumnosNivel({
                       onClick={() => abrirComparativa(r, r.cct, EVALUACION_ATERRIZAJE_2026)}
                       className={`rounded-lg bg-[#2E7D32]/8 text-center ${enlargedMobile ? "px-2 py-2.5" : "px-1.5 py-1.5"}`}
                     >
-                      <div className={`font-medium uppercase tracking-wide text-[#2E7D32] ${enlargedMobile ? "text-[10px]" : "text-[9px]"}`}>2026</div>
+                      <div className={`font-medium uppercase tracking-wide text-[#2E7D32] ${enlargedMobile ? "text-[10px]" : "text-[9px]"}`}>2027</div>
                       <div className={`mt-0.5 font-bold text-foreground ${enlargedMobile ? "text-lg" : "text-sm"}`}>{fmtPct(r.alumno.porcentaje2026)}</div>
                     </button>
                     <div className={`rounded-lg bg-[var(--fill-tertiary)] text-center ${enlargedMobile ? "px-2 py-2.5" : "px-1.5 py-1.5"}`}>

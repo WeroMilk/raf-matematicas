@@ -83,7 +83,7 @@ export default function DashboardHomeClient({ data, cobertura, isSuper, zonaForc
   const porcentajes2026 = useMemo(() => porcentajesReactivosGlobales(escuelas2026, NUM_REACTIVOS), [escuelas2026]);
 
   const comparativa = useMemo(() => {
-    const ccts = escuelas2025.map((e) => e.cct).filter((c) => escuelas2026.some((e) => e.cct === c));
+    const ccts = [...new Set([...escuelas2025.map((e) => e.cct), ...escuelas2026.map((e) => e.cct)])];
     return agregarGlobal(data, ccts);
   }, [data, escuelas2025, escuelas2026]);
 
@@ -137,7 +137,7 @@ export default function DashboardHomeClient({ data, cobertura, isSuper, zonaForc
                   />
                 </section>
                 <section className="card-ios my-2 rounded-2xl border border-border bg-card p-3 text-sm text-foreground/75">
-                  Comparativa entre escuelas con datos en ambas evaluaciones
+                  Despegue 2026 comparado con Aterrizaje 2027. El aterrizaje sigue en 0 hasta que haya resultados.
                   {zonaSeleccionada != null && ` · Zona ${zonaSeleccionada}`}
                 </section>
               </>

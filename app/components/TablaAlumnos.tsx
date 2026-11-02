@@ -29,8 +29,8 @@ const TENDENCIA_LABEL: Record<string, { text: string; color: string }> = {
   mejoro: { text: "Mejoró", color: "#2E7D32" },
   bajo: { text: "Bajó", color: "#D32F2F" },
   igual: { text: "Igual", color: "#757575" },
-  solo_2025: { text: "Solo 2025", color: "#4472C4" },
-  solo_2026: { text: "Solo 2026", color: "#2E7D32" },
+  solo_2025: { text: "Solo Despegue 2026", color: "#4472C4" },
+  solo_2026: { text: "Solo Aterrizaje 2027", color: "#2E7D32" },
 };
 
 function nivelLabel(nivel: string): string {
@@ -69,9 +69,9 @@ function TablaComparativa({ alumnos, cct, fillHeight = false }: { alumnos: Alumn
           <thead className="sticky top-0 z-10 bg-white">
             <tr className="border-b bg-white">
               <th className="bg-white p-2 text-left font-semibold">Alumno</th>
-              <th className="bg-white p-2 text-center font-semibold">% 2025</th>
-              <th className="bg-white p-2 text-center font-semibold">Nivel</th>
               <th className="bg-white p-2 text-center font-semibold">% 2026</th>
+              <th className="bg-white p-2 text-center font-semibold">Nivel</th>
+              <th className="bg-white p-2 text-center font-semibold">% 2027</th>
               <th className="bg-white p-2 text-center font-semibold">Nivel</th>
               <th className="bg-white p-2 text-center font-semibold">Cambio</th>
             </tr>

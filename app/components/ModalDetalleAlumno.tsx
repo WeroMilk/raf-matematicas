@@ -321,7 +321,7 @@ export default function ModalDetalleAlumno({
         : null;
   const subtitulo =
     vista === "comparar"
-      ? "Comparativa 2025 vs 2026"
+      ? "Comparativa Despegue 2026 vs Aterrizaje 2027"
       : EVALUACIONES_META[vista].nombreCorto;
 
   const tabs = [

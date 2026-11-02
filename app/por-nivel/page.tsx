@@ -116,14 +116,14 @@ export default async function PorNivelPage({
         </h1>
         <p className="text-xs text-foreground/80 max-lg:hidden">
           {evalMode === "comparar"
-            ? "Comparativa 2025 vs 2026 por alumno (agrupado por nivel Despegue 2026)."
+            ? "Comparativa Despegue 2026 vs Aterrizaje 2027 por alumno (agrupado por nivel Despegue 2026)."
             : nivelFiltro
               ? "Lista completa."
               : "Organiza por escuela o grupo."}
         </p>
         <p className="text-xs text-foreground/80 lg:hidden">
           {evalMode === "comparar"
-            ? "Comparativa 2025 vs 2026"
+            ? "Comparativa Despegue 2026 vs Aterrizaje 2027"
             : nivelFiltro
               ? "Lista completa"
               : "Toca un nivel para ver alumnos"}

@@ -72,13 +72,13 @@ export default function KPIComparativa({ comparativa, compact = false, getNivelH
             {/* Móvil: años apilados para que los números no se salgan */}
             <div className="space-y-1 sm:hidden">
               <div className="flex items-baseline justify-between gap-1 px-0.5">
-                <span className="shrink-0 text-[9px] uppercase text-foreground/50">2025</span>
+                <span className="shrink-0 text-[9px] uppercase text-foreground/50">2026</span>
                 <span className="min-w-0 truncate font-bold tabular-nums text-sm leading-none">
                   {formatPct(pct2025)}
                 </span>
               </div>
               <div className="flex items-baseline justify-between gap-1 px-0.5">
-                <span className="shrink-0 text-[9px] uppercase text-foreground/50">2026</span>
+                <span className="shrink-0 text-[9px] uppercase text-foreground/50">2027</span>
                 <span className="min-w-0 truncate font-bold tabular-nums text-sm leading-none">
                   {formatPct(pct2026)}
                 </span>
@@ -88,14 +88,14 @@ export default function KPIComparativa({ comparativa, compact = false, getNivelH
             {/* Escritorio: comparativa horizontal */}
             <div className="hidden items-center justify-center gap-2 sm:flex">
               <div className="min-w-0">
-                <div className="text-[9px] uppercase text-foreground/50">2025</div>
+                <div className="text-[9px] uppercase text-foreground/50">2026</div>
                 <div className={`font-bold tabular-nums ${compact ? "text-sm" : "text-lg"}`}>
                   {formatPct(pct2025)}
                 </div>
               </div>
               <div className="shrink-0 text-foreground/30">→</div>
               <div className="min-w-0">
-                <div className="text-[9px] uppercase text-foreground/50">2026</div>
+                <div className="text-[9px] uppercase text-foreground/50">2027</div>
                 <div className={`font-bold tabular-nums ${compact ? "text-sm" : "text-lg"}`}>
                   {formatPct(pct2026)}
                 </div>

@@ -60,7 +60,7 @@ export default function ComparativaNivelFilaMat({
 
         <div className="comparativa-nivel-fila__bars">
           <div className="comparativa-bar-row">
-            <span className="comparativa-bar-row__year comparativa-bar-row__year--2025">2025</span>
+            <span className="comparativa-bar-row__year comparativa-bar-row__year--2025">2026</span>
             <div className="comparativa-bar-row__track" aria-hidden>
               <div
                 className="comparativa-bar-row__fill"
@@ -70,7 +70,7 @@ export default function ComparativaNivelFilaMat({
             <span className="comparativa-bar-row__meta tabular-nums">{formatPct(pct2025)}</span>
           </div>
           <div className="comparativa-bar-row">
-            <span className="comparativa-bar-row__year comparativa-bar-row__year--2026">2026</span>
+            <span className="comparativa-bar-row__year comparativa-bar-row__year--2026">2027</span>
             <div className="comparativa-bar-row__track" aria-hidden>
               <div
                 className="comparativa-bar-row__fill comparativa-bar-row__fill--2026"

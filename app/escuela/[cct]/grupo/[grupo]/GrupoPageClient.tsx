@@ -48,7 +48,7 @@ export default function GrupoPageClient({ cct, grupo, data }: { cct: string; gru
       {evalMode === "comparar" ? (
         <>
           <section className="card-ios shrink-0 rounded-2xl border p-3 text-sm text-foreground/75">
-            Comparativa 2025 vs 2026 por alumno en este grupo.
+            Comparativa Despegue 2026 vs Aterrizaje 2027 por alumno en este grupo.
           </section>
           <section className="hidden min-h-0 min-w-0 flex-1 flex-col md:flex">
             <TablaAlumnos alumnos={[]} comparativa={comparativa} cct={cct} fillHeight />
