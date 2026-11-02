@@ -44,7 +44,7 @@ export default function LogoSonoraSec({
 }) {
   const [imgLoaded, setImgLoaded] = useState(false);
   const [imgError, setImgError] = useState(false);
-  const maxH = prominent ? "200px" : compact ? "56px" : "118px";
+  const maxH = prominent ? "148px" : compact ? "56px" : "118px";
   const wrapperClass = prominent
     ? "flex items-center justify-center relative w-full"
     : compact
