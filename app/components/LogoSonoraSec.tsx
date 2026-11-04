@@ -46,10 +46,10 @@ export default function LogoSonoraSec({
   const [imgError, setImgError] = useState(false);
   const maxH = prominent ? "148px" : compact ? "56px" : "118px";
   const wrapperClass = prominent
-    ? "flex items-center justify-center relative w-full"
+    ? "mx-auto flex w-full items-center justify-center relative"
     : compact
-      ? "rounded-lg p-1 flex items-center justify-center min-h-[56px] relative"
-      : "rounded-xl p-2 flex items-center justify-center min-h-[118px] relative";
+      ? "mx-auto flex items-center justify-center relative min-h-[56px] rounded-lg p-1"
+      : "mx-auto flex items-center justify-center relative min-h-[118px] rounded-xl p-2";
 
   return (
     <div
@@ -65,12 +65,17 @@ export default function LogoSonoraSec({
         style={{
           maxWidth: "100%",
           maxHeight: maxH,
+          width: "auto",
+          height: "auto",
           aspectRatio: "603 / 295",
+          marginLeft: "auto",
+          marginRight: "auto",
+          objectPosition: "center",
         }}
         className={
           imgLoaded && !imgError
-            ? "w-full h-auto object-contain opacity-100 transition-opacity duration-200"
-            : "absolute inset-0 m-auto w-auto max-w-full object-contain opacity-0 transition-opacity duration-200"
+            ? "mx-auto block h-auto w-auto max-w-full object-contain opacity-100 transition-opacity duration-200"
+            : "absolute inset-0 m-auto block h-auto w-auto max-w-full object-contain opacity-0 transition-opacity duration-200"
         }
         priority={priority}
         onLoad={() => setImgLoaded(true)}
